@@ -3,11 +3,12 @@ import { render, screen } from '@testing-library/react'
 import { Footer } from '../Footer'
 
 describe('Footer', () => {
-  it('should render footer with copyright text', () => {
+  it('should render footer with correct text', () => {
     render(<Footer />)
 
+    expect(screen.getByText(/xbrowser marketplace/i)).toBeInTheDocument()
     expect(screen.getByText(/Built with/i)).toBeInTheDocument()
-    expect(screen.getByText(/Hono RPC/i)).toBeInTheDocument()
+    expect(screen.getByText(/Hono/i)).toBeInTheDocument()
     expect(screen.getByText(/React/i)).toBeInTheDocument()
     expect(screen.getByText(/TypeScript/i)).toBeInTheDocument()
   })
