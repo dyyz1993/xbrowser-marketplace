@@ -1,15 +1,8 @@
 import path from 'path'
 import { defineConfig } from 'vite'
 import devServer from '@hono/vite-dev-server'
+import tailwindcss from '@tailwindcss/vite'
 import { websocketPlugin, dbPlugin } from './vite-plugins'
-
-let tailwindcssPlugin: any = null
-try {
-  const mod = await import('@tailwindcss/vite')
-  tailwindcssPlugin = mod.default()
-} catch {
-  console.warn('@tailwindcss/vite not available, skipping tailwind plugin')
-}
 
 export default defineConfig({
   server: {
@@ -20,7 +13,7 @@ export default defineConfig({
     },
   },
   plugins: [
-    ...(tailwindcssPlugin ? [tailwindcssPlugin] : []),
+    tailwindcss(),
     devServer({
       entry: 'src/server/index.ts',
       exclude: [
