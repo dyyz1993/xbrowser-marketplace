@@ -57,6 +57,9 @@ Thumbs.db
 .cache/
 .parcel-cache/
 
+# Wrangler
+.wrangler/
+
 # Misc
 *.tsbuildinfo
 .pi/

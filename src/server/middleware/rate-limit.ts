@@ -3,15 +3,7 @@ import type { Context, Next } from 'hono'
 type RateLimitEntry = { count: number; resetAt: number }
 
 const rateLimitStore = new Map<string, RateLimitEntry>()
-
-setInterval(() => {
-  const now = Date.now()
-  for (const [key, entry] of rateLimitStore) {
-    if (entry.resetAt <= now) {
-      rateLimitStore.delete(key)
-    }
-  }
-}, 60_000)
+let lastCleanup = 0
 
 export type RateLimitOptions = {
   windowMs?: number
@@ -25,15 +17,24 @@ export function rateLimitMiddleware(options: RateLimitOptions = {}) {
   const message = options.message ?? 'Too many requests'
 
   return async (c: Context, next: Next) => {
-    if (process.env.NODE_ENV === 'test') {
+    if (process.env.NODE_ENV === 'Test') {
       return next()
+    }
+
+    const now = Date.now()
+    if (now - lastCleanup > 60_000) {
+      lastCleanup = now
+      for (const [key, entry] of rateLimitStore) {
+        if (entry.resetAt <= now) {
+          rateLimitStore.delete(key)
+        }
+      }
     }
 
     const ip =
       c.req.header('x-forwarded-for')?.split(',')[0]?.trim() ||
       c.req.header('x-real-ip') ||
       'unknown'
-    const now = Date.now()
     const entry = rateLimitStore.get(ip)
 
     if (entry && entry.resetAt > now && entry.count >= max) {

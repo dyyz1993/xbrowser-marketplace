@@ -68,4 +68,5 @@ export {
   CategoryPluginListResponseSchema,
   PluginIdResponseSchema,
   DownloadCountResponseSchema,
+  ReviewIdResponseSchema,
 } from './plugins'

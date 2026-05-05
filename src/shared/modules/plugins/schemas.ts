@@ -98,6 +98,7 @@ export const CategoryPluginListResponseSchema = z.object({
 
 export const PluginIdResponseSchema = z.object({ id: z.string() })
 export const DownloadCountResponseSchema = z.object({ downloadCount: z.number() })
+export const ReviewIdResponseSchema = z.object({ id: z.string() })
 
 export const TokenResponseSchema = z.object({
   token: z.string(),

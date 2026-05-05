@@ -4,6 +4,13 @@ import { eq, desc } from 'drizzle-orm'
 import { generateUUID } from '../../utils/uuid'
 import { NotFoundError, AuthorizationError } from '../../utils/app-error'
 import type { CreateVersionInput } from '../plugin.types'
+import {
+  R2Storage,
+  NpmMirrorStorage,
+  validateNpmPackage,
+  resolveDownloadUrl,
+  type StorageType,
+} from './storage-service'
 
 type PluginRow = typeof plugins.$inferSelect
 type VersionRow = typeof pluginVersions.$inferSelect
@@ -21,6 +28,7 @@ export interface PublishData {
   commands: string[]
   tags: string[]
   siteUrls: string[]
+  storageType: StorageType
 }
 
 export interface PublishFiles {
@@ -34,13 +42,53 @@ function serializeJsonField(value: string[] | undefined): string | undefined {
   return JSON.stringify(value)
 }
 
+async function resolvePackageUrl(
+  data: PublishData,
+  files: PublishFiles,
+  env: { R2_BUCKET?: R2Bucket }
+): Promise<{ packageUrl: string; fileSize: number | null }> {
+  if (data.storageType === 'npm') {
+    const packageName = data.npmPackage || data.name
+    await validateNpmPackage(packageName, data.version)
+    return {
+      packageUrl: NpmMirrorStorage.buildKey(packageName, data.version),
+      fileSize: null,
+    }
+  }
+
+  if (!env.R2_BUCKET) {
+    if (files.files.length > 0) {
+      throw new Error('R2 storage is not configured. Cannot upload plugin files.')
+    }
+    return {
+      packageUrl: `db://${data.slug}/${data.version}`,
+      fileSize: null,
+    }
+  }
+
+  const tarballData = Buffer.concat(files.files.map((f) => Buffer.from(f.content)))
+  const packageUrl = await R2Storage.uploadPluginTarball(
+    env.R2_BUCKET,
+    data.slug,
+    data.version,
+    tarballData
+  )
+
+  return {
+    packageUrl,
+    fileSize: files.totalSize,
+  }
+}
+
 export async function publishPlugin(
   data: PublishData,
   files: PublishFiles,
   authorId: string,
-  _authorName: string
+  _authorName: string,
+  env: { R2_BUCKET?: R2Bucket } = {}
 ) {
   const db = await getDb()
+  const { packageUrl, fileSize } = await resolvePackageUrl(data, files, env)
 
   const existing: PluginRow[] = await db
     .select()
@@ -79,8 +127,8 @@ export async function publishPlugin(
       pluginId: existing[0].id,
       version: data.version,
       changelog: null,
-      packageUrl: `tarball://${data.slug}/${data.version}`,
-      fileSize: files.totalSize,
+      packageUrl,
+      fileSize,
       checksum: files.checksum,
       status: 'pending',
       publishedAt: now,
@@ -150,8 +198,8 @@ export async function publishPlugin(
     pluginId: id,
     version: data.version,
     changelog: null,
-    packageUrl: `tarball://${data.slug}/${data.version}`,
-    fileSize: files.totalSize,
+    packageUrl,
+    fileSize,
     checksum: files.checksum,
     status: 'pending',
     publishedAt: now,
@@ -235,7 +283,10 @@ export async function publishVersion(
   return rows[0]
 }
 
-export async function getTarballInfo(slug: string): Promise<{ url: string }> {
+export async function getTarballInfo(
+  slug: string,
+  env: { R2_BUCKET?: R2Bucket } = {}
+): Promise<{ url: string; stream?: ReadableStream }> {
   const db = await getDb()
 
   const pluginRows: PluginRow[] = await db
@@ -259,5 +310,24 @@ export async function getTarballInfo(slug: string): Promise<{ url: string }> {
     throw new NotFoundError('Tarball', slug)
   }
 
-  return { url: versionRows[0].packageUrl }
+  const packageUrl = versionRows[0].packageUrl
+
+  if (packageUrl.startsWith('npm://')) {
+    const downloadUrl = resolveDownloadUrl(packageUrl)
+    return { url: downloadUrl || packageUrl }
+  }
+
+  if (packageUrl.startsWith('r2://') && env.R2_BUCKET) {
+    const key = packageUrl.slice(5)
+    const r2Object = await env.R2_BUCKET.get(key)
+    if (!r2Object) {
+      throw new NotFoundError('Tarball', key)
+    }
+    return {
+      url: packageUrl,
+      stream: r2Object.body,
+    }
+  }
+
+  return { url: packageUrl }
 }

@@ -10,6 +10,10 @@ import {
 import { PluginSlugSchema, PublishMetadataSchema, CreateVersionSchema } from '../plugin.types'
 import * as publishService from '../services/publish-service'
 
+function getR2Bucket(): R2Bucket | undefined {
+  return (globalThis as unknown as { R2_BUCKET?: R2Bucket }).R2_BUCKET
+}
+
 const publishPluginRoute = createRoute({
   method: 'post',
   path: '/plugins/publish',
@@ -99,6 +103,7 @@ export const publishRoutes = new OpenAPIHono()
         commands: meta.commands ?? [],
         tags: meta.tags ?? [],
         siteUrls: meta.sites ?? [],
+        storageType: meta.storageType ?? 'r2',
       },
       {
         files,
@@ -106,7 +111,8 @@ export const publishRoutes = new OpenAPIHono()
         checksum,
       },
       user.id,
-      user.username
+      user.username,
+      { R2_BUCKET: getR2Bucket() }
     )
 
     return c.json(created(plugin), 201)
@@ -132,6 +138,20 @@ export const publishRoutes = new OpenAPIHono()
   })
   .openapi(downloadTarballRoute, async (c) => {
     const { slug } = c.req.valid('param')
-    const result = await publishService.getTarballInfo(slug)
-    return c.json(success(result), 200)
+    const result = await publishService.getTarballInfo(slug, { R2_BUCKET: getR2Bucket() })
+
+    if (result.stream) {
+      return new Response(result.stream, {
+        headers: {
+          'Content-Type': 'application/gzip',
+          'Content-Disposition': `attachment; filename="${slug}.tar.gz"`,
+        },
+      })
+    }
+
+    if (result.url.startsWith('http')) {
+      return c.redirect(result.url, 302)
+    }
+
+    return c.json(success({ url: result.url }), 200)
   })

@@ -19,6 +19,7 @@ import { getCloudflareRuntimeAdapter } from '@server/core/runtime-cloudflare'
 export interface CloudflareBindings extends AppBindings {
   DB: D1Database
   REALTIME_DO: DurableObjectNamespace
+  R2_BUCKET: R2Bucket
 }
 
 const runtimeAdapter = getCloudflareRuntimeAdapter()
@@ -29,6 +30,7 @@ const app = createApp<CloudflareBindings>()
 const wrappedApp = app
   .use('*', async (c, next) => {
     ;(globalThis as unknown as { DB: D1Database }).DB = c.env.DB
+    ;(globalThis as unknown as { R2_BUCKET: R2Bucket }).R2_BUCKET = c.env.R2_BUCKET
     await next()
   })
   .get('/', c =>
@@ -50,6 +52,9 @@ const wrappedApp = app
 
 export default {
   fetch: async (request: Request, env: CloudflareBindings, ctx: ExecutionContext) => {
+    ;(globalThis as unknown as { DB: D1Database }).DB = env.DB
+    ;(globalThis as unknown as { R2_BUCKET: R2Bucket }).R2_BUCKET = (env as Record<string, unknown>).R2_BUCKET as R2Bucket
+
     const url = new URL(request.url)
 
     if (url.pathname.startsWith('/api/') || url.pathname === '/health') {

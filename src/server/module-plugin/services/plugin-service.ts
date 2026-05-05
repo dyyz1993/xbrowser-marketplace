@@ -485,6 +485,20 @@ export async function submitReview(
     throw new NotFoundError('Plugin', slug)
   }
 
+  if (pluginRows[0].status !== 'approved') {
+    throw new ConflictError('Cannot review a plugin that is not approved')
+  }
+
+  const existingReview: ReviewRow[] = await db
+    .select()
+    .from(pluginReviews)
+    .where(and(eq(pluginReviews.pluginId, pluginRows[0].id), eq(pluginReviews.userId, userId)))
+    .limit(1)
+
+  if (existingReview.length > 0) {
+    throw new ConflictError('You have already reviewed this plugin')
+  }
+
   const id = generateUUID()
   const now = new Date()
 
@@ -642,4 +656,38 @@ export async function getStats() {
     totalReviews: allReviews.length,
     recentPlugins: recentWithStats,
   }
+}
+
+export async function deleteReview(
+  slug: string,
+  reviewId: string,
+  userId: string,
+  userRole: string
+): Promise<{ id: string }> {
+  const db = await getDb()
+
+  const pluginRows: PluginRow[] = await db.select().from(plugins).where(eq(plugins.slug, slug)).limit(1)
+
+  if (pluginRows.length === 0) {
+    throw new NotFoundError('Plugin', slug)
+  }
+
+  const reviewRows: ReviewRow[] = await db
+    .select()
+    .from(pluginReviews)
+    .where(and(eq(pluginReviews.id, reviewId), eq(pluginReviews.pluginId, pluginRows[0].id)))
+    .limit(1)
+
+  if (reviewRows.length === 0) {
+    throw new NotFoundError('Review', reviewId)
+  }
+
+  const isAdmin = userRole === 'super_admin' || userRole === 'customer_service'
+  if (reviewRows[0].userId !== userId && !isAdmin) {
+    throw new AuthorizationError('Only the review author or admin can delete this review')
+  }
+
+  await db.delete(pluginReviews).where(eq(pluginReviews.id, reviewId))
+
+  return { id: reviewId }
 }

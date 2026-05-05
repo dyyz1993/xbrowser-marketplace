@@ -13,6 +13,7 @@ import {
   StatsSchema,
   PluginIdResponseSchema,
   DownloadCountResponseSchema,
+  ReviewIdResponseSchema,
 } from '@shared/modules/plugins'
 import {
   CreatePluginSchema,
@@ -140,6 +141,21 @@ const getReviewsRoute = createRoute({
   responses: {
     200: successResponse(ReviewListResponseSchema, 'Get reviews'),
     404: errorResponse('Plugin not found'),
+  },
+})
+
+const deleteReviewRoute = createRoute({
+  method: 'delete',
+  path: '/plugins/{slug}/reviews/{reviewId}',
+  tags: ['plugins'],
+  security: [{ Bearer: [] }],
+  middleware: [authMiddleware()],
+  request: {
+    params: PluginSlugSchema.extend({ reviewId: z.string() }),
+  },
+  responses: {
+    200: successResponse(ReviewIdResponseSchema, 'Review deleted'),
+    404: errorResponse('Review not found'),
   },
 })
 
@@ -272,6 +288,12 @@ export const pluginRoutes = new OpenAPIHono()
       }),
       200
     )
+  })
+  .openapi(deleteReviewRoute, async c => {
+    const { slug, reviewId } = c.req.valid('param')
+    const user = c.get('authUser')
+    const result = await pluginService.deleteReview(slug, reviewId, user.id, user.role)
+    return c.json(success(result), 200)
   })
   .openapi(trackInstallRoute, async c => {
     const { slug } = c.req.valid('param')

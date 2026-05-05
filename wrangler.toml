@@ -9,7 +9,8 @@ ENVIRONMENT = "production"
 [[d1_databases]]
 binding = "DB"
 database_name = "xbrowser-marketplace-db"
-database_id = ""  # TODO: Run 'wrangler d1 create xbrowser-marketplace-db' and paste the ID here
+database_id = "c18edb9b-4747-41f0-b31a-9f705421fbef"
+migrations_dir = "migrations"
 
 [[durable_objects.bindings]]
 name = "REALTIME_DO"
@@ -27,6 +28,11 @@ renamed_classes = [{ from = "NotificationDurableObject", to = "RealtimeDurableOb
 directory = "./dist/client"
 binding = "ASSETS"
 not_found_handling = "single-page-application"
+
+# [[r2_buckets]]
+# binding = "R2_BUCKET"
+# bucket_name = "xbrowser-plugins"
+# R2 not enabled on account yet - uncomment when enabled via dashboard
 
 [dev]
 port = 8787

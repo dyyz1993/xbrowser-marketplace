@@ -68,6 +68,8 @@ export const CategorySlugSchema = z.object({
   slug: z.string(),
 })
 
+export const storageTypeSchema = z.enum(['npm', 'r2']).default('r2')
+
 export const PublishMetadataSchema = z.object({
   name: z.string().min(1).max(100),
   slug: z.string().regex(/^[a-z0-9-]+$/),
@@ -81,6 +83,7 @@ export const PublishMetadataSchema = z.object({
   homepageUrl: z.string().optional().nullable(),
   repositoryUrl: z.string().optional().nullable(),
   npmPackage: z.string().optional().nullable(),
+  storageType: storageTypeSchema,
 })
 
 export const CreateVersionSchema = z.object({
