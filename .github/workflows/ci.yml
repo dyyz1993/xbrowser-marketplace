@@ -23,6 +23,7 @@ jobs:
           cache: npm
 
       - run: npm ci --legacy-peer-deps
+      - run: npm rebuild @tailwindcss/oxide 2>/dev/null || npm install @tailwindcss/oxide --legacy-peer-deps
 
       - name: Lint
         run: npm run lint || true
@@ -58,6 +59,7 @@ jobs:
           cache: npm
 
       - run: npm ci
+      - run: npm rebuild @tailwindcss/oxide 2>/dev/null || npm install @tailwindcss/oxide
       - run: npm run build:cloudflare
 
       - name: Deploy to Cloudflare Workers
