@@ -1,6 +1,7 @@
 import path from 'path'
 import { defineConfig } from 'vite'
 import devServer from '@hono/vite-dev-server'
+import tailwindcss from '@tailwindcss/vite'
 import { websocketPlugin, dbPlugin } from './vite-plugins'
 
 export default defineConfig({
@@ -12,6 +13,7 @@ export default defineConfig({
     },
   },
   plugins: [
+    tailwindcss(),
     devServer({
       entry: 'src/server/index.ts',
       exclude: [

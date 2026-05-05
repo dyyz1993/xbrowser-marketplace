@@ -29,10 +29,9 @@ directory = "./dist/client"
 binding = "ASSETS"
 not_found_handling = "single-page-application"
 
-# [[r2_buckets]]
-# binding = "R2_BUCKET"
-# bucket_name = "xbrowser-plugins"
-# R2 not enabled on account yet - uncomment when enabled via dashboard
+[[r2_buckets]]
+binding = "R2_BUCKET"
+bucket_name = "xbrowser-plugins"
 
 [dev]
 port = 8787
