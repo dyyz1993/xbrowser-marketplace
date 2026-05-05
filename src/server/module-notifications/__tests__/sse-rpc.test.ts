@@ -1,7 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach, afterEach } from 'vitest'
 import { createApp } from '../../app'
 import { createTestServer } from '../../test-utils/test-server'
-import { createTestClient } from '../../test-utils/test-client'
 import { setRuntimeAdapter } from '@server/core/runtime'
 import { getNodeRuntimeAdapter } from '@server/core/runtime-node'
 import { SSEClientImpl } from '@shared/core/sse-client'
@@ -11,11 +10,12 @@ import type { AppSSEProtocol } from '@shared/schemas'
 setRuntimeAdapter(getNodeRuntimeAdapter())
 
 let sseTestContext: { port: number; close: () => Promise<void> }
-let client: ReturnType<typeof createTestClient>
 
 function connectSSE() {
-  const conn = client.api.notifications.stream.$sse()
-  return conn as unknown as SSEClientImpl<AppSSEProtocol>
+  return new SSEClientImpl<AppSSEProtocol>(
+    `http://localhost:${sseTestContext.port}/api/notifications/stream`,
+    { Authorization: 'Bearer admin-token' }
+  )
 }
 
 describe('SSE Routes with Patched $sse() RPC Method', () => {
@@ -23,11 +23,6 @@ describe('SSE Routes with Patched $sse() RPC Method', () => {
     const app = createApp()
     const server = await createTestServer(app, ['/api/notifications/stream'])
     sseTestContext = { port: server.port, close: server.close }
-
-    client = createTestClient(`http://localhost:${server.port}`, {
-      sse: url => new SSEClientImpl(url, { Authorization: 'Bearer admin-token' }),
-      headers: { Authorization: 'Bearer admin-token' },
-    })
   }, 15000)
 
   afterAll(async () => {
