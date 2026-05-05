@@ -22,7 +22,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: npm
 
-      - run: rm -f package-lock.json && npm install
+      - run: npm ci --legacy-peer-deps
 
       - name: Lint
         run: npm run lint || true
