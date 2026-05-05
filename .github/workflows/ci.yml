@@ -23,6 +23,12 @@ jobs:
           cache: npm
 
       - run: rm -rf node_modules package-lock.json && npm install --legacy-peer-deps --force
+      - name: Fix Tailwind native bindings
+        run: |
+          npm pack @tailwindcss/oxide-linux-x64-gnu@4.2.4 2>/dev/null || true
+          mkdir -p /tmp/oxide-native
+          tar xzf tailwindcss-oxide-linux-x64-gnu-*.tgz -C /tmp/oxide-native 2>/dev/null || true
+          echo "NAPI_RS_NATIVE_LIBRARY_PATH=/tmp/oxide-native/package" >> $GITHUB_ENV
 
       - name: Lint
         run: npm run lint || true
