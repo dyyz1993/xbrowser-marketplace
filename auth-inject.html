@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head><title>Auth Inject</title></head>
+<body>
+<script>
+localStorage.setItem('ops-storage', JSON.stringify({
+  "state": {
+    "user": {
+      "id": "1",
+      "username": "superadmin",
+      "email": "admin@biomimic.com",
+      "role": "super_admin",
+      "avatar": null,
+      "permissions": [
+        "user:view","user:create","user:edit","user:delete",
+        "content:view","content:create","content:edit","content:delete",
+        "system:settings","system:logs","system:monitor",
+        "data:export","data:import",
+        "order:view","order:process",
+        "ticket:view","ticket:reply","ticket:close",
+        "dispute:view","dispute:create","dispute:edit","dispute:delete","dispute:resolve",
+        "notification:view","notification:create","notification:edit"
+      ]
+    },
+    "token": "fake-test-token-for-ui-testing",
+    "isAuthenticated": true
+  },
+  "version": 0
+}));
+window.location.href = '/ops/dashboard';
+</script>
+</body>
+</html>

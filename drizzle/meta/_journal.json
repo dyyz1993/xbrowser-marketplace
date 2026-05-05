@@ -1,0 +1,27 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1773459507461,
+      "tag": "0000_rainy_boomer",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1746400000000,
+      "tag": "0001_add_todo_attachments",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1777980401221,
+      "tag": "0002_zippy_sue_storm",
+      "breakpoints": true
+    }
+  ]
+}

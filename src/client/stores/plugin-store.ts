@@ -1,0 +1,148 @@
+import { create } from 'zustand'
+import {
+  pluginApi,
+  type PluginListItem,
+  type PluginDetail,
+  type Category,
+  type MarketplaceStats,
+  type PluginListParams,
+  type SearchParams,
+} from '@client/services/plugin-api'
+
+interface PluginState {
+  plugins: PluginListItem[]
+  currentPlugin: PluginDetail | null
+  categories: Category[]
+  stats: MarketplaceStats | null
+  searchQuery: string
+  selectedCategory: string | null
+  loading: boolean
+  error: string | null
+  pagination: { page: number; pageSize: number; total: number }
+
+  fetchPlugins: (params?: PluginListParams) => Promise<void>
+  searchPlugins: (params: SearchParams) => Promise<void>
+  fetchPlugin: (slug: string) => Promise<void>
+  fetchCategories: () => Promise<void>
+  fetchStats: () => Promise<void>
+  trackInstall: (slug: string) => Promise<void>
+  setSearchQuery: (query: string) => void
+  setSelectedCategory: (category: string | null) => void
+  setPage: (page: number) => void
+}
+
+export const usePluginStore = create<PluginState>((set, get) => ({
+  plugins: [],
+  currentPlugin: null,
+  categories: [],
+  stats: null,
+  searchQuery: '',
+  selectedCategory: null,
+  loading: false,
+  error: null,
+  pagination: { page: 1, pageSize: 20, total: 0 },
+
+  fetchPlugins: async (params = {}) => {
+    set({ loading: true, error: null })
+    try {
+      const { pagination, selectedCategory } = get()
+      const result = await pluginApi.list({
+        page: params.page ?? pagination.page,
+        limit: params.limit ?? pagination.pageSize,
+        category: params.category ?? selectedCategory ?? undefined,
+        sort: params.sort,
+        featured: params.featured,
+      })
+      if (result.success) {
+        set({
+          plugins: result.data.items,
+          pagination: {
+            page: result.data.page,
+            pageSize: result.data.limit,
+            total: result.data.total,
+          },
+          loading: false,
+        })
+      } else {
+        set({ error: result.error ?? 'Failed to fetch plugins', loading: false })
+      }
+    } catch (err) {
+      set({ error: err instanceof Error ? err.message : 'Unknown error', loading: false })
+    }
+  },
+
+  searchPlugins: async (params) => {
+    set({ loading: true, error: null })
+    try {
+      const { pagination } = get()
+      const result = await pluginApi.search({
+        ...params,
+        page: params.page ?? pagination.page,
+        limit: params.limit ?? pagination.pageSize,
+      })
+      if (result.success) {
+        set({
+          plugins: result.data.items,
+          pagination: {
+            page: result.data.page,
+            pageSize: result.data.limit,
+            total: result.data.total,
+          },
+          loading: false,
+        })
+      } else {
+        set({ error: result.error ?? 'Search failed', loading: false })
+      }
+    } catch (err) {
+      set({ error: err instanceof Error ? err.message : 'Unknown error', loading: false })
+    }
+  },
+
+  fetchPlugin: async (slug: string) => {
+    set({ loading: true, error: null, currentPlugin: null })
+    try {
+      const result = await pluginApi.get(slug)
+      if (result.success) {
+        set({ currentPlugin: result.data, loading: false })
+      } else {
+        set({ error: result.error ?? 'Plugin not found', loading: false })
+      }
+    } catch (err) {
+      set({ error: err instanceof Error ? err.message : 'Unknown error', loading: false })
+    }
+  },
+
+  fetchCategories: async () => {
+    try {
+      const result = await pluginApi.categories()
+      if (result.success) {
+        set({ categories: result.data })
+      }
+    } catch (err) {
+      console.error('Failed to fetch categories:', err)
+    }
+  },
+
+  fetchStats: async () => {
+    try {
+      const result = await pluginApi.stats()
+      if (result.success) {
+        set({ stats: result.data })
+      }
+    } catch (err) {
+      console.error('Failed to fetch stats:', err)
+    }
+  },
+
+  trackInstall: async (slug: string) => {
+    try {
+      await pluginApi.trackInstall(slug)
+    } catch (err) {
+      console.error('Failed to track install:', err)
+    }
+  },
+
+  setSearchQuery: (query: string) => set({ searchQuery: query }),
+  setSelectedCategory: (category: string | null) => set({ selectedCategory: category }),
+  setPage: (page: number) => set({ pagination: { ...get().pagination, page } }),
+}))
