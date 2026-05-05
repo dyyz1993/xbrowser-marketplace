@@ -66,7 +66,17 @@ async function resolvePackageUrl(
     }
   }
 
-  const tarballData = Buffer.concat(files.files.map((f) => Buffer.from(f.content)))
+  if (files.files.length === 0) {
+    throw new Error('No files provided for R2 storage')
+  }
+
+  let tarballData: Buffer | ArrayBuffer
+  if (files.files.length === 1) {
+    tarballData = files.files[0].content
+  } else {
+    tarballData = Buffer.concat(files.files.map((f) => Buffer.from(f.content)))
+  }
+
   const packageUrl = await R2Storage.uploadPluginTarball(
     env.R2_BUCKET,
     data.slug,
