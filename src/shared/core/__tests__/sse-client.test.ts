@@ -1,3 +1,7 @@
+/**
+ * @framework-baseline 093c01eedb133d32
+ */
+
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { SSEClientImpl } from '../sse-client'
 

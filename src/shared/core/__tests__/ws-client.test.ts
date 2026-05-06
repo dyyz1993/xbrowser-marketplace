@@ -1,3 +1,7 @@
+/**
+ * @framework-baseline 7032a3f77cb2cfd8
+ */
+
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 
 class MockWebSocket {
