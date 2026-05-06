@@ -13,8 +13,6 @@
 
 import { test, expect } from '@playwright/test'
 
-test.skip('Todo App tests skipped — this app is a plugin marketplace, not a todo app')
-
 function getBaseUrl(): string {
   return process.env.PLAYWRIGHT_TEST_BASE_URL || 'http://localhost:3010'
 }

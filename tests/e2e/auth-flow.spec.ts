@@ -7,8 +7,6 @@
 
 import { test, expect } from '@playwright/test'
 
-test.skip('Client auth pages not implemented yet')
-
 function getBaseUrl(): string {
   return process.env.PLAYWRIGHT_TEST_BASE_URL || 'http://localhost:3010'
 }

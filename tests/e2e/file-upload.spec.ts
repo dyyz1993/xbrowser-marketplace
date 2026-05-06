@@ -6,7 +6,6 @@
 
 import { test, expect } from '@playwright/test'
 
-test.skip('Client file upload page not implemented yet')
 import path from 'path'
 
 function getBaseUrl(): string {
