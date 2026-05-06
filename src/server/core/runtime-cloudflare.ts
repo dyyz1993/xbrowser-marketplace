@@ -61,9 +61,6 @@ export class CloudflareRuntimeAdapter implements RuntimeAdapter {
   }
 
   broadcast(event: string, data: unknown, exclude: string[] = []): void {
-    console.warn(
-      `[Broadcast] event: ${event}, data: ${JSON.stringify(data)}, exclude: ${exclude}, sseClients: ${this.core.sseClients.size}`
-    )
     this.core.broadcast(data, exclude, event)
   }
 
@@ -120,10 +117,6 @@ export class CloudflareRuntimeAdapter implements RuntimeAdapter {
     let keepAliveTimeout: ReturnType<typeof setTimeout> | null = null
     let isActive = true
 
-    console.warn(
-      `[SSE] New connection, clientId: ${clientId}, current sseClients: ${this.core.sseClients.size}`
-    )
-
     const scheduleKeepAlive = (controller: ReadableStreamDefaultController) => {
       if (!isActive) return
 
@@ -155,8 +148,6 @@ export class CloudflareRuntimeAdapter implements RuntimeAdapter {
           },
         })
 
-        console.warn(`[SSE] Client added, total sseClients: ${this.core.sseClients.size}`)
-
         // Send initial connected event
         const connectMsg = `event: connected\ndata: ${JSON.stringify({ timestamp: Date.now() })}\n\n`
         controller.enqueue(new TextEncoder().encode(connectMsg))
@@ -165,7 +156,6 @@ export class CloudflareRuntimeAdapter implements RuntimeAdapter {
         scheduleKeepAlive(controller)
       },
       cancel: () => {
-        console.warn(`[SSE] Connection cancelled, clientId: ${clientId}`)
         isActive = false
         if (keepAliveTimeout) {
           clearTimeout(keepAliveTimeout)

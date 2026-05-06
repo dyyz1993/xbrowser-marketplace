@@ -25,7 +25,7 @@ export const RolesPage: React.FC = () => {
   const [modalVisible, setModalVisible] = useState(false)
   const [permissionModalVisible, setPermissionModalVisible] = useState(false)
   const [editingRole, setEditingRole] = useState<RoleType | null>(null)
-  const [selectedPermissions, setSelectedPermissions] = useState<string[]>([])
+  const [selectedPermissions, setSelectedPermissions] = useState<string[]>(() => [])
   const [form] = Form.useForm<RoleFormValues>()
 
   useEffect(() => {

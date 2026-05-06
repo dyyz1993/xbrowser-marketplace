@@ -11,15 +11,17 @@ export type CorsOptions = {
   maxAge?: number
 }
 
-const defaultCorsOptions: Required<Omit<CorsOptions, 'exposeHeaders' | 'maxAge'>> & CorsOptions = {
-  origin: getConfig().corsOrigin,
-  credentials: true,
-  allowMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowHeaders: ['Content-Type', 'Authorization'],
+function getDefaultCorsOptions(): Required<Omit<CorsOptions, 'exposeHeaders' | 'maxAge'>> & CorsOptions {
+  return {
+    origin: getConfig().corsOrigin,
+    credentials: true,
+    allowMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowHeaders: ['Content-Type', 'Authorization'],
+  }
 }
 
 export function corsMiddleware(options: CorsOptions = {}): MiddlewareHandler {
-  const mergedOptions = { ...defaultCorsOptions, ...options }
+  const mergedOptions = { ...getDefaultCorsOptions(), ...options }
 
   return cors(mergedOptions as never)
 }

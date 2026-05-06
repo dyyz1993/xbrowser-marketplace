@@ -5,6 +5,23 @@ import { desc, eq } from 'drizzle-orm'
 import { toISOString } from '../../utils/date'
 import { getMockUsers } from '../../utils/auth'
 import { Role, getPermissionsByRole } from '@shared/modules/permission'
+import { getConfig } from '../../config'
+
+async function createAdminToken(userId: string, role: string): Promise<string> {
+  const secretKey = getConfig().authSecretKey
+  const data = `${userId}.${role}`
+  const encoder = new TextEncoder()
+  const key = await crypto.subtle.importKey(
+    'raw',
+    encoder.encode(secretKey),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign']
+  )
+  const sig = await crypto.subtle.sign('HMAC', key, encoder.encode(data))
+  const hex = Array.from(new Uint8Array(sig)).map(b => b.toString(16).padStart(2, '0')).join('')
+  return `adm.${userId}.${role}.${hex}`
+}
 import type {
   SystemStats,
   HealthCheck,
@@ -76,24 +93,19 @@ export async function getRecentActivity(limit: number = 10): Promise<
   }))
 }
 
-const MOCK_PASSWORD_HASH = getConfig().mockPasswordHash
+function getMockPasswordHash(): string {
+  return getConfig().mockPasswordHash
+}
 
 export async function login(data: LoginRequest): Promise<LoginResponse> {
   const mockUsers = getMockUsers()
   const user = mockUsers.find(u => u.username === data.username)
 
-  if (!user || !(await bcrypt.compare(data.password, MOCK_PASSWORD_HASH))) {
+  if (!user || !(await bcrypt.compare(data.password, getMockPasswordHash()))) {
     throw new Error('Invalid credentials')
   }
 
-  let token: string
-  if (user.role === Role.SUPER_ADMIN) {
-    token = `test-super-admin-${user.id}`
-  } else if (user.role === Role.CUSTOMER_SERVICE) {
-    token = `test-customer-service-${user.id}`
-  } else {
-    token = `test-user-${user.id}`
-  }
+  const token = await createAdminToken(user.id, user.role)
 
   return {
     user: {

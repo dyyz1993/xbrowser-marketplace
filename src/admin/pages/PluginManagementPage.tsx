@@ -33,7 +33,7 @@ const statusColorMap: Record<string, string> = {
 }
 
 export const PluginManagementPage: React.FC = () => {
-  const [plugins, setPlugins] = useState<PluginItem[]>([])
+  const [plugins, setPlugins] = useState<PluginItem[]>(() => [])
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(true)
   const [page, setPage] = useState(1)

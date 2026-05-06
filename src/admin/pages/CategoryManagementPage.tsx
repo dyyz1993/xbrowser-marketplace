@@ -1,5 +1,6 @@
-import { useEffect, useState, useCallback } from 'react'
+import { useState } from 'react'
 import { pluginAdminApi } from '../services/plugin-admin-api'
+import { useCRUD } from '../hooks/useCRUD'
 import {
   Table,
   Button,
@@ -9,7 +10,6 @@ import {
   Input,
   InputNumber,
   Popconfirm,
-  message,
   Tag,
 } from 'antd'
 import { Plus, Pencil, Trash2, RefreshCw } from 'lucide-react'
@@ -33,85 +33,78 @@ interface CategoryFormValues {
 }
 
 export const CategoryManagementPage: React.FC = () => {
-  const [categories, setCategories] = useState<CategoryItem[]>([])
-  const [loading, setLoading] = useState(true)
-  const [modalOpen, setModalOpen] = useState(false)
-  const [editingCategory, setEditingCategory] = useState<CategoryItem | null>(null)
   const [submitting, setSubmitting] = useState(false)
-  const [form] = Form.useForm<CategoryFormValues>()
+  const [createForm] = Form.useForm<CategoryFormValues>()
+  const [editForm] = Form.useForm<CategoryFormValues>()
 
-  const fetchCategories = useCallback(async () => {
-    try {
-      setLoading(true)
+  const {
+    items: categories,
+    loading,
+    fetchItems,
+    showCreateModal,
+    showEditModal,
+    openCreate,
+    closeCreate,
+    openEdit,
+    closeEdit,
+    handleCreate,
+    handleUpdate,
+    handleDelete,
+  } = useCRUD<CategoryItem, CategoryFormValues, CategoryFormValues>({
+    fetchFn: async () => {
       const result = await pluginAdminApi.getCategories()
       if (result.success) {
-        setCategories(result.data as unknown as CategoryItem[])
+        return result.data as unknown as CategoryItem[]
       }
-    } catch (error) {
-      console.error('Failed to fetch categories:', error)
-    } finally {
-      setLoading(false)
-    }
-  }, [])
+      return []
+    },
+    createFn: async (input) => {
+      const result = await pluginAdminApi.createCategory(input)
+      if (!result.success) throw new Error('Create failed')
+      return result.data as unknown as CategoryItem
+    },
+    updateFn: async (id, input) => {
+      const result = await pluginAdminApi.updateCategory(id, input)
+      if (!result.success) throw new Error('Update failed')
+      return result.data as unknown as CategoryItem
+    },
+    deleteFn: async (id) => {
+      const result = await pluginAdminApi.deleteCategory(id)
+      if (!result.success) throw new Error('Delete failed')
+    },
+    itemName: 'Category',
+  })
 
-  useEffect(() => {
-    fetchCategories()
-  }, [fetchCategories])
-
-  const handleCreate = () => {
-    setEditingCategory(null)
-    form.resetFields()
-    setModalOpen(true)
-  }
-
-  const handleEdit = (category: CategoryItem) => {
-    setEditingCategory(category)
-    form.setFieldsValue({
+  const onOpenEdit = (category: CategoryItem) => {
+    editForm.setFieldsValue({
       name: category.name,
       slug: category.slug,
       description: category.description ?? undefined,
       icon: category.icon ?? undefined,
       sortOrder: category.sortOrder ?? undefined,
     })
-    setModalOpen(true)
+    openEdit(category)
   }
 
-  const handleSubmit = async () => {
+  const onSubmitCreate = async () => {
+    const values = await createForm.validateFields()
+    setSubmitting(true)
     try {
-      const values = await form.validateFields()
-      setSubmitting(true)
-
-      if (editingCategory) {
-        const result = await pluginAdminApi.updateCategory(editingCategory.id, values)
-        if (result.success) {
-          message.success('Category updated')
-        }
-      } else {
-        const result = await pluginAdminApi.createCategory(values)
-        if (result.success) {
-          message.success('Category created')
-        }
-      }
-
-      setModalOpen(false)
-      form.resetFields()
-      fetchCategories()
-    } catch (error) {
-      console.error('Failed to save category:', error)
+      await handleCreate(values)
+      createForm.resetFields()
     } finally {
       setSubmitting(false)
     }
   }
 
-  const handleDelete = async (id: string) => {
+  const onSubmitEdit = async () => {
+    const values = await editForm.validateFields()
+    setSubmitting(true)
     try {
-      const result = await pluginAdminApi.deleteCategory(id)
-      if (result.success) {
-        message.success('Category deleted')
-        fetchCategories()
-      }
-    } catch {
-      message.error('Failed to delete category')
+      await handleUpdate(values)
+      editForm.resetFields()
+    } finally {
+      setSubmitting(false)
     }
   }
 
@@ -159,7 +152,7 @@ export const CategoryManagementPage: React.FC = () => {
           <Button
             size="small"
             icon={<Pencil className="w-3 h-3" />}
-            onClick={() => handleEdit(record)}
+            onClick={() => onOpenEdit(record)}
           >
             Edit
           </Button>
@@ -182,10 +175,10 @@ export const CategoryManagementPage: React.FC = () => {
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Categories</h1>
         <Space>
-          <Button icon={<RefreshCw className="w-4 h-4" />} onClick={fetchCategories}>
+          <Button icon={<RefreshCw className="w-4 h-4" />} onClick={fetchItems}>
             Refresh
           </Button>
-          <Button type="primary" icon={<Plus className="w-4 h-4" />} onClick={handleCreate}>
+          <Button type="primary" icon={<Plus className="w-4 h-4" />} onClick={openCreate}>
             Add Category
           </Button>
         </Space>
@@ -200,17 +193,58 @@ export const CategoryManagementPage: React.FC = () => {
       />
 
       <Modal
-        title={editingCategory ? 'Edit Category' : 'Add Category'}
-        open={modalOpen}
-        onOk={handleSubmit}
+        title="Add Category"
+        open={showCreateModal}
+        onOk={onSubmitCreate}
         onCancel={() => {
-          setModalOpen(false)
-          form.resetFields()
+          closeCreate()
+          createForm.resetFields()
         }}
         confirmLoading={submitting}
-        okText={editingCategory ? 'Update' : 'Create'}
+        okText="Create"
       >
-        <Form form={form} layout="vertical" className="mt-4">
+        <Form form={createForm} layout="vertical" className="mt-4">
+          <Form.Item
+            name="name"
+            label="Name"
+            rules={[{ required: true, message: 'Name is required' }]}
+          >
+            <Input placeholder="Category name" />
+          </Form.Item>
+          <Form.Item
+            name="slug"
+            label="Slug"
+            rules={[
+              { required: true, message: 'Slug is required' },
+              { pattern: /^[a-z0-9-]+$/, message: 'Only lowercase letters, numbers, and hyphens' },
+            ]}
+          >
+            <Input placeholder="category-slug" />
+          </Form.Item>
+          <Form.Item name="description" label="Description">
+            <Input.TextArea rows={2} placeholder="Optional description" />
+          </Form.Item>
+          <Form.Item name="icon" label="Icon">
+            <Input placeholder="Icon name (e.g. puzzle)" />
+          </Form.Item>
+          <Form.Item name="sortOrder" label="Sort Order">
+            <InputNumber min={0} placeholder="0" className="w-full" />
+          </Form.Item>
+        </Form>
+      </Modal>
+
+      <Modal
+        title="Edit Category"
+        open={showEditModal}
+        onOk={onSubmitEdit}
+        onCancel={() => {
+          closeEdit()
+          editForm.resetFields()
+        }}
+        confirmLoading={submitting}
+        okText="Update"
+      >
+        <Form form={editForm} layout="vertical" className="mt-4">
           <Form.Item
             name="name"
             label="Name"

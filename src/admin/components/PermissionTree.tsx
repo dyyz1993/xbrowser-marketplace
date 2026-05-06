@@ -22,7 +22,7 @@ export const PermissionTree: React.FC<PermissionTreeProps> = ({
   onSelectionChange,
 }) => {
   const [searchText, setSearchText] = useState('')
-  const [expandedKeys, setExpandedKeys] = useState<string[]>([])
+  const [expandedKeys, setExpandedKeys] = useState<string[]>(() => [])
 
   const treeData = useMemo(() => {
     const categoryMap = new Map<string, PermissionInfo[]>()

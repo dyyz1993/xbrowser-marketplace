@@ -2,33 +2,16 @@ import { useState } from 'react'
 import { Card, Button, Space, message, Typography, Progress } from 'antd'
 import { Download } from 'lucide-react'
 import { apiClient } from '../../../services/apiClient'
+import {
+  TOTAL_LINES,
+  supportsFileSystemAccess,
+  readStreamToLines,
+  readStreamToFileSystem,
+  readStreamToBlob,
+  saveBlobAsFile,
+} from '../utils/stream-download'
 
 const { Paragraph, Text } = Typography
-
-const TOTAL_LINES = 12
-
-const supportsFileSystemAccess = 'showSaveFilePicker' in window
-
-async function readStreamToLines(
-  reader: ReadableStreamDefaultReader<Uint8Array>,
-  onLine: (lineCount: number, line: string) => void,
-) {
-  const decoder = new TextDecoder()
-  let lineCount = 0
-
-  while (true) {
-    const { done, value } = await reader.read()
-    if (done) break
-
-    const chunk = decoder.decode(value)
-    const lines = chunk.split('\n').filter(l => l.trim())
-
-    for (const line of lines) {
-      lineCount++
-      onLine(lineCount, line)
-    }
-  }
-}
 
 export const DownloadCard: React.FC = () => {
   const [streamProgress, setStreamProgress] = useState(0)
@@ -94,26 +77,11 @@ export const DownloadCard: React.FC = () => {
       const reader = response.body?.getReader()
       if (!reader) throw new Error('No response body')
 
-      const decoder = new TextDecoder()
-      let lineCount = 0
+      await readStreamToFileSystem(reader, writable, {
+        onLine: line => setStreamLines(prev => [...prev, line]),
+        onProgress: progress => setStreamProgress(progress),
+      })
 
-      while (true) {
-        const { done, value } = await reader.read()
-        if (done) break
-
-        await writable.write(value)
-
-        const chunk = decoder.decode(value)
-        const lines = chunk.split('\n').filter(l => l.trim())
-
-        for (const line of lines) {
-          lineCount++
-          setStreamLines(prev => [...prev, line])
-          setStreamProgress(Math.round((lineCount / TOTAL_LINES) * 100))
-        }
-      }
-
-      await writable.close()
       message.success('流式导出完成！请在浏览器下载管理器中查看进度')
     } catch (error) {
       if ((error as Error).name === 'AbortError') {
@@ -131,42 +99,19 @@ export const DownloadCard: React.FC = () => {
     setIsDirectDownloading(true)
     setDirectProgress(0)
     setDirectSpeed('')
-    const startTime = Date.now()
 
     try {
       const response = await apiClient.api.admin.todos.export.$get()
       const contentLength = parseInt(response.headers.get('Content-Length') || '0')
       const reader = response.body?.getReader()
-
       if (!reader) throw new Error('No response body')
 
-      const chunks: Uint8Array[] = []
-      let receivedLength = 0
+      const blob = await readStreamToBlob(reader, contentLength, {
+        onProgress: progress => setDirectProgress(progress),
+        onSpeed: speed => setDirectSpeed(speed),
+      })
 
-      while (true) {
-        const { done, value } = await reader.read()
-        if (done) break
-
-        chunks.push(value)
-        receivedLength += value.length
-
-        if (contentLength > 0) {
-          const progress = Math.round((receivedLength / contentLength) * 100)
-          setDirectProgress(progress)
-        }
-
-        const elapsed = (Date.now() - startTime) / 1000
-        const speed = (receivedLength / 1024 / elapsed).toFixed(1)
-        setDirectSpeed(`${speed} KB/s`)
-      }
-
-      const blob = new Blob(chunks)
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = 'todos.csv'
-      a.click()
-      URL.revokeObjectURL(url)
+      saveBlobAsFile(blob, 'todos.csv')
       message.success('文件下载成功')
     } catch (error) {
       console.error('Failed to download:', error)
@@ -285,12 +230,7 @@ export const DownloadCard: React.FC = () => {
               onClick={() => {
                 const csv = streamLines.join('\n')
                 const blob = new Blob([csv], { type: 'text/csv' })
-                const url = URL.createObjectURL(blob)
-                const a = document.createElement('a')
-                a.href = url
-                a.download = 'todos-stream.csv'
-                a.click()
-                URL.revokeObjectURL(url)
+                saveBlobAsFile(blob, 'todos-stream.csv')
               }}
             >
               保存为文件

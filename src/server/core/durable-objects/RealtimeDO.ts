@@ -100,10 +100,6 @@ export class RealtimeDurableObject {
     let keepAliveTimeout: ReturnType<typeof setTimeout> | null = null
     let isActive = true
 
-    console.warn(
-      `[SSE-DO] New connection, clientId: ${clientId}, current sseClients: ${this.core.sseClients.size}`
-    )
-
     const scheduleKeepAlive = (controller: ReadableStreamDefaultController) => {
       if (!isActive) return
 
@@ -133,8 +129,6 @@ export class RealtimeDurableObject {
           },
         })
 
-        console.warn(`[SSE-DO] Client added, total sseClients: ${this.core.sseClients.size}`)
-
         // Send initial connected event
         const connectMsg = `event: connected\ndata: ${JSON.stringify({ timestamp: Date.now() })}\n\n`
         controller.enqueue(new TextEncoder().encode(connectMsg))
@@ -143,7 +137,6 @@ export class RealtimeDurableObject {
         scheduleKeepAlive(controller)
       },
       cancel: () => {
-        console.warn(`[SSE-DO] Connection cancelled, clientId: ${clientId}`)
         isActive = false
         if (keepAliveTimeout) {
           clearTimeout(keepAliveTimeout)
@@ -164,7 +157,6 @@ export class RealtimeDurableObject {
   }
 
   private async handleBroadcast(request: Request): Promise<Response> {
-    console.warn('[RealtimeDO] handleBroadcast called')
     const body = (await request.clone().json()) as {
       event: string
       data: unknown
@@ -175,9 +167,6 @@ export class RealtimeDurableObject {
       return Response.json({ success: false as const, error: 'event is required' }, { status: 400 })
     }
 
-    console.warn(
-      `[RealtimeDO] broadcasting event: ${body.event}, data: ${JSON.stringify(body.data)}, sseClients: ${this.core.sseClients.size}`
-    )
     this.core.broadcast(body.data, body.exclude || [], body.event)
     return Response.json({
       success: true as const,

@@ -22,7 +22,7 @@ import type { Review } from '@client/services/plugin-api'
 export const PluginDetailPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>()
   const { currentPlugin: plugin, loading, fetchPlugin, trackInstall } = usePluginStore()
-  const [reviews, setReviews] = useState<Review[]>([])
+  const [reviews, setReviews] = useState<Review[]>(() => [])
   const [installOpen, setInstallOpen] = useState(false)
   const [copied, setCopied] = useState(false)
 

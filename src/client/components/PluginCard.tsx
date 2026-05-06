@@ -1,13 +1,13 @@
 import { Link } from 'react-router-dom'
 import { Download, Star, Tag, Copy } from 'lucide-react'
-import { useState } from 'react'
+import React, { useState } from 'react'
 import type { PluginListItem } from '@client/services/plugin-api'
 
 interface PluginCardProps {
   plugin: PluginListItem
 }
 
-export const PluginCard: React.FC<PluginCardProps> = ({ plugin }) => {
+export const PluginCard = React.memo(function PluginCard({ plugin }: PluginCardProps) {
   const [copied, setCopied] = useState(false)
 
   const installCmd = `xbrowser plugin install ${plugin.slug}`
@@ -90,4 +90,4 @@ export const PluginCard: React.FC<PluginCardProps> = ({ plugin }) => {
       </div>
     </Link>
   )
-}
+})

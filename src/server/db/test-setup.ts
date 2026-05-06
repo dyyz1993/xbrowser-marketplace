@@ -562,5 +562,10 @@ export async function cleanupTestDatabase(): Promise<void> {
     } catch {
       // Table may not exist
     }
+    try {
+      await client.execute('DELETE FROM admin_users')
+    } catch {
+      // Table may not exist
+    }
   }
 }

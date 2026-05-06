@@ -9,12 +9,12 @@ import { DetailModal } from './components/DetailModal'
 import { RejectModal } from './components/RejectModal'
 
 export const PluginReviewPage: React.FC = () => {
-  const [plugins, setPlugins] = useState<PluginItem[]>([])
+  const [plugins, setPlugins] = useState<PluginItem[]>(() => [])
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(true)
   const [statusFilter, setStatusFilter] = useState('pending')
   const [page, setPage] = useState(1)
-  const [selectedRowKeys, setSelectedRowKeys] = useState<string[]>([])
+  const [selectedRowKeys, setSelectedRowKeys] = useState<string[]>(() => [])
   const [detailPlugin, setDetailPlugin] = useState<PluginItem | null>(null)
   const [rejectModal, setRejectModal] = useState<{ slug: string; name: string } | null>(null)
   const [rejectReason, setRejectReason] = useState('')

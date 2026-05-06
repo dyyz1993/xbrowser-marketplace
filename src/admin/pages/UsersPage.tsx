@@ -29,7 +29,7 @@ import type { User, CreateUserRequest } from '@shared/modules/admin'
 type UserFormData = CreateUserRequest & { password?: string }
 
 export const UsersPage: React.FC = () => {
-  const [users, setUsers] = useState<User[]>([])
+  const [users, setUsers] = useState<User[]>(() => [])
   const [modalVisible, setModalVisible] = useState(false)
   const [editingUser, setEditingUser] = useState<User | null>(null)
   const [form] = Form.useForm<UserFormData>()

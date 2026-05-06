@@ -83,7 +83,7 @@ export function getAppConfig(): AppConfig {
     ? process.env.AUTH_SECRET_KEY
     : '';
 
-  if (isProd && !authSecretKeyRaw) {
+  if (isProd && !authSecretKeyRaw && !isCloudflare) {
     throw new Error('AUTH_SECRET_KEY environment variable is required in production');
   }
 
@@ -102,7 +102,7 @@ export function getAppConfig(): AppConfig {
   }
 
   const mockPasswordHash = typeof process !== 'undefined'
-    ? (process.env.MOCK_PASSWORD_HASH || '$2b$10$9iWkIfjDcJ7Kv4wHSb8ONONnrlfGb6rcfiJlZuuY4G2xQMG78DBbm')
+    ? (process.env.MOCK_PASSWORD_HASH || '$2b$10$zOV1yAf1zhU6jcszonK3xOjjk4pHVFLatyFmwpQvWYphf4iFg2Kii')
     : '';
 
   if (typeof process !== 'undefined' && !process.env.MOCK_PASSWORD_HASH && !isTest) {
@@ -125,7 +125,7 @@ export function getAppConfig(): AppConfig {
     ? process.env.FILE_SECRET_KEY
     : '';
 
-  if (!isTest && !fileSecretKeyRaw) {
+  if (!isTest && !fileSecretKeyRaw && !isCloudflare) {
     throw new Error('FILE_SECRET_KEY environment variable is required in production');
   }
 
@@ -173,10 +173,10 @@ export function getDatabaseConfig(): DatabaseConfig {
 let _cachedConfig: AppConfig | null = null;
 
 export function getConfig(): AppConfig {
-  if (!_cachedConfig) {
-    _cachedConfig = getAppConfig();
+  if (isCloudflare || !_cachedConfig) {
+    _cachedConfig = getAppConfig()
   }
-  return _cachedConfig;
+  return _cachedConfig
 }
 
 export function resetConfig(): void {

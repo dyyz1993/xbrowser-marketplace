@@ -45,8 +45,10 @@ const isDevTokensEnabled = (): boolean => {
   return getConfig().enableDevTokens
 }
 
-if (getConfig().enableDevTokens) {
-  console.warn('⚠️  WARNING: Dev tokens are ENABLED. Do not use in production!')
+function checkDevTokensEnabled(): void {
+  if (getConfig().enableDevTokens) {
+    console.warn('⚠️  WARNING: Dev tokens are ENABLED. Do not use in production!')
+  }
 }
 
 function extractToken(authHeader: string | undefined): string | null {
@@ -129,6 +131,46 @@ function verifyToken(token: string, secretKey: string): AuthUser | null {
   return null
 }
 
+async function verifyAdminToken(token: string): Promise<AuthUser | null> {
+  if (!token.startsWith('adm.')) return null
+
+  const parts = token.split('.')
+  if (parts.length !== 4) return null
+
+  const [, userId, role, hexSig] = parts
+  const secretKey = getConfig().authSecretKey
+  const data = `${userId}.${role}`
+  const encoder = new TextEncoder()
+  const key = await crypto.subtle.importKey(
+    'raw',
+    encoder.encode(secretKey),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign']
+  )
+  const sig = await crypto.subtle.sign('HMAC', key, encoder.encode(data))
+  const expectedHex = Array.from(new Uint8Array(sig)).map(b => b.toString(16).padStart(2, '0')).join('')
+
+  if (hexSig !== expectedHex) return null
+
+  const roleMap: Record<string, Role> = {
+    super_admin: Role.SUPER_ADMIN,
+    customer_service: Role.CUSTOMER_SERVICE,
+    user: Role.USER,
+  }
+
+  const mappedRole = roleMap[role]
+  if (!mappedRole) return null
+
+  return {
+    id: userId,
+    username: userId === '1' ? 'superadmin' : userId === '2' ? 'customerservice' : 'user1',
+    email: userId === '1' ? 'superadmin@example.com' : userId === '2' ? 'cs@example.com' : 'user1@example.com',
+    role: mappedRole,
+    permissions: getPermissionsByRole(mappedRole),
+  }
+}
+
 async function verifyApiKey(token: string): Promise<AuthUser | null> {
   try {
     const { verifyApiKey: verifyDevKey } = await import('../module-auth/services/auth-service')
@@ -148,6 +190,7 @@ async function verifyApiKey(token: string): Promise<AuthUser | null> {
 export function authMiddleware(options: AuthMiddlewareOptions = {}): MiddlewareHandler {
   const _secretKey = options.secretKey
   const log = createModuleLoggerSync('auth')
+  checkDevTokensEnabled()
 
   return async (c, next) => {
     const secretKey = _secretKey ?? getAuthSecret()
@@ -159,7 +202,7 @@ export function authMiddleware(options: AuthMiddlewareOptions = {}): MiddlewareH
       throw AuthenticationError.tokenMissing()
     }
 
-    const user = verifyToken(token, secretKey) || await verifyApiKey(token)
+    const user = verifyToken(token, secretKey) || await verifyAdminToken(token) || await verifyApiKey(token)
 
     if (!user) {
       log.warn({ path: c.req.path, method: c.req.method }, 'Invalid auth token')

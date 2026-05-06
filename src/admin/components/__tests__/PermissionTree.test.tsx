@@ -1,0 +1,105 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { render, screen, fireEvent } from '@testing-library/react'
+import { PermissionTree } from '../PermissionTree'
+import type { PermissionInfo, PermissionCategory } from '@shared/modules/permission'
+
+const mockPermissions: PermissionInfo[] = [
+  { permission: 'user:view' as any, label: '查看用户', category: 'user' },
+  { permission: 'user:create' as any, label: '创建用户', category: 'user' },
+  { permission: 'user:edit' as any, label: '编辑用户', category: 'user' },
+  { permission: 'content:view' as any, label: '查看内容', category: 'content' },
+  { permission: 'content:create' as any, label: '创建内容', category: 'content' },
+]
+
+const mockCategories: Record<string, PermissionCategory> = {
+  user: { label: '用户管理', permissions: ['user:view', 'user:create', 'user:edit'] as any[] },
+  content: { label: '内容管理', permissions: ['content:view', 'content:create'] as any[] },
+}
+
+vi.mock('@shared/modules/permission/permission-dependencies', () => ({
+  PERMISSION_DEPENDENCIES: {
+    'user:create': ['user:view'],
+    'user:edit': ['user:view'],
+    'content:create': ['content:view'],
+  },
+  getRequiredPermissions: (perm: string) => {
+    const deps: Record<string, string[]> = {
+      'user:create': ['user:view'],
+      'user:edit': ['user:view'],
+      'content:create': ['content:view'],
+    }
+    return deps[perm] || []
+  },
+}))
+
+const defaultProps = {
+  permissions: mockPermissions,
+  categories: mockCategories,
+  selectedPermissions: [] as string[],
+  onSelectionChange: vi.fn(),
+}
+
+describe('PermissionTree', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it('should render category labels', () => {
+    render(<PermissionTree {...defaultProps} />)
+    expect(screen.getByText('用户管理')).toBeInTheDocument()
+    expect(screen.getByText('内容管理')).toBeInTheDocument()
+  })
+
+  it('should render permission labels after expanding', () => {
+    render(<PermissionTree {...defaultProps} />)
+    fireEvent.click(screen.getByText('展开全部'))
+    expect(screen.getByText('查看用户')).toBeInTheDocument()
+    expect(screen.getByText('创建用户')).toBeInTheDocument()
+    expect(screen.getByText('查看内容')).toBeInTheDocument()
+  })
+
+  it('should render search input', () => {
+    render(<PermissionTree {...defaultProps} />)
+    expect(screen.getByPlaceholderText('搜索权限...')).toBeInTheDocument()
+  })
+
+  it('should filter permissions by search text', () => {
+    render(<PermissionTree {...defaultProps} />)
+    fireEvent.click(screen.getByText('展开全部'))
+    const input = screen.getByPlaceholderText('搜索权限...')
+    fireEvent.change(input, { target: { value: '查看' } })
+
+    expect(screen.getByText('查看用户')).toBeInTheDocument()
+    expect(screen.getByText('查看内容')).toBeInTheDocument()
+    expect(screen.queryByText('创建用户')).not.toBeInTheDocument()
+  })
+
+  it('should show selected count', () => {
+    render(<PermissionTree {...defaultProps} selectedPermissions={['user:view']} />)
+    expect(screen.getByText('1')).toBeInTheDocument()
+  })
+
+  it('should call onSelectionChange with all permissions on select all', () => {
+    render(<PermissionTree {...defaultProps} />)
+    const selectAllBtn = screen.getByText('全选')
+    fireEvent.click(selectAllBtn)
+    expect(defaultProps.onSelectionChange).toHaveBeenCalledWith(
+      mockPermissions.map(p => p.permission)
+    )
+  })
+
+  it('should call onSelectionChange with empty on clear all', () => {
+    render(<PermissionTree {...defaultProps} selectedPermissions={['user:view']} />)
+    const clearBtn = screen.getByText('清空')
+    fireEvent.click(clearBtn)
+    expect(defaultProps.onSelectionChange).toHaveBeenCalledWith([])
+  })
+
+  it('should render action buttons', () => {
+    render(<PermissionTree {...defaultProps} />)
+    expect(screen.getByText('全选')).toBeInTheDocument()
+    expect(screen.getByText('清空')).toBeInTheDocument()
+    expect(screen.getByText('展开全部')).toBeInTheDocument()
+    expect(screen.getByText('收起全部')).toBeInTheDocument()
+  })
+})
