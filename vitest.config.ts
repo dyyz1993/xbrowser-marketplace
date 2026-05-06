@@ -20,6 +20,7 @@ export default defineConfig({
       NODE_ENV: 'test',
       SQLITE_PATH: ':memory:',
       ENABLE_DEV_TOKENS: 'true',
+      MOCK_PASSWORD_HASH: '$2b$10$64mJb74fJp1SfUycIjbDGODBLXuot84SexEZyPuYvTEGs/7tZxlqa',
     },
     coverage: {
       provider: 'v8',

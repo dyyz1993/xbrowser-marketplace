@@ -27,10 +27,8 @@ class MockWebSocket {
   constructor(_url: string | URL, _protocols?: string | string[]) {}
 }
 
-let mockWsInstance: MockWebSocket
-
 beforeEach(() => {
-  mockWsInstance = new MockWebSocket()
+  vi.stubGlobal('WebSocket', MockWebSocket)
   vi.stubGlobal('WebSocket', MockWebSocket)
   vi.resetModules()
 })

@@ -78,8 +78,9 @@ src/
 
 ## 测试
 - 框架: Vitest
-- 测试数: 950（全部通过）
-- 77 个测试文件
+- 测试数: 1356（全部通过）
+- 测试文件: 115 个
+- E2E 场景: 9 个 spec 文件
 - 场景覆盖率: 97/97 = 100%
 - 关键测试文件:
   - marketplace-flow.test.ts（E2E 全流程 26 测试）
@@ -295,7 +296,7 @@ push/PR → quality (format+lint+typecheck+audit)
 - ✅ TypeScript 错误 → 0 个
 
 #### 测试覆盖率健康
-- 950 个测试，77 个文件
+- 1356 个测试，115 个文件
 - 覆盖率 ~70%（可接受范围）
 - E2E + 单元 + 集成全覆盖
 
@@ -341,5 +342,49 @@ push/PR → quality (format+lint+typecheck+audit)
 - **测试**: 77 文件 / 950 用例 / 100% 通过
 - **覆盖率**: Stmts 70.44% / Funcs 67.67% / Branch 58.73% / Lines 71.32%
 
-#### 总优化轮次: 5 轮
-#### 总修复项: 49 项
+### 十二、测试大补全（8 阶段，406 个新测试）
+
+#### Phase 1: 工具函数测试 (69 cases)
+- lru-cache, json, app-error, auth, uuid, date, response
+
+#### Phase 2: 中间件测试 (51 cases)
+- rate-limit, captcha, error-handler, cors, audit-log, permission
+
+#### Phase 3: 客户端 Store + 共享层测试 (60 cases)
+- authStore, notificationStore, plugin-store
+- sse-client, ws-client
+- useSSE, useWebSocket
+
+#### Phase 4: 服务层测试 (116 cases)
+- plugin-query-service, plugin-review-service
+- admin-stats-service, admin-plugin-management-service
+- admin-category-service, admin-developer-service
+- storage-service, audit-log-service
+
+#### Phase 5: 路由测试 (39 cases)
+- admin-notification-routes, user-management-routes
+- system-routes, admin-auth-routes, audit-log-routes
+
+#### Phase 6: Admin UI 组件测试 (46 cases)
+- useCRUD, CaptchaModal, NotificationDrawer
+- PermissionTree, PermissionConfigEditor
+
+#### Phase 7: E2E 场景测试 (55 cases)
+- 插件市场全流程 (13 tests)
+- 管理员审批流程 (9 tests)
+- 用户认证流程 (11 tests)
+- 文件上传流程 (10 tests)
+- 权限角色管理 (12 tests)
+
+#### Phase 8: 修复验证
+- 修复 16 个测试文件的 mock/断言问题
+- 修复 9 个 TS 类型错误
+- 最终结果: 1356 tests, 115 files, 0 failures
+
+#### 最终验证结果
+- **TypeScript**: 0 错误
+- **测试**: 115 文件 / 1356 用例 / 100% 通过
+- **E2E**: 9 个场景文件 / 108 个用例
+
+#### 总优化轮次: 6 轮
+#### 总修复项: 87 项 (49 + 38 测试项)

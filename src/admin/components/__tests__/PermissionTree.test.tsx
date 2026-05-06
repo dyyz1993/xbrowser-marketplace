@@ -81,8 +81,10 @@ describe('PermissionTree', () => {
 
   it('should call onSelectionChange with all permissions on select all', () => {
     render(<PermissionTree {...defaultProps} />)
-    const selectAllBtn = screen.getByText('全选')
-    fireEvent.click(selectAllBtn)
+    const buttons = screen.getAllByRole('button')
+    const selectAllBtn = buttons.find(b => b.textContent?.replace(/\s/g, '').includes('全选'))
+    expect(selectAllBtn).toBeTruthy()
+    fireEvent.click(selectAllBtn!)
     expect(defaultProps.onSelectionChange).toHaveBeenCalledWith(
       mockPermissions.map(p => p.permission)
     )
@@ -90,16 +92,20 @@ describe('PermissionTree', () => {
 
   it('should call onSelectionChange with empty on clear all', () => {
     render(<PermissionTree {...defaultProps} selectedPermissions={['user:view']} />)
-    const clearBtn = screen.getByText('清空')
-    fireEvent.click(clearBtn)
+    const buttons = screen.getAllByRole('button')
+    const clearBtn = buttons.find(b => b.textContent?.replace(/\s/g, '').includes('清空'))
+    expect(clearBtn).toBeTruthy()
+    fireEvent.click(clearBtn!)
     expect(defaultProps.onSelectionChange).toHaveBeenCalledWith([])
   })
 
   it('should render action buttons', () => {
     render(<PermissionTree {...defaultProps} />)
-    expect(screen.getByText('全选')).toBeInTheDocument()
-    expect(screen.getByText('清空')).toBeInTheDocument()
-    expect(screen.getByText('展开全部')).toBeInTheDocument()
-    expect(screen.getByText('收起全部')).toBeInTheDocument()
+    const buttons = screen.getAllByRole('button')
+    const buttonTexts = buttons.map(btn => btn.textContent?.replace(/\s/g, '') || '')
+    expect(buttonTexts.some(t => t.includes('全选'))).toBe(true)
+    expect(buttonTexts.some(t => t.includes('清空'))).toBe(true)
+    expect(buttonTexts.some(t => t.includes('展开全部'))).toBe(true)
+    expect(buttonTexts.some(t => t.includes('收起全部'))).toBe(true)
   })
 })

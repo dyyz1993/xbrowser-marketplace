@@ -33,7 +33,6 @@ import type {
   CreateUserRequest,
 } from '@shared/modules/admin'
 import { LRUCache } from '../../utils/lru-cache'
-import { getConfig } from '../../config'
 
 export async function getSystemStats(): Promise<SystemStats> {
   const db = await getDb()

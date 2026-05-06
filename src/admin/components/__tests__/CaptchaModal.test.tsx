@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterAll } from 'vitest'
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { CaptchaModal } from '../CaptchaModal'
 
 const mockResolve = vi.fn()
@@ -87,8 +87,9 @@ describe('CaptchaModal', () => {
       expect(screen.getByAltText('验证码')).toBeInTheDocument()
     })
 
-    const cancelBtn = screen.getByRole('button', { name: /取消/ })
-    fireEvent.click(cancelBtn)
+    const buttons = screen.getAllByRole('button')
+    const cancelButton = buttons.find(b => b.textContent?.replace(/\s/g, '').includes('取消'))
+    fireEvent.click(cancelButton!)
 
     expect(mockResolve).toHaveBeenCalledWith(false)
   })
@@ -110,8 +111,9 @@ describe('CaptchaModal', () => {
 
     const input = screen.getByPlaceholderText('请输入验证码')
     fireEvent.change(input, { target: { value: '1234' } })
-    const submitBtn = screen.getByRole('button', { name: /提交/ })
-    fireEvent.click(submitBtn)
+    const buttons = screen.getAllByRole('button')
+    const submitBtn = buttons.find(b => b.textContent?.replace(/\s/g, '').includes('提交'))
+    fireEvent.click(submitBtn!)
 
     await waitFor(() => {
       expect(mockResolve).toHaveBeenCalledWith(true)
@@ -138,8 +140,9 @@ describe('CaptchaModal', () => {
 
     const input = screen.getByPlaceholderText('请输入验证码')
     fireEvent.change(input, { target: { value: 'wrong' } })
-    const submitBtn = screen.getByRole('button', { name: /提交/ })
-    fireEvent.click(submitBtn)
+    const buttons = screen.getAllByRole('button')
+    const submitBtn = buttons.find(b => b.textContent?.replace(/\s/g, '').includes('提交'))
+    fireEvent.click(submitBtn!)
 
     await waitFor(() => {
       expect(mockFetch).toHaveBeenCalledTimes(3)

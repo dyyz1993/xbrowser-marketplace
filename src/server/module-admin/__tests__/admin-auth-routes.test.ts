@@ -51,20 +51,11 @@ describe('Admin Auth Routes', () => {
 
   describe('POST /api/admin/login', () => {
     it('should login with valid credentials', async () => {
-      await doFetch('/api/admin/register', {
-        method: 'POST',
-        body: JSON.stringify({
-          username: 'superadmin',
-          email: 'superadmin@example.com',
-          password: 'admin123',
-        }),
-      })
-
       const res = await doFetch('/api/admin/login', {
         method: 'POST',
         body: JSON.stringify({
           username: 'superadmin',
-          password: 'admin123',
+          password: 'password123',
         }),
       })
       expect(res.status).toBe(200)

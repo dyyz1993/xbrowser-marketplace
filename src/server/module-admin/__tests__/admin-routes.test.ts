@@ -203,7 +203,7 @@ describe('Admin Routes', () => {
     it('should login with valid credentials', async () => {
       const client = createTestClient()
       const res = await client.api.admin.login.$post({
-        json: { username: 'superadmin', password: '123456' },
+        json: { username: 'superadmin', password: 'password123' },
       })
 
       expect(res.status).toBe(200)
@@ -233,7 +233,7 @@ describe('Admin Routes', () => {
         json: {
           username: 'newuser',
           email: 'newuser@example.com',
-          password: '123456',
+          password: 'password123',
         },
       })
 
@@ -256,7 +256,7 @@ describe('Admin Routes', () => {
           json: {
             username: 'testuser',
             email: 'testuser@example.com',
-            password: '123456',
+            password: 'password123',
             role: Role.USER,
           },
         },
@@ -289,7 +289,7 @@ describe('Admin Routes', () => {
           json: {
             username: `testuser${uniqueId}`,
             email: `testuser${uniqueId}@example.com`,
-            password: '123456',
+            password: 'password123',
             role: Role.USER,
           },
         },
