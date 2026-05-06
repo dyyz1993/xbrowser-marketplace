@@ -1,4 +1,5 @@
 import type { AppNotification, CreateNotificationInput } from '@shared/schemas'
+import type { NotificationType } from '@shared/modules/notifications'
 import { generateUUID } from '../../utils/uuid'
 import { realtime } from '@server/core'
 
@@ -49,7 +50,20 @@ export function createNotification(input: CreateNotificationInput): AppNotificat
 
   notifications.unshift(notification)
 
+  if (notifications.length > 100) {
+    notifications.pop()
+  }
+
   return notification
+}
+
+async function broadcastUnreadCount(): Promise<void> {
+  try {
+    const unreadCount = getUnreadCount()
+    await realtime.broadcast('unread-count', { count: unreadCount })
+  } catch {
+    // Ignore broadcast errors in test environment
+  }
 }
 
 export async function createNotificationAndBroadcast(
@@ -59,6 +73,7 @@ export async function createNotificationAndBroadcast(
 
   try {
     await realtime.broadcast('notification', notification)
+    await broadcastUnreadCount()
   } catch {
     // Ignore broadcast errors in test environment
   }
@@ -74,6 +89,15 @@ export function markAsRead(id: string): AppNotification | undefined {
   return notification
 }
 
+export async function markAsReadAndBroadcast(id: string): Promise<boolean> {
+  const notification = markAsRead(id)
+  if (notification) {
+    await broadcastUnreadCount()
+    return true
+  }
+  return false
+}
+
 export function markAllAsRead(): number {
   let count = 0
   notifications.forEach(n => {
@@ -82,6 +106,12 @@ export function markAllAsRead(): number {
       count++
     }
   })
+  return count
+}
+
+export async function markAllAsReadAndBroadcast(): Promise<number> {
+  const count = markAllAsRead()
+  await broadcastUnreadCount()
   return count
 }
 
@@ -100,4 +130,28 @@ export function getUnreadCount(): number {
 
 export function clearAllNotifications(): void {
   notifications.length = 0
+}
+
+export async function sendTestNotification(
+  type: NotificationType = 'info'
+): Promise<AppNotification> {
+  const titles: Record<NotificationType, string> = {
+    info: '系统通知',
+    warning: '警告通知',
+    error: '错误通知',
+    success: '成功通知',
+  }
+
+  const messages: Record<NotificationType, string> = {
+    info: '这是一条普通信息通知',
+    warning: '这是一条警告通知，请注意！',
+    error: '这是一条错误通知，请立即处理！',
+    success: '操作成功完成！',
+  }
+
+  return createNotificationAndBroadcast({
+    type,
+    title: titles[type],
+    message: messages[type],
+  })
 }

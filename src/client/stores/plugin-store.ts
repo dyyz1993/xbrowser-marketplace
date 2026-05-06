@@ -1,13 +1,13 @@
 import { create } from 'zustand'
-import {
-  pluginApi,
-  type PluginListItem,
-  type PluginDetail,
-  type Category,
-  type MarketplaceStats,
-  type PluginListParams,
-  type SearchParams,
-} from '@client/services/plugin-api'
+import type {
+  PluginListItem,
+  PluginDetail,
+  Category,
+  MarketplaceStats,
+  PluginListParams,
+  SearchParams,
+} from '@shared/modules/plugins'
+import { pluginApi } from '@client/services/plugin-api'
 
 interface PluginState {
   plugins: PluginListItem[]
@@ -64,7 +64,11 @@ export const usePluginStore = create<PluginState>((set, get) => ({
           loading: false,
         })
       } else {
-        set({ error: result.error ?? 'Failed to fetch plugins', loading: false })
+        let errorText: string = 'Failed to fetch plugins'
+        if (!result.success && 'error' in result) {
+          errorText = result.error as string
+        }
+        set({ error: errorText, loading: false })
       }
     } catch (err) {
       set({ error: err instanceof Error ? err.message : 'Unknown error', loading: false })
@@ -91,7 +95,11 @@ export const usePluginStore = create<PluginState>((set, get) => ({
           loading: false,
         })
       } else {
-        set({ error: result.error ?? 'Search failed', loading: false })
+        let errorText: string = 'Search failed'
+        if (!result.success && 'error' in result) {
+          errorText = result.error as string
+        }
+        set({ error: errorText, loading: false })
       }
     } catch (err) {
       set({ error: err instanceof Error ? err.message : 'Unknown error', loading: false })

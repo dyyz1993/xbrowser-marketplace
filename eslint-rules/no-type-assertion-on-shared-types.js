@@ -1,4 +1,8 @@
 /**
+ * @framework-baseline 6ba23878d6454c1f
+ */
+
+/**
  * 自定义 ESLint 规则：禁止对 @shared/modules 导入的类型使用 `as` 类型断言
  *
  * 从 @shared/modules 导入的类型应该是类型安全的。

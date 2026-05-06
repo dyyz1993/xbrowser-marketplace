@@ -17,7 +17,7 @@ export function rateLimitMiddleware(options: RateLimitOptions = {}) {
   const message = options.message ?? 'Too many requests'
 
   return async (c: Context, next: Next) => {
-    if (process.env.NODE_ENV === 'Test') {
+    if (process.env.NODE_ENV === 'test') {
       return next()
     }
 

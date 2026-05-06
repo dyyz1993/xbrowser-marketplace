@@ -1,4 +1,8 @@
 /**
+ * @framework-baseline b8577e20b7faff0e
+ */
+
+/**
  * 自定义 ESLint 规则：
  * 1. 禁止使用普通 Hono，必须使用 OpenAPIHono
  * 2. 强制 OpenAPIHono 使用链式语法

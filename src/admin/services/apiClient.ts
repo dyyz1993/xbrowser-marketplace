@@ -7,7 +7,7 @@
 
 import { hc } from 'hono/client'
 import { WSClientImpl } from '@shared/core/ws-client'
-import { SSEClientImpl } from '@shared/core/sse-client'
+import { extendHonoClient } from '@shared/core/hono-client-types'
 import { createRequestInterceptor } from './requestInterceptor'
 import { useCaptchaStore } from '../stores/captchaStore'
 import type { AdminApiType } from '@server/index'
@@ -21,19 +21,6 @@ function clearAuthAndRedirect(): void {
   if (window.location.pathname !== '/admin/login') {
     window.location.href = '/admin/login'
   }
-}
-
-function getAuthToken(): string | null {
-  try {
-    const stored = localStorage.getItem(TOKEN_KEY)
-    if (stored) {
-      const parsed = JSON.parse(stored)
-      return parsed.state?.token || null
-    }
-  } catch {
-    return null
-  }
-  return null
 }
 
 function createCustomFetch() {
@@ -50,17 +37,11 @@ function createCustomFetch() {
   })
 }
 
-export const apiClient = hc<AdminApiType>(baseUrl, {
-  fetch: createCustomFetch() as typeof fetch,
-  webSocket: url => new WSClientImpl(url),
-  sse: url => {
-    const token = getAuthToken()
-    const headers: Record<string, string> = {}
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`
-    }
-    return new SSEClientImpl(url, headers)
-  },
-})
+export const apiClient = extendHonoClient(
+  hc<AdminApiType>(baseUrl, {
+    fetch: createCustomFetch() as typeof fetch,
+    webSocket: url => new WSClientImpl(url),
+  })
+)
 
 export { api } from '@shared/core/api-request'

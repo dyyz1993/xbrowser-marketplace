@@ -1,5 +1,6 @@
 import type { MiddlewareHandler } from 'hono'
 import { cors } from 'hono/cors'
+import { getConfig } from '../config'
 
 export type CorsOptions = {
   origin?: string | string[]
@@ -11,9 +12,7 @@ export type CorsOptions = {
 }
 
 const defaultCorsOptions: Required<Omit<CorsOptions, 'exposeHeaders' | 'maxAge'>> & CorsOptions = {
-  origin: process.env.NODE_ENV === 'production'
-    ? (process.env.CORS_ORIGIN?.split(',') || [])
-    : ['http://localhost:5173', 'http://localhost:3010'],
+  origin: getConfig().corsOrigin,
   credentials: true,
   allowMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowHeaders: ['Content-Type', 'Authorization'],

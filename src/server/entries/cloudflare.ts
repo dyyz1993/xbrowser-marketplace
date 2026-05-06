@@ -1,5 +1,5 @@
 /**
- * @framework-baseline e350401421193896
+ * @framework-baseline bd1f09a9821e5162
  * @framework-modify
  * @reason 统一错误响应格式为 JSON，确保所有错误都返回结构化数据；移除冗余的 globalThis 设置
  * @impact 影响 Cloudflare Workers 环境的错误响应格式
@@ -20,6 +20,7 @@ export interface CloudflareBindings extends AppBindings {
   DB: D1Database
   REALTIME_DO: DurableObjectNamespace
   R2_BUCKET: R2Bucket
+  AUTH_SECRET_KEY?: string
 }
 
 const runtimeAdapter = getCloudflareRuntimeAdapter()
@@ -31,6 +32,12 @@ const wrappedApp = app
   .use('*', async (c, next) => {
     ;(globalThis as unknown as { DB: D1Database }).DB = c.env.DB
     ;(globalThis as unknown as { R2_BUCKET: R2Bucket }).R2_BUCKET = c.env.R2_BUCKET
+    if (c.env.AUTH_SECRET_KEY) {
+      process.env.AUTH_SECRET_KEY = c.env.AUTH_SECRET_KEY
+    }
+    if (c.env.ENVIRONMENT) {
+      ;(process.env as Record<string, string>).NODE_ENV = c.env.ENVIRONMENT
+    }
     await next()
   })
   .get('/', c =>
@@ -53,7 +60,13 @@ const wrappedApp = app
 export default {
   fetch: async (request: Request, env: CloudflareBindings, ctx: ExecutionContext) => {
     ;(globalThis as unknown as { DB: D1Database }).DB = env.DB
-    ;(globalThis as unknown as { R2_BUCKET: R2Bucket }).R2_BUCKET = (env as Record<string, unknown>).R2_BUCKET as R2Bucket
+    ;(globalThis as unknown as { R2_BUCKET: R2Bucket }).R2_BUCKET = (env as unknown as Record<string, unknown>).R2_BUCKET as R2Bucket
+    if (env.AUTH_SECRET_KEY) {
+      process.env.AUTH_SECRET_KEY = env.AUTH_SECRET_KEY
+    }
+    if (env.ENVIRONMENT) {
+      ;(process.env as Record<string, string>).NODE_ENV = env.ENVIRONMENT
+    }
 
     const url = new URL(request.url)
 

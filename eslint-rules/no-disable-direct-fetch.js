@@ -1,4 +1,8 @@
 /**
+ * @framework-baseline 38db2f9a5517acb1
+ */
+
+/**
  * 禁止禁用 no-direct-fetch 规则
  * 确保所有前端代码都使用 apiClient 而不是直接使用 fetch
  */

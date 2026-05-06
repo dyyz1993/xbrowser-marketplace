@@ -6,6 +6,7 @@ import type {
   SSEClient,
   AppSSEProtocol,
 } from '@shared/schemas'
+import { createSSEClientFromRoute } from '@shared/utils/sse-route-helpers'
 
 interface NotificationState {
   notifications: AppNotification[]
@@ -146,19 +147,20 @@ export const useNotificationStore = create<NotificationState>(set => ({
     if (sseClient) return
 
     try {
-      const conn = apiClient.api.notifications.stream.$sse()
+      const conn = createSSEClientFromRoute<AppSSEProtocol>(
+        apiClient.api.notifications.stream
+      )
 
-      conn.onStatusChange(status => {
+      conn.onStatusChange((status: 'connecting' | 'open' | 'closed') => {
         console.log('[SSE] Status changed:', status)
         set({ sseConnected: status === 'open' })
       })
 
-      // Listen for the initial connected event from server
-      conn.on('connected', payload => {
+      conn.on('connected', (payload: AppSSEProtocol['events']['connected']) => {
         console.log('[SSE] Connected:', payload)
       })
 
-      conn.on('notification', notification => {
+      conn.on('notification', (notification: AppNotification) => {
         console.log('[SSE] Received notification:', notification)
         set(state => {
           if (state.notifications.some(n => n.id === notification.id)) {
@@ -171,7 +173,7 @@ export const useNotificationStore = create<NotificationState>(set => ({
         })
       })
 
-      conn.onError(error => {
+      conn.onError((error: Error) => {
         console.error('[SSE] Error:', error)
       })
 

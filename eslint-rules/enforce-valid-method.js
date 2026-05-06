@@ -1,4 +1,8 @@
 /**
+ * @framework-baseline a46dbed45beaa561
+ */
+
+/**
  * ESLint 规则：强制在 OpenAPI 路由中使用正确的 c.req.valid() 方法
  *
  * 根据 route definition 中的 request schema 自动推导应该使用的 valid 方法：

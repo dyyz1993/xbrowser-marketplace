@@ -15,6 +15,7 @@ import {
   GenerateUrlRequestSchema,
   FileUrlResponseSchema,
 } from '@shared/schemas'
+import { getConfig } from '../../config'
 
 const FileContentSchema = z.any()
 
@@ -178,7 +179,7 @@ export const fileRoutes = new OpenAPIHono()
       return c.json({ success: false as const, error: 'File not found' }, 404)
     }
 
-    const baseUrl = process.env.PUBLIC_URL || ''
+    const baseUrl = getConfig().publicUrl
 
     if (isPrivate) {
       const { url, expiry } = getPrivateFileUrl(

@@ -1,4 +1,8 @@
 /**
+ * @framework-baseline de2fed6c6a7ff346
+ */
+
+/**
  * 禁止在 routes/ 和 services/ 目录下创建文件
  *
  * 规则：

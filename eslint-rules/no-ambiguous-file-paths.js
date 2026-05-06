@@ -1,4 +1,8 @@
 /**
+ * @framework-baseline e5b8bf14244c53b9
+ */
+
+/**
  * 自定义 ESLint 规则：禁止有歧义的文件路径命名
  *
  * 禁止以下模式：

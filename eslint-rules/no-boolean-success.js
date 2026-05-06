@@ -1,4 +1,8 @@
 /**
+ * @framework-baseline 25c432374a6c4795
+ */
+
+/**
  * 禁止在路由定义中使用 z.boolean() 定义 success 字段
  * 应该使用 z.literal(true) 或 z.literal(false) 以获得正确的类型推导
  */

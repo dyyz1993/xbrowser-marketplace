@@ -69,4 +69,12 @@ export {
   PluginIdResponseSchema,
   DownloadCountResponseSchema,
   ReviewIdResponseSchema,
+  type PluginListItem,
+  type PluginDetail,
+  type Category,
+  type Review,
+  type MarketplaceStats,
+  type PluginListResult,
+  type PluginListParams,
+  type SearchParams,
 } from './plugins'

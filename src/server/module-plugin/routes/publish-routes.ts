@@ -2,6 +2,7 @@ import { createRoute, z } from '@hono/zod-openapi'
 import { OpenAPIHono } from '@hono/zod-openapi'
 import { authMiddleware } from '../../middleware/auth'
 import { successResponse, errorResponse, success, created } from '../../utils/route-helpers'
+import { ApiSuccessSchema } from '@shared/schemas'
 import {
   PluginDetailSchema,
   VersionSchema,
@@ -25,6 +26,7 @@ const publishPluginRoute = createRoute({
   },
   responses: {
     201: successResponse(PluginDetailSchema, 'Plugin published'),
+    400: errorResponse('Missing metadata'),
     409: errorResponse('Plugin slug already exists'),
   },
 })
@@ -53,7 +55,18 @@ const downloadTarballRoute = createRoute({
     params: PluginSlugSchema,
   },
   responses: {
-    200: successResponse(TarballInfoSchema, 'Tarball download info'),
+    // eslint-disable-next-line local-rules/require-response-helpers -- multi-content-type response with gzip stream
+    200: {
+      content: {
+        'application/json': { schema: ApiSuccessSchema(TarballInfoSchema) },
+        'application/gzip': { schema: z.any() },
+      },
+      description: 'Tarball download info',
+    },
+    // eslint-disable-next-line local-rules/require-response-helpers -- 302 redirect has no JSON body
+    302: {
+      description: 'Redirect to tarball URL',
+    },
     404: errorResponse('Plugin not found'),
   },
 })
@@ -65,7 +78,7 @@ export const publishRoutes = new OpenAPIHono()
 
     const metadataStr = body['metadata']
     if (!metadataStr || typeof metadataStr === 'string') {
-      return c.json({ success: false, error: 'Missing metadata' }, 400)
+      return c.json({ success: false as const, error: 'Missing metadata', timestamp: new Date().toISOString() }, 400)
     }
     const metadataText = await (metadataStr as File).text()
     const rawMeta = JSON.parse(metadataText)

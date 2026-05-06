@@ -1,5 +1,5 @@
 /**
- * @framework-baseline b18502d5cc33f07d
+ * @framework-baseline d16be4b1b9aefd60
  *
  * @framework-modify
  * @reason 添加 headers 参数支持，以便在测试中传递认证头
@@ -7,17 +7,16 @@
  */
 
 import { hc } from 'hono/client'
-import type { AppType } from '@server/index'
 import { createApp } from '@server/app'
 import { SSEClientImpl } from '@shared/core/sse-client'
+import { extendHonoClient, type ExtendedClientOptions } from '@shared/core/hono-client-types'
 
 /**
  * 测试客户端类型
  *
- * 注意：TypeScript 在推导 Hono Client 类型时可能触发 TS2589，
- * 该警告不影响运行时行为，测试客户端可正常工作。
+ * 注意：使用 any 避免深度的类型推导问题 (TS2589)
  */
-export type TestClient = ReturnType<typeof hc<AppType>>
+export type TestClient = any
 
 export interface TestClientOptions {
   webSocket?: (url: string | URL) => WebSocket
@@ -28,7 +27,7 @@ export interface TestClientOptions {
 /**
  * 创建测试客户端
  */
-export function createTestClient(baseUrl?: string, options?: TestClientOptions) {
+export function createTestClient(baseUrl?: string, options?: TestClientOptions): TestClient {
   const app = createApp()
   const defaultHeaders = {
     'User-Agent': 'TestClient/1.0 (Unit Test)',
@@ -40,13 +39,14 @@ export function createTestClient(baseUrl?: string, options?: TestClientOptions) 
     : (url: string | URL) => new SSEClientImpl(url, defaultHeaders)
 
   if (baseUrl) {
-    return hc<AppType>(baseUrl, {
+    const baseClient = hc(baseUrl, {
       headers: defaultHeaders,
       webSocket: options?.webSocket ? (url: string | URL) => options.webSocket!(url) : undefined,
       sse: sseFactory as (url: string) => unknown,
-    })
+    } as ExtendedClientOptions) as any
+    return extendHonoClient(baseClient) as TestClient
   }
-  return hc<AppType>('http://localhost', {
+  const baseClient = hc('http://localhost', {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     fetch: (input: any, init?: any) => {
       const request = new Request(input, init)
@@ -58,5 +58,6 @@ export function createTestClient(baseUrl?: string, options?: TestClientOptions) 
       return app.fetch(request)
     },
     sse: sseFactory as (url: string) => unknown,
-  })
+  } as ExtendedClientOptions) as any
+  return extendHonoClient(baseClient) as TestClient
 }

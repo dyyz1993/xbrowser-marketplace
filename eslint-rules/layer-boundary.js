@@ -1,4 +1,8 @@
 /**
+ * @framework-baseline 1636ca089cc6b544
+ */
+
+/**
  * ESLint 规则：框架层和业务层边界约束
  *
  * 规则：

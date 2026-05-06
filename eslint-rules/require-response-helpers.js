@@ -1,3 +1,7 @@
+/**
+ * @framework-baseline 411aa894e66ae6d5
+ */
+
 export const requireResponseHelpers = {
   meta: {
     type: 'problem',

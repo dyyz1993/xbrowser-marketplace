@@ -1,4 +1,8 @@
 /**
+ * @framework-baseline 57f760912fa6ecd4
+ */
+
+/**
  * 约束E2E测试文件的位置和命名
  * 1. E2E测试文件必须放在 tests/e2e/ 目录下
  * 2. E2E测试文件必须以 .spec.ts 结尾

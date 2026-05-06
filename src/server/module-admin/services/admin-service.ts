@@ -1,7 +1,7 @@
 import bcrypt from 'bcryptjs'
-import { getDb, getRawClient } from '../../db'
+import { getDb } from '../../db'
 import { todos } from '../../db/schema'
-import { desc } from 'drizzle-orm'
+import { desc, eq } from 'drizzle-orm'
 import { toISOString } from '../../utils/date'
 import { getMockUsers } from '../../utils/auth'
 import { Role, getPermissionsByRole } from '@shared/modules/permission'
@@ -15,156 +15,22 @@ import type {
   UpdateUserRequest,
   CreateUserRequest,
 } from '@shared/modules/admin'
-import type {
-  AppNotification,
-  NotificationType,
-  CreateNotificationInput,
-} from '@shared/modules/notifications'
-import { generateUUID } from '../../utils/uuid'
-import { realtime } from '@server/core'
-
-const notifications: AppNotification[] = []
-
-export function createNotification(input: CreateNotificationInput): AppNotification {
-  const notification: AppNotification = {
-    id: generateUUID(),
-    type: input.type,
-    title: input.title,
-    message: input.message,
-    read: false,
-    createdAt: new Date().toISOString(),
-  }
-
-  notifications.unshift(notification)
-
-  if (notifications.length > 100) {
-    notifications.pop()
-  }
-
-  return notification
-}
-
-export async function createNotificationAndBroadcast(
-  input: CreateNotificationInput
-): Promise<AppNotification> {
-  const notification = createNotification(input)
-  try {
-    await realtime.broadcast('notification', notification)
-
-    const unreadCount = notifications.filter(n => !n.read).length
-    await realtime.broadcast('unread-count', { count: unreadCount })
-  } catch {
-    // Ignore broadcast errors in test environment
-  }
-
-  return notification
-}
-
-export function getNotifications(options?: {
-  unreadOnly?: boolean
-  limit?: number
-}): AppNotification[] {
-  let result = [...notifications]
-
-  if (options?.unreadOnly) {
-    result = result.filter(n => !n.read)
-  }
-
-  const limit = options?.limit || 20
-  return result.slice(0, limit)
-}
-
-export function getUnreadCount(): number {
-  return notifications.filter(n => !n.read).length
-}
-
-export async function markNotificationRead(id: string): Promise<boolean> {
-  const notification = notifications.find(n => n.id === id)
-  if (notification) {
-    notification.read = true
-    const unreadCount = getUnreadCount()
-    try {
-      await realtime.broadcast('unread-count', { count: unreadCount })
-    } catch {
-      // Ignore broadcast errors in test environment
-    }
-    return true
-  }
-  return false
-}
-
-export async function markAllNotificationsRead(): Promise<number> {
-  let count = 0
-  for (const notification of notifications) {
-    if (!notification.read) {
-      notification.read = true
-      count++
-    }
-  }
-  try {
-    await realtime.broadcast('unread-count', { count: 0 })
-  } catch {
-    // Ignore broadcast errors in test environment
-  }
-  return count
-}
-
-export async function sendTestNotification(
-  type: NotificationType = 'info'
-): Promise<AppNotification> {
-  const titles: Record<NotificationType, string> = {
-    info: '系统通知',
-    warning: '警告通知',
-    error: '错误通知',
-    success: '成功通知',
-  }
-
-  const messages: Record<NotificationType, string> = {
-    info: '这是一条普通信息通知',
-    warning: '这是一条警告通知，请注意！',
-    error: '这是一条错误通知，请立即处理！',
-    success: '操作成功完成！',
-  }
-
-  return createNotificationAndBroadcast({
-    type,
-    title: titles[type],
-    message: messages[type],
-  })
-}
+import { LRUCache } from '../../utils/lru-cache'
+import { getConfig } from '../../config'
 
 export async function getSystemStats(): Promise<SystemStats> {
-  const rawClient = await getRawClient()
-
-  if (rawClient && 'execute' in rawClient) {
-    const totalResult = await rawClient.execute('SELECT COUNT(*) as count FROM todos')
-    const pendingResult = await rawClient.execute(
-      "SELECT COUNT(*) as count FROM todos WHERE status = 'pending'"
-    )
-    const completedResult = await rawClient.execute(
-      "SELECT COUNT(*) as count FROM todos WHERE status = 'completed'"
-    )
-
-    const getCount = (rows: unknown[]) => {
-      const row = rows[0] as Record<string, unknown> | undefined
-      return typeof row?.count === 'number' ? row.count : 0
-    }
-
-    return {
-      totalTodos: getCount(totalResult.rows),
-      pendingTodos: getCount(pendingResult.rows),
-      completedTodos: getCount(completedResult.rows),
-      lastUpdated: new Date().toISOString(),
-    }
-  }
-
   const db = await getDb()
-  const allTodos = await db.select().from(todos)
+
+  const [allTodos, pendingTodos, completedTodos] = await Promise.all([
+    db.select().from(todos),
+    db.select().from(todos).where(eq(todos.status, 'pending')),
+    db.select().from(todos).where(eq(todos.status, 'completed')),
+  ])
 
   return {
     totalTodos: allTodos.length,
-    pendingTodos: allTodos.filter(t => t.status === 'pending').length,
-    completedTodos: allTodos.filter(t => t.status === 'completed').length,
+    pendingTodos: pendingTodos.length,
+    completedTodos: completedTodos.length,
     lastUpdated: new Date().toISOString(),
   }
 }
@@ -210,7 +76,7 @@ export async function getRecentActivity(limit: number = 10): Promise<
   }))
 }
 
-const MOCK_PASSWORD_HASH = '$2b$10$9iWkIfjDcJ7Kv4wHSb8ONONnrlfGb6rcfiJlZuuY4G2xQMG78DBbm'
+const MOCK_PASSWORD_HASH = getConfig().mockPasswordHash
 
 export async function login(data: LoginRequest): Promise<LoginResponse> {
   const mockUsers = getMockUsers()
@@ -350,12 +216,13 @@ export async function getAllTodos(): Promise<
   }))
 }
 
-const avatarCache = new Map<string, { data: Blob; contentType: string }>()
-const iconCache = new Map<string, string>()
+const avatarCache = new LRUCache<{ data: Blob; contentType: string }>(50, 30 * 60 * 1000)
+const iconCache = new LRUCache<string>(100, 60 * 60 * 1000)
 
 export async function getAvatar(id: string): Promise<{ data: Blob; contentType: string } | null> {
-  if (avatarCache.has(id)) {
-    return avatarCache.get(id)!
+  const cached = avatarCache.get(id)
+  if (cached) {
+    return cached
   }
   const response = await fetch(`https://api.dicebear.com/7.x/avataaars/png?seed=${id}`)
   if (!response.ok) {
@@ -368,8 +235,9 @@ export async function getAvatar(id: string): Promise<{ data: Blob; contentType: 
 }
 
 export async function getIcon(name: string): Promise<string | null> {
-  if (iconCache.has(name)) {
-    return iconCache.get(name)!
+  const cached = iconCache.get(name)
+  if (cached) {
+    return cached
   }
   const icons: Record<string, string> = {
     home: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-6 6 6 6-6 9 9 6-6-9-9z"></path><path d="M9 21l6-6 6 6-6 9 9 6-6 9-9z"></path></svg>`,

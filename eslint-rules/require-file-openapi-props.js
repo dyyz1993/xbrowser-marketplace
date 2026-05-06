@@ -1,4 +1,8 @@
 /**
+ * @framework-baseline 0956d31f0680e2f0
+ */
+
+/**
  * 要求 z.file() 必须指定 type 和 format
  * 避免 Internal server error: Unknown zod object type 错误
  */

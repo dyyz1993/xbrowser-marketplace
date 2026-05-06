@@ -27,7 +27,7 @@ renamed_classes = [{ from = "NotificationDurableObject", to = "RealtimeDurableOb
 [assets]
 directory = "./dist/client"
 binding = "ASSETS"
-not_found_handling = "single-page-application"
+not_found_handling = "none"
 
 [[r2_buckets]]
 binding = "R2_BUCKET"

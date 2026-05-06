@@ -32,3 +32,15 @@
 | 2026-03-21 | src/server/test-utils/test-client.ts          | d16fe334284db1d7 → b18502d5cc33f07d | 添加 headers 参数支持，以便在测试中传递认证头                | 测试客户端现在支持自定义 headers，用于认证测试                           | -      |
 | 2026-03-21 | src/client/services/apiClient.ts              | ab16e97716a7556e → 5517d7521a8bb458 | 添加客户端认证支持，自动在请求头中携带 Authorization token   | 影响所有客户端 API 请求，需要用户登录后才能访问受保护的接口              | -      |
 | 2026-03-21 | src/server/index.ts                           | 13391b28b7c66ede → 8a40700e91824590 | 添加 AdminApiType 导出以支持客户端类型安全的 RPC 调用        | 导出 AdminApiType 供 admin 模块使用                                      | -      |
+| 2026-05-06 | src/shared/core/ws-client.ts | 4437e01c1b0bcabb → 1c50679a1896f818 | WSClientImpl 不再 extends WebSocket，改为动态基类模式兼容 browser/node 环境 | 所有使用 WSClientImpl 的地方不再需要 WebSocket 类型断言 | - |
+| 2026-05-06 | src/shared/core/sse-client.ts | 0a1efed4372dadaa → 3a48c171e16adb9b | 使用 fetch API 替代 EventSource，支持自定义 headers（认证） | SSE 客户端现在支持 Authorization header | - |
+| 2026-05-06 | src/shared/core/index.ts | f51621ebf8da3453 → 2e976477689dd2fe | [必填] 修改原因 | [必填] 影响范围 | - |
+| 2026-05-06 | src/shared/core/api-schemas.ts | 295608e4d0c3a8de → ea98867432a604cd | [必填] 修改原因 | [必填] 影响范围 | - |
+| 2026-05-06 | src/shared/core/api-request.ts | a1b2c3d4e5f6 → e208d2740eff268e | 新增 API 请求包装器，提供链式调用的增强功能（loading、重试、错误处理） | 所有使用 api() 函数的 API 调用都会受到影响，提供统一的请求处理能力 | - |
+| 2026-05-06 | src/server/core/durable-objects/RealtimeDO.ts | a6639465c6bc7806 → 658d0eea50246937 | 重命名为 RealtimeDurableObject，使其更通用，不再绑定特定业务 | Cloudflare Workers 环境下的 SSE/WebSocket 实时通信功能 | - |
+| 2026-05-06 | src/server/entries/node.ts | 159d5e23f19e9793 → 9fed8806e1563690 | 添加 SPA 前端路由处理，区分开发/生产环境 | 新增前端路由处理逻辑，/admin/* 返回 admin.html，其他路由返回 index.html | - |
+| 2026-05-06 | src/server/entries/cloudflare.ts | e350401421193896 → bd1f09a9821e5162 | 统一错误响应格式为 JSON，确保所有错误都返回结构化数据；移除冗余的 globalThis 设置 | 影响 Cloudflare Workers 环境的错误响应格式 | - |
+| 2026-05-06 | src/server/test-utils/test-server.ts | ecef67ddd440f5b9 → d0cb77568700eeb4 | 修复 ReadableStream 类型检查，添加 null 检查以避免类型错误 | 测试工具中的流式响应处理更加健壮，避免运行时错误 | - |
+| 2026-05-06 | src/server/test-utils/test-client.ts | b18502d5cc33f07d → d16be4b1b9aefd60 | 添加 headers 参数支持，以便在测试中传递认证头 | 测试客户端现在支持自定义 headers，用于认证测试 | - |
+| 2026-05-06 | src/server/index.ts | 13391b28b7c66ede → 8a40700e91824590 | 添加 AdminApiType 导出以支持客户端类型安全的 RPC 调用 | 导出 AdminApiType 供 admin 模块使用 | - |
+| 2026-05-06 | src/client/services/apiClient.ts | 5517d7521a8bb458 → 5a56f258c863be5d | 添加客户端认证支持，自动在请求头中携带 Authorization token | 影响所有客户端 API 请求，需要用户登录后才能访问受保护的接口 | - |

@@ -1,7 +1,8 @@
 import path from 'path'
-import { defineConfig } from 'vite'
+import { defineConfig, type Plugin } from 'vite'
 import devServer from '@hono/vite-dev-server'
 import tailwindcss from '@tailwindcss/vite'
+import { visualizer } from 'rollup-plugin-visualizer'
 import { websocketPlugin, dbPlugin } from './vite-plugins'
 
 export default defineConfig({
@@ -24,6 +25,12 @@ export default defineConfig({
     }),
     websocketPlugin(),
     dbPlugin(),
+    visualizer({
+      open: true,
+      gzipSize: true,
+      brotliSize: true,
+      filename: 'bundle-analysis.html',
+    }) as Plugin,
   ],
   build: {
     outDir: 'dist/client',

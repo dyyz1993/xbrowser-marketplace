@@ -1,5 +1,5 @@
 /**
- * @framework-baseline a1b2c3d4e5f6g7h8
+ * @framework-baseline e208d2740eff268eg7h8
  * @framework-modify
  * @reason 新增 API 请求包装器，提供链式调用的增强功能（loading、重试、错误处理）
  * @impact 所有使用 api() 函数的 API 调用都会受到影响，提供统一的请求处理能力

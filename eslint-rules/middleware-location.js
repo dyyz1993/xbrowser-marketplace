@@ -1,4 +1,8 @@
 /**
+ * @framework-baseline 78198aa6d5603535
+ */
+
+/**
  * 约束中间件的位置和写法
  * 1. 中间件必须放在 src/server/middleware/ 目录下
  * 2. 中间件文件必须导出命名函数，函数名以 Middleware 结尾

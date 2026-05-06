@@ -1,4 +1,8 @@
 /**
+ * @framework-baseline a96111023f2c1552
+ */
+
+/**
  * @fileoverview 限制会导致 TypeScript 类型推导复杂化的写法
  *
  * 此规则检测以下可能导致类型推导问题的模式：

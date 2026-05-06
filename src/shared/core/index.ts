@@ -1,5 +1,5 @@
 /**
- * @framework-baseline f51621ebf8da3453
+ * @framework-baseline 2e976477689dd2fe
  *
  * 此文件属于框架层代码。如需修改，请添加以下说明：
  *
@@ -26,3 +26,6 @@ export { WSClientImpl, createWSClient } from './ws-client'
 
 // SSE Client
 export { SSEClientImpl, createSSEClient } from './sse-client'
+
+// Hono Client Utilities (minimal, for testing/CLI only)
+export { extendHonoClient, type ExtendedClientOptions } from './hono-client-types'

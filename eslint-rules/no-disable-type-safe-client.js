@@ -1,4 +1,8 @@
 /**
+ * @framework-baseline 148741dae447c99a
+ */
+
+/**
  * 禁止在测试文件中禁用 require-type-safe-test-client 规则
  * 确保所有路由/RPC测试都使用类型安全的测试客户端
  */

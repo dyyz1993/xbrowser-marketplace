@@ -1,4 +1,8 @@
 /**
+ * @framework-baseline 4bd543b4884df5af
+ */
+
+/**
  * 禁止直接使用 fetch/axios/ajax 等 HTTP 请求方式，强制使用 apiClient
  *
  * 原因：

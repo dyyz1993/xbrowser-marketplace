@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { notification } from 'antd'
 import { apiClient } from '../services/apiClient'
 import type { SSEClient, AppSSEProtocol, AppNotification, UnreadCountEvent } from '@shared/schemas'
+import { createSSEClientFromRoute } from '@shared/utils/sse-route-helpers'
 
 type SSEStatus = 'connecting' | 'open' | 'closed'
 
@@ -72,7 +73,9 @@ export function useAdminNotifications(): UseAdminNotificationsReturn {
     setStatus('connecting')
 
     try {
-      const client = apiClient.api.admin.notifications.stream.$sse()
+      const client = createSSEClientFromRoute<AppSSEProtocol>(
+        apiClient.api.admin.notifications.stream
+      )
       clientRef.current = client
 
       client.onStatusChange((newStatus: 'connecting' | 'open' | 'closed') => {

@@ -17,7 +17,9 @@ import { fileRoutes } from './module-file/routes/file-routes'
 export { type AppBindings, type CreateAppOptions } from './types/bindings'
 
 export function createApp<T extends AppBindings = AppBindings>(_options: CreateAppOptions = {}) {
-  const app = new OpenAPIHono<{ Bindings: T }>()
+  // eslint-disable-next-line local-rules/require-hono-chain-syntax -- app instance needs separate setup for middleware + routes
+  const openapiApp = new OpenAPIHono<{ Bindings: T }>()
+  const app = openapiApp
     .use('*', errorHandlerMiddleware())
     .use('*', loggerMiddleware())
     .use('*', corsMiddleware())
@@ -53,8 +55,23 @@ export function createApp<T extends AppBindings = AppBindings>(_options: CreateA
       }
     })
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  autoRegisterRealtime(app as any)
+  autoRegisterRealtime(openapiApp)
+
+  app
+    .get('/admin/*', async c => {
+      const assets = (c.env as AppBindings).ASSETS
+      if (!assets) return c.notFound()
+      const response = await assets.fetch(new Request(new URL('/admin.html', c.req.url)))
+      if (response.ok) return response
+      return c.notFound()
+    })
+    .get('*', async c => {
+      const assets = (c.env as AppBindings).ASSETS
+      if (!assets) return c.notFound()
+      const response = await assets.fetch(new Request(new URL('/index.html', c.req.url)))
+      if (response.ok) return response
+      return c.notFound()
+    })
 
   // Last-resort error handler for framework-level errors (e.g. 404 Not Found).
   // The canonical error handler is errorHandlerMiddleware (middleware/error-handler.ts).

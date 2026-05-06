@@ -2,6 +2,7 @@ import type { MiddlewareHandler } from 'hono'
 import { createModuleLoggerSync } from '../utils/logger'
 import { Role, Permission, getPermissionsByRole } from '@shared/modules/permission'
 import { AuthenticationError, AuthorizationError } from '../utils/app-error'
+import { getConfig } from '../config'
 
 export type UserRole = Role
 
@@ -26,13 +27,25 @@ declare module 'hono' {
   }
 }
 
-const defaultSecretKey = 'dev-secret-key-change-in-production'
+const DEV_SECRET_KEY = 'dev-secret-key-change-in-production'
 
-const isDevTokensEnabled = (): boolean => {
-  return process.env.ENABLE_DEV_TOKENS === 'true' && process.env.NODE_ENV !== 'production'
+function getAuthSecret(): string {
+  const config = getConfig()
+  if (config.authSecretKey && config.authSecretKey !== DEV_SECRET_KEY) return config.authSecretKey
+  if (config.authSecretKey) return config.authSecretKey
+
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('AUTH_SECRET_KEY environment variable is required in production')
+  }
+
+  return DEV_SECRET_KEY
 }
 
-if (isDevTokensEnabled()) {
+const isDevTokensEnabled = (): boolean => {
+  return getConfig().enableDevTokens
+}
+
+if (getConfig().enableDevTokens) {
   console.warn('⚠️  WARNING: Dev tokens are ENABLED. Do not use in production!')
 }
 
@@ -101,7 +114,7 @@ function verifyDevToken(token: string): AuthUser | null {
 }
 
 function verifyToken(token: string, secretKey: string): AuthUser | null {
-  if (secretKey === defaultSecretKey && isDevTokensEnabled()) {
+  if (secretKey === DEV_SECRET_KEY && isDevTokensEnabled()) {
     const devUser = verifyDevToken(token)
     if (devUser) {
       const log = createModuleLoggerSync('auth')
@@ -133,10 +146,11 @@ async function verifyApiKey(token: string): Promise<AuthUser | null> {
 }
 
 export function authMiddleware(options: AuthMiddlewareOptions = {}): MiddlewareHandler {
-  const secretKey = options.secretKey ?? process.env.AUTH_SECRET_KEY ?? defaultSecretKey
+  const _secretKey = options.secretKey
   const log = createModuleLoggerSync('auth')
 
   return async (c, next) => {
+    const secretKey = _secretKey ?? getAuthSecret()
     const authHeader = c.req.header('Authorization')
     const token = extractToken(authHeader)
 

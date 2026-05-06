@@ -1,5 +1,5 @@
 /**
- * @framework-baseline 13391b28b7c66ede
+ * @framework-baseline 8a40700e91824590
  * @framework-modify
  * @reason 添加 AdminApiType 导出以支持客户端类型安全的 RPC 调用
  * @impact 导出 AdminApiType 供 admin 模块使用

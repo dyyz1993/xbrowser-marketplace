@@ -112,7 +112,7 @@ describe('Plugin Routes Extended', () => {
 
   describe('GET /api/plugins/:slug/versions', () => {
     it('should return versions for a plugin', async () => {
-      const { id } = await seedApprovedPlugin()
+      const { id } = (await seedApprovedPlugin())!
       await seedVersion(id)
       const res = await doFetch('/api/plugins/ext-plugin/versions')
       expect(res.status).toBe(200)
@@ -144,8 +144,8 @@ describe('Plugin Routes Extended', () => {
 
   describe('GET /api/categories/:slug/plugins', () => {
     it('should return plugins by category', async () => {
-      const { id: pluginId } = await seedApprovedPlugin()
-      const catId = await seedCategory()
+      const { id: pluginId } = (await seedApprovedPlugin())!
+      const catId = (await seedCategory())!
       await seedCategoryMapping(pluginId, catId)
       const res = await doFetch('/api/categories/ext-category/plugins?page=1&limit=20')
       expect(res.status).toBe(200)
@@ -167,7 +167,7 @@ describe('Plugin Routes Extended', () => {
 
   describe('DELETE /api/plugins/:slug/reviews/:reviewId', () => {
     it('should allow review owner to delete their review', async () => {
-      const { id } = await seedApprovedPlugin()
+      const { id } = (await seedApprovedPlugin())!
       const reviewId = await seedReview(id)
       const res = await doFetch(`/api/plugins/ext-plugin/reviews/${reviewId}`, {
         method: 'DELETE',
@@ -181,7 +181,7 @@ describe('Plugin Routes Extended', () => {
     })
 
     it('should reject non-owner deletion (non-admin)', async () => {
-      const { id } = await seedApprovedPlugin('review-del-2', 'plugin-rd2')
+      const { id } = (await seedApprovedPlugin('review-del-2', 'plugin-rd2'))!
       const reviewId = await seedReview(id, 'review-del-2', 'user-1', 'testuser')
       const res = await doFetch(`/api/plugins/review-del-2/reviews/${reviewId}`, {
         method: 'DELETE',
@@ -246,7 +246,7 @@ describe('Plugin Routes Extended', () => {
     })
 
     it('should reject duplicate review from same user', async () => {
-      const { id } = await seedApprovedPlugin('dup-rev-plugin', 'plugin-dup')
+      const { id } = (await seedApprovedPlugin('dup-rev-plugin', 'plugin-dup'))!
       await seedReview(id, 'review-dup-1', 'super-admin-1', 'superadmin')
       const res = await doFetch('/api/plugins/dup-rev-plugin/reviews', {
         method: 'POST',
@@ -290,8 +290,8 @@ describe('Plugin Routes Extended', () => {
 
   describe('GET /api/plugins with filters', () => {
     it('should filter by category', async () => {
-      const { id: pluginId } = await seedApprovedPlugin()
-      const catId = await seedCategory()
+      const { id: pluginId } = (await seedApprovedPlugin())!
+      const catId = (await seedCategory())!
       await seedCategoryMapping(pluginId, catId)
       const res = await doFetch('/api/plugins?page=1&limit=20&category=ext-category')
       expect(res.status).toBe(200)

@@ -141,6 +141,7 @@ export async function setupTestDatabase(): Promise<void> {
       site_urls TEXT,
       tags TEXT,
       commands TEXT,
+      reject_reason TEXT,
       created_at INTEGER NOT NULL DEFAULT (unixepoch() * 1000),
       updated_at INTEGER NOT NULL DEFAULT (unixepoch() * 1000)
     );

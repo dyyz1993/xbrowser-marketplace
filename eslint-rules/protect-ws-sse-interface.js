@@ -1,4 +1,8 @@
 /**
+ * @framework-baseline dbb0b78091cd9d47
+ */
+
+/**
  * 自定义 ESLint 规则：保护 WS/SSE 客户端的核心接口
  * 禁止随意添加新的公共方法
  */

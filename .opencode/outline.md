@@ -78,8 +78,8 @@ src/
 
 ## 测试
 - 框架: Vitest
-- 测试数: 742（全部通过）
-- 62 个测试文件
+- 测试数: 950（全部通过）
+- 77 个测试文件
 - 场景覆盖率: 97/97 = 100%
 - 关键测试文件:
   - marketplace-flow.test.ts（E2E 全流程 26 测试）
@@ -107,3 +107,124 @@ src/
 - 代理: http://127.0.0.1:7890
 - Cloudflare 账户: dyyz1993@qq.com
 - Account ID: 89d33e8baa4ff32eb2def95cff00e91b
+
+## 会话优化记录 (2026-05-06)
+
+### 一、代码质量优化（15 项完成）
+
+#### 🔴 关键问题修复 (6/6)
+1. **Rate Limit 环境变量 bug**: `NODE_ENV === 'Test'` → `'test'` (rate-limit.ts)
+2. **硬编码密码哈希**: 迁移到 `MOCK_PASSWORD_HASH` 环境变量 + .env.example
+3. **Auth Secret Key 硬编码**: 生产环境强制要求环境变量，否则抛错
+4. **app.ts as any 类型逃逸**: 拆分 OpenAPIHono 实例变量，消除 cast
+5. **原生 SQL → Drizzle ORM**: admin-service.ts 中 COUNT 查询改用 ORM
+6. **Auth 模块测试**: 新增 39 个测试用例 (auth-service.test.ts + auth-routes.test.ts)
+
+#### 🟡 警告修复 (6/6)
+1. **N+1 查询 → 批量查询**: 新增 getReviewStatsBatch()，5 处 N+1 消除
+2. **plugin-service.ts 拆分**: 693 行 → 4 个文件 (plugin-utils/plugin-query-service/plugin-review-service/plugin-service)
+3. **类型统一到 shared 层**: PluginListItem/PluginDetail 统一到 @shared/modules/plugins/schemas.ts
+4. **无界缓存 → LRU Cache**: 新增 LRUCache 工具类 (TTL + maxSize)，替换 avatarCache/iconCache
+5. **测试页面生产隔离**: MediaTestPage/TestCaptchaPage 加 process.env 守卫 + React.lazy
+6. **内存通知合并**: 删除 admin-service.ts 内存数组，合并到 DB 持久化通知系统
+
+#### 🟢 建议实施 (2/5，3 项延期)
+1. ✅ 重复工具函数 → utils/json.ts (parseJsonField/serializeJsonField)
+2. ✅ React.lazy 路由级代码分割 (client/App.tsx)
+3. ⏸️ plugin-api.ts → Hono RPC（大型重构，后续单独处理）
+4. ⏸️ process.env 集中到 config.ts（大型重构，后续单独处理）
+5. ⏸️ bundle 分析工具（后续单独处理）
+
+### 二、CI/CD 全面改造（12 项完成）
+
+#### 重写前的问题
+- lint/typecheck `|| true` 导致质量门永远通过
+- ci.yml + deploy.yml 双重部署冲突
+- deploy.yml 无 CI 关卡，失败代码可直接上线
+- 3 种不同 npm install 策略导致依赖树不一致
+- 无 E2E 测试、无格式检查、无安全扫描、无并发控制
+
+#### 改造后的 CI 管道
+```
+push/PR → quality (format+lint+typecheck+audit)
+         → test (vitest --coverage)  ┐ (并行)
+         → build                     ┘
+         → e2e (playwright)
+         → deploy (仅 main, CI 通过后触发)
+```
+
+#### 具体修复
+1. 移除 `|| true`，lint/typecheck 真正拦截错误
+2. ci.yml 移除 deploy job，避免双重部署
+3. deploy.yml 改用 workflow_run 触发，CI 通过才部署
+4. 统一 `npm ci --legacy-peer-deps` 安装策略
+5. 新增 E2E 测试 job (playwright)
+6. 新增 prettier --check 格式检查
+7. 新增 npm audit 安全扫描
+8. 新增 concurrency 并发控制
+9. 新增 .github/dependabot.yml（npm + github-actions）
+10. 覆盖率用 vitest run --coverage 强制执行阈值
+11. 部署预留 db:migrate 步骤
+12. deploy.yml 加 environment: production
+
+### 三、验证结果（最终）
+- **TypeScript**: 52 个预存错误，0 新增错误
+- **测试**: 950 通过，0 失败（77 个测试文件）
+- **覆盖率**: Lines 68.94% / Functions 57.11% / Branches 66.69% / Statements 70.24%
+- **测试增量**: 742 → 950（+208 新测试），62 → 77 文件（+15 新测试文件）
+
+### 四、新增文件清单
+| 文件 | 用途 |
+|------|------|
+| src/server/utils/lru-cache.ts | LRU 缓存工具类 |
+| src/server/utils/json.ts | JSON 序列化共享工具 |
+| src/server/module-auth/__tests__/auth-service.test.ts | Auth 服务测试 (15 cases) |
+| src/server/module-auth/__tests__/auth-routes.test.ts | Auth 路由测试 (24 cases) |
+| src/shared/modules/plugins/schemas.ts | 插件类型统一定义 |
+| src/server/module-plugin/services/plugin-utils.ts | 插件工具函数 |
+| src/server/module-plugin/services/plugin-query-service.ts | 插件查询服务 |
+| src/server/module-plugin/services/plugin-review-service.ts | 插件评论服务 |
+| .github/dependabot.yml | Dependabot 配置 |
+
+### 五、剩余待办
+- [x] 补全客户端页面测试 (5 个页面) ✅ 61 个用例
+- [x] 补全 Admin hooks 测试 (4 个) ✅ 35 个用例
+- [x] 补全 Admin 页面测试 (4 个重点页面) ✅ 46 个用例
+- [x] 拆分 MediaTestPage.tsx (524行) ✅ → 目录结构
+- [x] 拆分 file-storage.ts (456行) ✅ → 3 文件
+- [x] 拆分 RolesPage.tsx (330行) ✅ → 目录结构
+- [x] 拆分 PluginReviewPage.tsx (392行) ✅ → 目录结构
+- [ ] plugin-api.ts → Hono RPC 重构
+- [ ] process.env 集中到 config.ts
+- [ ] 添加 bundle 分析工具
+- [ ] 修复 52 个预存 TypeScript 类型错误
+
+### 六、第二轮优化完成（测试补全 + 文件拆分）
+
+#### 新增测试 (208 个用例)
+| 模块 | 文件 | 测试数 |
+|------|------|--------|
+| 客户端 | Home.test.tsx | 10 |
+| 客户端 | Search.test.tsx | 10 |
+| 客户端 | PluginDetail.test.tsx | 18 |
+| 客户端 | Categories.test.tsx | 7 |
+| 客户端 | CLI.test.tsx | 16 |
+| Admin hooks | useAdminNotifications.test.tsx | 8 |
+| Admin hooks | useAuditLogs.test.ts | 7 |
+| Admin hooks | useConfig.test.tsx | 8 |
+| Admin hooks | useRoles.test.ts | 12 |
+| Admin pages | PluginReviewPage.test.tsx | 13 |
+| Admin pages | RolesPage.test.tsx | 11 |
+| Admin pages | UsersPage.test.tsx | 10 |
+| Admin pages | PluginManagementPage.test.tsx | 12 |
+
+#### 文件拆分
+| 原文件 | 拆分后 |
+|--------|--------|
+| file-storage.ts (456行) | file-storage-core.ts + file-storage-signing.ts + file-storage.ts(桶导出) |
+| PluginReviewPage.tsx (392行) | PluginReviewPage/ 目录 (index + Columns + DetailModal + RejectModal + ExpandedRow) |
+| RolesPage.tsx (330行) | RolesPage/ 目录 (index + Columns + RoleFormModal + PermissionModal) |
+| MediaTestPage.tsx (524行) | MediaTestPage/ 目录 (index + AvatarCard + SvgCard + DownloadCard) |
+
+#### Bug 修复
+- 测试 DB 缺少 `reject_reason` 列导致 131 个预存测试失败 → 已修复

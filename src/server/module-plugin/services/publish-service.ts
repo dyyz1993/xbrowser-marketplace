@@ -37,10 +37,7 @@ export interface PublishFiles {
   checksum: string | null
 }
 
-function serializeJsonField(value: string[] | undefined): string | undefined {
-  if (!value || value.length === 0) return undefined
-  return JSON.stringify(value)
-}
+import { serializeJsonField } from '../../utils/json'
 
 async function resolvePackageUrl(
   data: PublishData,

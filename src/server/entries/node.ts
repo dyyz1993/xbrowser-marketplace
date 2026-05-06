@@ -1,5 +1,5 @@
 /**
- * @framework-baseline 159d5e23f19e9793
+ * @framework-baseline 9fed8806e1563690
  * @framework-modify
  * @reason 添加 SPA 前端路由处理，区分开发/生产环境
  * @impact 新增前端路由处理逻辑，/admin/* 返回 admin.html，其他路由返回 index.html

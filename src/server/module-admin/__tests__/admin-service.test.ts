@@ -219,22 +219,4 @@ describe('Admin Service', () => {
       expect(activity.length).toBe(0)
     })
   })
-
-  describe('getUnreadCount', () => {
-    it('should get unread count', async () => {
-      const count = adminService.getUnreadCount()
-      expect(typeof count).toBe('number')
-      expect(count).toBeGreaterThanOrEqual(0)
-    })
-
-    it('should return zero when no notifications', async () => {
-      const notifications = adminService.getNotifications()
-      for (const n of notifications) {
-        await adminService.markNotificationRead(n.id)
-      }
-      const count = adminService.getUnreadCount()
-      expect(count).toBe(0)
-      expect(typeof count).toBe('number')
-    })
-  })
 })

@@ -25,10 +25,11 @@ export const plugins = sqliteTable('plugins', {
   siteUrls: text('site_urls'),
   tags: text('tags'),
   commands: text('commands'),
-  createdAt: integer('created_at', { mode: 'timestamp' })
+  rejectReason: text('reject_reason'),
+  createdAt: integer('created_at', { mode: 'timestamp_ms' })
     .notNull()
     .default(sql`(unixepoch() * 1000)`),
-  updatedAt: integer('updated_at', { mode: 'timestamp' })
+  updatedAt: integer('updated_at', { mode: 'timestamp_ms' })
     .notNull()
     .default(sql`(unixepoch() * 1000)`),
 });
@@ -44,7 +45,7 @@ export const pluginVersions = sqliteTable('plugin_versions', {
   fileSize: integer('file_size'),
   checksum: text('checksum'),
   status: text('status', { enum: pluginStatuses }).notNull().default('pending'),
-  publishedAt: integer('published_at', { mode: 'timestamp' })
+  publishedAt: integer('published_at', { mode: 'timestamp_ms' })
     .notNull()
     .default(sql`(unixepoch() * 1000)`),
 });
@@ -59,7 +60,7 @@ export const pluginReviews = sqliteTable('plugin_reviews', {
   rating: integer('rating').notNull(),
   title: text('title'),
   content: text('content'),
-  createdAt: integer('created_at', { mode: 'timestamp' })
+  createdAt: integer('created_at', { mode: 'timestamp_ms' })
     .notNull()
     .default(sql`(unixepoch() * 1000)`),
 });

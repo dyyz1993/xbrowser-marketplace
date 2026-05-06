@@ -55,6 +55,10 @@ export function captchaMiddleware(config: CaptchaConfig = {}) {
       return next()
     }
 
+    if (path.startsWith('/api/admin/') && c.req.header('Authorization')?.startsWith('Bearer ')) {
+      return next()
+    }
+
     const sessionId = getCookie(c, 'session_id') || generateSessionId()
 
     if (!getCookie(c, 'session_id')) {

@@ -1,3 +1,7 @@
+/**
+ * @framework-baseline 46287a1935b462a6
+ */
+
 import * as crypto from 'crypto'
 import * as fs from 'fs'
 

@@ -1,4 +1,8 @@
 /**
+ * @framework-baseline bc3bcc3019498619
+ */
+
+/**
  * 禁止在 file-routes.ts 中直接从 'zod' 导入 z
  * 必须使用 '@hono/zod-openapi' 提供的 z
  */

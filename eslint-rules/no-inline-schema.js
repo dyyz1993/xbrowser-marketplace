@@ -1,3 +1,7 @@
+/**
+ * @framework-baseline 1ff76e6aa25d3ef6
+ */
+
 export const noInlineSchema = {
   meta: {
     type: 'problem',

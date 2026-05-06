@@ -1,4 +1,8 @@
 /**
+ * @framework-baseline 874a6622c84a4e53
+ */
+
+/**
  * 自定义 ESLint 规则：禁止直接使用原生 WebSocket 和 EventSource
  * 强制使用类型安全的 $ws() 和 $sse() 方法
  */

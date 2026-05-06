@@ -67,7 +67,7 @@ export const PluginCard: React.FC<PluginCardProps> = ({ plugin }) => {
               {plugin.avgRating!.toFixed(1)}
             </span>
           )}
-          {plugin.reviewCount !== undefined && plugin.reviewCount > 0 && (
+          {plugin.reviewCount != null && plugin.reviewCount > 0 && (
             <span className="text-gray-400">({plugin.reviewCount})</span>
           )}
         </div>

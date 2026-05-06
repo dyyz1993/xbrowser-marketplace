@@ -4,7 +4,7 @@
  * @reason Admin plugin management routes for marketplace
  */
 
-import { createRoute } from '@hono/zod-openapi'
+import { createRoute, z } from '@hono/zod-openapi'
 import { OpenAPIHono } from '@hono/zod-openapi'
 import { authMiddleware } from '../../middleware/auth'
 import { Role } from '@shared/modules/permission'
@@ -16,6 +16,10 @@ import {
   AdminBulkResultSchema,
   AdminBulkRejectResultSchema,
   CategorySchema,
+  CategoryListResponseSchema,
+  DbCleanupResultSchema,
+  DeveloperSchema,
+  PromoteResultSchema,
   RejectBodySchema,
   BulkSlugsBodySchema,
   BulkRejectBodySchema,
@@ -26,10 +30,49 @@ import {
   CreateCategoryBodySchema,
   UpdateCategoryBodySchema,
   PluginIdResponseSchema,
+  PluginInventoryResponseSchema,
+  PromoteDeveloperBodySchema,
 } from '@shared/modules/plugins'
 import * as adminService from '../services/admin-plugin-service'
 
 const adminAuth = authMiddleware({ requiredRole: Role.SUPER_ADMIN })
+const adminOrDevAuth = authMiddleware({ requiredRole: Role.SUPER_ADMIN })
+
+const dbCleanupRoute = createRoute({
+  method: 'post',
+  path: '/admin/db/cleanup',
+  tags: ['admin-maintenance'],
+  security: [{ Bearer: [] }],
+  middleware: [adminOrDevAuth],
+  responses: {
+    200: successResponse(DbCleanupResultSchema, 'Cleanup result'),
+  },
+})
+
+const listDevelopersRoute = createRoute({
+  method: 'get',
+  path: '/admin/developers',
+  tags: ['admin-maintenance'],
+  security: [{ Bearer: [] }],
+  middleware: [adminOrDevAuth],
+  responses: {
+    200: successResponse(z.array(DeveloperSchema), 'List developers'),
+  },
+})
+
+const promoteDeveloperRoute = createRoute({
+  method: 'post',
+  path: '/admin/developers/promote',
+  tags: ['admin-maintenance'],
+  security: [{ Bearer: [] }],
+  middleware: [adminOrDevAuth],
+  request: {
+    body: { content: { 'application/json': { schema: PromoteDeveloperBodySchema } } },
+  },
+  responses: {
+    200: successResponse(PromoteResultSchema, 'Promote developer'),
+  },
+})
 
 const getDashboardRoute = createRoute({
   method: 'get',
@@ -39,6 +82,17 @@ const getDashboardRoute = createRoute({
   middleware: [adminAuth],
   responses: {
     200: successResponse(AdminDashboardStatsSchema, 'Dashboard stats'),
+  },
+})
+
+const getInventoryRoute = createRoute({
+  method: 'get',
+  path: '/admin/stats/inventory',
+  tags: ['admin-plugins'],
+  security: [{ Bearer: [] }],
+  middleware: [adminAuth],
+  responses: {
+    200: successResponse(PluginInventoryResponseSchema, 'Plugin inventory'),
   },
 })
 
@@ -152,7 +206,7 @@ const listCategoriesRoute = createRoute({
   security: [{ Bearer: [] }],
   middleware: [adminAuth],
   responses: {
-    200: successResponse(CategorySchema, 'List categories'),
+    200: successResponse(CategoryListResponseSchema, 'List categories'),
   },
 })
 
@@ -207,6 +261,10 @@ export const pluginAdminRoutes = new OpenAPIHono()
   .openapi(getDashboardRoute, async c => {
     const stats = await adminService.getDashboardStats()
     return c.json(success(stats), 200)
+  })
+  .openapi(getInventoryRoute, async c => {
+    const inventory = await adminService.getPluginInventory()
+    return c.json(success(inventory), 200)
   })
   .openapi(getPendingRoute, async c => {
     const query = c.req.valid('query')
@@ -296,5 +354,23 @@ export const pluginAdminRoutes = new OpenAPIHono()
   .openapi(deleteCategoryRoute, async c => {
     const { id } = c.req.valid('param')
     const result = await adminService.deleteCategory(id)
+    return c.json(success(result), 200)
+  })
+  .openapi(dbCleanupRoute, async c => {
+    const seedSlugs = ['baidu', 'douyin', 'github-seo', 'web-automation']
+    const countResult = await adminService.resetSeedPluginCounts(seedSlugs)
+    const reviewResult = await adminService.cleanupTestReviews()
+    return c.json(success({
+      countsReset: countResult,
+      reviewsCleaned: reviewResult,
+    }), 200)
+  })
+  .openapi(listDevelopersRoute, async c => {
+    const devs = await adminService.listAllDevelopers()
+    return c.json(success(devs), 200)
+  })
+  .openapi(promoteDeveloperRoute, async c => {
+    const body = c.req.valid('json')
+    const result = await adminService.promoteToAdmin(body.email, body.username)
     return c.json(success(result), 200)
   })

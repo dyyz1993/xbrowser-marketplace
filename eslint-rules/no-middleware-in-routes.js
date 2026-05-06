@@ -1,4 +1,8 @@
 /**
+ * @framework-baseline 3ca6f37bc0a8c550
+ */
+
+/**
  * @fileoverview 禁止在路由文件中使用中间件
  * @description 中间件只能在 app.ts 中应用，在路由文件中应用会导致类型推导丢失
  * @exception 路由定义中的 middleware 字段是允许的（针对单个路由的中间件）

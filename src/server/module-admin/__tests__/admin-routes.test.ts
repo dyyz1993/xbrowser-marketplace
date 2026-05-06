@@ -3,7 +3,7 @@ import { createTestClient } from '../../test-utils/test-client'
 import { setupTestDatabase, cleanupTestDatabase } from '../../db/test-setup'
 import { getRawClient } from '../../db'
 import { Role } from '@shared/modules/permission'
-import * as adminService from '../services/admin-service'
+import * as notificationService from '../../module-notifications/services/notification-service'
 
 function authedClient(token = 'admin-token') {
   return createTestClient(undefined, {
@@ -306,7 +306,7 @@ describe('Admin Routes', () => {
 
   describe('PUT /api/admin/notifications/:id/read', () => {
     it('should mark notification as read', async () => {
-      const notif = adminService.createNotification({
+      const notif = notificationService.createNotification({
         type: 'info',
         title: 'Test',
         message: 'Test notification',

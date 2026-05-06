@@ -1,7 +1,7 @@
 import { createRoute, z } from '@hono/zod-openapi'
 import { OpenAPIHono } from '@hono/zod-openapi'
 import { authMiddleware, type AuthUser } from '../../middleware/auth'
-import * as adminService from '../services/admin-service'
+import * as notificationService from '../../module-notifications/services/notification-service'
 import { successResponse, errorResponse, success } from '../../utils/route-helpers'
 import { Role } from '@shared/modules/permission'
 import {
@@ -116,31 +116,31 @@ const notificationSSERoute = createRoute({
 export const adminNotificationRoutes = new OpenAPIHono<{ Variables: { authUser: AuthUser } }>()
   .openapi(getNotificationsRoute, async c => {
     const { unreadOnly, limit } = c.req.valid('query')
-    const notifications = adminService.getNotifications({
+    const result = notificationService.listNotifications({
       unreadOnly: unreadOnly === 'true',
       limit: limit ? parseInt(limit, 10) : 20,
     })
-    return c.json(success(notifications), 200)
+    return c.json(success(result.data), 200)
   })
   .openapi(getUnreadCountRoute, async c => {
-    const count = adminService.getUnreadCount()
+    const count = notificationService.getUnreadCount()
     return c.json(success({ count }), 200)
   })
   .openapi(markNotificationReadRoute, async c => {
     const { id } = c.req.valid('param')
-    const marked = await adminService.markNotificationRead(id)
+    const marked = await notificationService.markAsReadAndBroadcast(id)
     if (!marked) {
       return c.json({ success: false as const, error: 'Notification not found' }, 404)
     }
     return c.json(success({}), 200)
   })
   .openapi(markAllNotificationsReadRoute, async c => {
-    const count = await adminService.markAllNotificationsRead()
+    const count = await notificationService.markAllAsReadAndBroadcast()
     return c.json(success({ count }), 200)
   })
   .openapi(sendTestNotificationRoute, async c => {
     const { type } = c.req.valid('json')
-    const notification = await adminService.sendTestNotification(type ?? undefined)
+    const notification = await notificationService.sendTestNotification(type ?? undefined)
     return c.json(success(notification), 200)
   })
   .openapi(notificationSSERoute, async c => {

@@ -1,4 +1,8 @@
 /**
+ * @framework-baseline cd6f04e13a16affd
+ */
+
+/**
  * 自定义 ESLint 规则：禁止在 RPC 调用中使用类型断言
  *
  * Hono RPC 有完整的类型推导，如果需要使用 `as` 类型断言，

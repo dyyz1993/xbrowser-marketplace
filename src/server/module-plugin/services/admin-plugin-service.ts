@@ -1,22 +1,14 @@
 import { getDb } from '../../db'
-import { plugins, pluginCategories, pluginCategoryMappings } from '../../db/schema'
+import { plugins, pluginCategories, pluginCategoryMappings, pluginReviews, developers } from '../../db/schema'
 import type { PluginStatus } from '../../db/schema'
 import { eq, and, desc, asc, sql, SQL } from 'drizzle-orm'
 import { NotFoundError, BusinessError } from '../../utils/app-error'
 import { generateUUID } from '../../utils/uuid'
+import { parseJsonField } from '../../utils/json'
 
 type PluginRow = typeof plugins.$inferSelect
 type CategoryRow = typeof pluginCategories.$inferSelect
 type MappingRow = typeof pluginCategoryMappings.$inferSelect
-
-function parseJsonField<T>(value: string | null | undefined): T | undefined {
-  if (!value) return undefined
-  try {
-    return JSON.parse(value) as T
-  } catch {
-    return undefined
-  }
-}
 
 interface AdminPluginItem {
   id: string
@@ -35,8 +27,15 @@ interface AdminPluginItem {
   siteUrls: string[]
   commands: string[]
   readme: string | null
+  rejectReason: string | null
   createdAt: number
   updatedAt: number
+}
+
+function toTimestamp(value: Date | number | null | undefined): number {
+  if (!value) return 0
+  if (typeof value === 'number') return value
+  return value.getTime()
 }
 
 function toAdminPluginItem(row: PluginRow): AdminPluginItem {
@@ -57,8 +56,9 @@ function toAdminPluginItem(row: PluginRow): AdminPluginItem {
     siteUrls: parseJsonField<string[]>(row.siteUrls) ?? [],
     commands: parseJsonField<string[]>(row.commands) ?? [],
     readme: row.readme,
-    createdAt: row.createdAt.getTime(),
-    updatedAt: row.updatedAt.getTime(),
+    rejectReason: row.rejectReason ?? null,
+    createdAt: toTimestamp(row.createdAt),
+    updatedAt: toTimestamp(row.updatedAt),
   }
 }
 
@@ -115,7 +115,7 @@ export async function approvePlugin(slug: string, _adminId: string): Promise<Adm
 
 export async function rejectPlugin(
   slug: string,
-  _reason: string,
+  reason: string,
   _adminId: string
 ): Promise<AdminPluginItem> {
   const db = await getDb()
@@ -131,7 +131,7 @@ export async function rejectPlugin(
 
   await db
     .update(plugins)
-    .set({ status: 'rejected' satisfies PluginStatus, updatedAt: new Date() })
+    .set({ status: 'rejected' satisfies PluginStatus, rejectReason: reason, updatedAt: new Date() })
     .where(eq(plugins.id, existing[0].id))
 
   const updated: PluginRow[] = await db.select().from(plugins).where(eq(plugins.id, existing[0].id)).limit(1)
@@ -180,11 +180,42 @@ export async function adminRemovePlugin(slug: string): Promise<{ id: string }> {
 export async function getDashboardStats() {
   const db = await getDb()
 
-  const allPlugins: PluginRow[] = await db.select().from(plugins)
-  const pendingPlugins = allPlugins.filter(p => p.status === 'pending')
+  const allPlugins: PluginRow[] = await db
+    .select()
+    .from(plugins)
+    .where(sql`${plugins.status} != 'removed'`)
+
+  const pendingPlugins = allPlugins.filter(p => p.status === 'pending').length
   const approvedPlugins = allPlugins.filter(p => p.status === 'approved')
+  const rejectedPlugins = allPlugins.filter(p => p.status === 'rejected').length
+  const totalPlugins = allPlugins.length
   const totalDownloads = approvedPlugins.reduce((sum, p) => sum + (p.downloadCount ?? 0), 0)
+  const totalViews = allPlugins.reduce((sum, p) => sum + (p.viewCount ?? 0), 0)
   const activeDevelopers = new Set(approvedPlugins.map(p => p.authorId)).size
+
+  const allReviews = await db.select().from(pluginReviews)
+  const totalReviews = allReviews.length
+
+  const allCategoryMappings = await db.select().from(pluginCategoryMappings)
+  const allCategories = await db.select().from(pluginCategories)
+
+  const approvedPluginIds = new Set(approvedPlugins.map(p => p.id))
+  const catPluginCounts = new Map<string, number>()
+  for (const m of allCategoryMappings) {
+    if (approvedPluginIds.has(m.pluginId)) {
+      const cat = allCategories.find(c => c.id === m.categoryId)
+      const catName = cat?.name ?? 'uncategorized'
+      catPluginCounts.set(catName, (catPluginCounts.get(catName) ?? 0) + 1)
+    }
+  }
+  const pluginsByCategory = Array.from(catPluginCounts.entries()).map(([category, count]) => ({ category, count }))
+
+  const allDevelopers = await db.select().from(developers)
+  const roleCounts = new Map<string, number>()
+  for (const d of allDevelopers) {
+    roleCounts.set(d.role, (roleCounts.get(d.role) ?? 0) + 1)
+  }
+  const developerRoles = Array.from(roleCounts.entries()).map(([role, count]) => ({ role, count }))
 
   const recentRows: PluginRow[] = await db
     .select()
@@ -194,12 +225,68 @@ export async function getDashboardStats() {
     .limit(10)
 
   return {
-    totalPlugins: allPlugins.filter(p => ['pending', 'approved', 'rejected'].includes(p.status)).length,
-    pendingPlugins: pendingPlugins.length,
+    totalPlugins,
+    pendingPlugins,
     approvedPlugins: approvedPlugins.length,
+    rejectedPlugins,
     totalDownloads,
+    totalViews,
+    totalReviews,
     activeDevelopers,
     recentSubmissions: recentRows.map(toAdminPluginItem),
+    pluginsByCategory,
+    developerRoles,
+  }
+}
+
+export async function getPluginInventory() {
+  const db = await getDb()
+
+  const allPlugins: PluginRow[] = await db.select().from(plugins).where(sql`${plugins.status} != 'removed'`)
+
+  const allMappings = await db.select().from(pluginCategoryMappings)
+  const allReviews = await db.select().from(pluginReviews)
+
+  const catCountByPlugin = new Map<string, number>()
+  for (const m of allMappings) {
+    catCountByPlugin.set(m.pluginId, (catCountByPlugin.get(m.pluginId) ?? 0) + 1)
+  }
+
+  const reviewStatsByPlugin = new Map<string, { count: number; totalRating: number }>()
+  for (const r of allReviews) {
+    const existing = reviewStatsByPlugin.get(r.pluginId) ?? { count: 0, totalRating: 0 }
+    existing.count++
+    existing.totalRating += r.rating
+    reviewStatsByPlugin.set(r.pluginId, existing)
+  }
+
+  const pluginItems = allPlugins.map(p => {
+    const stats = reviewStatsByPlugin.get(p.id)
+    return {
+      id: p.id,
+      slug: p.slug,
+      name: p.name,
+      status: p.status,
+      authorName: p.authorName,
+      downloadCount: p.downloadCount ?? 0,
+      viewCount: p.viewCount ?? 0,
+      featured: p.featured ?? false,
+      createdAt: p.createdAt.toISOString(),
+      updatedAt: p.updatedAt.toISOString(),
+      categoryCount: catCountByPlugin.get(p.id) ?? 0,
+      reviewCount: stats?.count ?? 0,
+      avgRating: stats ? Math.round((stats.totalRating / stats.count) * 100) / 100 : null,
+    }
+  })
+
+  return {
+    plugins: pluginItems,
+    summary: {
+      total: pluginItems.length,
+      withDownloads: pluginItems.filter(p => p.downloadCount > 0).length,
+      withReviews: pluginItems.filter(p => p.reviewCount > 0).length,
+      featured: pluginItems.filter(p => p.featured).length,
+    },
   }
 }
 
@@ -258,7 +345,7 @@ export async function createCategory(data: {
   })
 
   const rows: CategoryRow[] = await db.select().from(pluginCategories).where(eq(pluginCategories.id, id)).limit(1)
-  return rows[0]
+  return { ...rows[0], pluginCount: 0 }
 }
 
 export async function updateCategory(
@@ -282,7 +369,7 @@ export async function updateCategory(
   await db.update(pluginCategories).set(updateData).where(eq(pluginCategories.id, id))
 
   const rows: CategoryRow[] = await db.select().from(pluginCategories).where(eq(pluginCategories.id, id)).limit(1)
-  return rows[0]
+  return { ...rows[0], pluginCount: 0 }
 }
 
 export async function deleteCategory(id: string): Promise<{ id: string }> {
@@ -297,6 +384,49 @@ export async function deleteCategory(id: string): Promise<{ id: string }> {
   await db.delete(pluginCategories).where(eq(pluginCategories.id, id))
 
   return { id }
+}
+
+export async function resetSeedPluginCounts(slugs: string[]): Promise<{ reset: number }> {
+  const db = await getDb()
+  let reset = 0
+  for (const slug of slugs) {
+    await db
+      .update(plugins)
+      .set({ downloadCount: 0, viewCount: 0, updatedAt: new Date() })
+      .where(eq(plugins.slug, slug))
+    reset++
+  }
+  return { reset }
+}
+
+export async function cleanupTestReviews(): Promise<{ deleted: number }> {
+  const db = await getDb()
+  const testNames = ['e2e-tester', 'e2e-full-test']
+  let deleted = 0
+  for (const name of testNames) {
+    await db.delete(pluginReviews).where(sql`${pluginReviews.userName} = ${name}`)
+    deleted++
+  }
+  return { deleted }
+}
+
+export async function promoteToAdmin(email: string, newUsername: string): Promise<{ id: string; username: string; role: string }> {
+  const db = await getDb()
+  const rows = await db.select().from(developers).where(sql`${developers.email} = ${email}`).limit(1)
+  if (rows.length === 0) {
+    throw new NotFoundError('Developer', email)
+  }
+  await db
+    .update(developers)
+    .set({ role: 'super_admin', username: newUsername, updatedAt: new Date() })
+    .where(eq(developers.id, rows[0].id))
+  return { id: rows[0].id, username: newUsername, role: 'super_admin' }
+}
+
+export async function listAllDevelopers(): Promise<Array<{ id: string; username: string; email: string; role: string }>> {
+  const db = await getDb()
+  const rows = await db.select().from(developers)
+  return rows.map(r => ({ id: r.id, username: r.username, email: r.email, role: r.role }))
 }
 
 export async function listCategoriesAdmin() {

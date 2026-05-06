@@ -1,4 +1,8 @@
 /**
+ * @framework-baseline 28658b9194686a10
+ */
+
+/**
  * 自定义 ESLint 规则：强制路由/RPC 测试使用类型安全的测试客户端
  *
  * 必须使用 createTestClient() 返回的客户端进行 API 测试

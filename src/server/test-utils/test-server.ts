@@ -1,5 +1,5 @@
 /**
- * @framework-baseline ecef67ddd440f5b9
+ * @framework-baseline d0cb77568700eeb4
  * @framework-modify
  * @reason 修复 ReadableStream 类型检查，添加 null 检查以避免类型错误
  * @impact 测试工具中的流式响应处理更加健壮，避免运行时错误

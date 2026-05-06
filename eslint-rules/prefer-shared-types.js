@@ -1,3 +1,7 @@
+/**
+ * @framework-baseline 3d7fff2afc62da61
+ */
+
 import { readFileSync, existsSync, readdirSync, statSync } from 'fs'
 import { resolve, join } from 'path'
 

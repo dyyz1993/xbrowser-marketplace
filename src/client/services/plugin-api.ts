@@ -1,135 +1,95 @@
-const BASE = '/api'
+/**
+ * @framework-baseline a1b2c3d4e5f67890
+ * @framework-modify
+ * @reason 重构以使用 Hono RPC 客户端替代原生 fetch，实现类型安全的 API 调用
+ * @impact 所有调用 pluginApi 的代码保持兼容，仅底层实现从 fetch 切换为 Hono RPC
+ */
 
-async function request<T>(url: string, init?: RequestInit): Promise<{ success: boolean; data: T; error?: string }> {
-  const res = await fetch(`${BASE}${url}`, {
-    headers: { 'Content-Type': 'application/json' },
-    ...init,
-  })
-  return res.json()
-}
+import { apiClient } from './apiClient'
+import type {
+  PluginListItem,
+  PluginDetail,
+  Category,
+  Review,
+  MarketplaceStats,
+  PluginListResult,
+  PluginListParams,
+  SearchParams,
+} from '@shared/modules/plugins'
 
-export interface PluginListItem {
-  id: string
-  name: string
-  slug: string
-  description: string
-  authorName: string
-  version: string
-  status: string
-  downloadCount: number
-  viewCount: number
-  featured: boolean
-  screenshotUrl: string | null
-  tags: string[]
-  siteUrls: string[]
-  commands: string[]
-  createdAt: number
-  updatedAt: number
-  avgRating?: number
-  reviewCount?: number
-}
-
-export interface PluginDetail extends PluginListItem {
-  authorId: string
-  readme: string | null
-  repositoryUrl: string | null
-  homepageUrl: string | null
-  npmPackage: string | null
-  license: string | null
-  categories: { id: string; name: string; slug: string }[]
-  versions: { id: string; version: string; changelog: string | null; publishedAt: number }[]
-}
-
-export interface Category {
-  id: string
-  name: string
-  slug: string
-  description: string | null
-  icon: string | null
-  sortOrder: number | null
-  pluginCount: number
-}
-
-export interface Review {
-  id: string
-  pluginId: string
-  userId: string
-  userName: string
-  rating: number
-  title: string | null
-  content: string | null
-  createdAt: number
-}
-
-export interface MarketplaceStats {
-  totalPlugins: number
-  totalDownloads: number
-  totalCategories: number
-  totalReviews: number
-  recentPlugins: PluginListItem[]
-}
-
-export interface PluginListResult {
-  items: PluginListItem[]
-  total: number
-  page: number
-  limit: number
-}
-
-export interface PluginListParams {
-  page?: number
-  limit?: number
-  category?: string
-  tag?: string
-  sort?: 'newest' | 'popular' | 'most_downloaded' | 'name'
-  featured?: boolean
-}
-
-export interface SearchParams {
-  q: string
-  tag?: string
-  site?: string
-  category?: string
-  page?: number
-  limit?: number
-}
-
-function buildQuery(params: Record<string, unknown>): string {
-  const sp = new URLSearchParams()
-  for (const [k, v] of Object.entries(params)) {
-    if (v !== undefined && v !== null && v !== '') {
-      sp.set(k, String(v))
-    }
-  }
-  return sp.toString() ? `?${sp.toString()}` : ''
-}
+export type { PluginListItem, PluginDetail, Category, Review, MarketplaceStats, PluginListResult, PluginListParams, SearchParams }
 
 export const pluginApi = {
-  list: (params: PluginListParams = {}) =>
-    request<PluginListResult>(`/plugins${buildQuery(params as Record<string, unknown>)}`),
+  list: async (params: PluginListParams = {}) => {
+    const query: Record<string, string | undefined> = {}
+    if (params.category) query.category = params.category
+    if (params.tag) query.tag = params.tag
+    if (params.sort) query.sort = params.sort
+    if (params.page != null) query.page = String(params.page)
+    if (params.limit != null) query.limit = String(params.limit)
+    if (params.featured != null) query.featured = String(params.featured)
+    const res = await apiClient.api.plugins.$get({ query })
+    return res.json()
+  },
 
-  search: (params: SearchParams) =>
-    request<PluginListResult>(`/plugins/search${buildQuery(params as unknown as Record<string, unknown>)}`),
+  search: async (params: SearchParams) => {
+    const res = await apiClient.api.plugins.search.$get({
+      query: {
+        q: params.q,
+        tag: params.tag,
+        site: params.site,
+        category: params.category,
+        page: params.page ? String(params.page) : undefined,
+        limit: params.limit ? String(params.limit) : undefined,
+      },
+    })
+    return res.json()
+  },
 
-  get: (slug: string) => request<PluginDetail>(`/plugins/${slug}`),
+  get: async (slug: string) => {
+    const res = await apiClient.api.plugins[':slug'].$get({
+      param: { slug },
+    })
+    return res.json()
+  },
 
-  getVersions: (slug: string) =>
-    request<
-      { id: string; version: string; changelog: string | null; packageUrl: string | null; publishedAt: number }[]
-    >(`/plugins/${slug}/versions`),
+  getVersions: async (slug: string) => {
+    const res = await apiClient.api.plugins[':slug'].versions.$get({
+      param: { slug },
+    })
+    return res.json()
+  },
 
-  getReviews: (slug: string, page = 1, limit = 20) =>
-    request<{ items: Review[]; total: number }>(`/plugins/${slug}/reviews${buildQuery({ page, limit })}`),
+  getReviews: async (slug: string, page = 1, limit = 20) => {
+    const res = await apiClient.api.plugins[':slug'].reviews.$get({
+      param: { slug },
+      query: { page: String(page), limit: String(limit) },
+    })
+    return res.json()
+  },
 
-  trackInstall: (slug: string) =>
-    request<{ downloadCount: number }>(`/plugins/${slug}/install`, { method: 'POST' }),
+  trackInstall: async (slug: string) => {
+    const res = await apiClient.api.plugins[':slug'].install.$post({
+      param: { slug },
+    })
+    return res.json()
+  },
 
-  categories: () => request<Category[]>('/categories'),
+  categories: async () => {
+    const res = await apiClient.api.categories.$get()
+    return res.json()
+  },
 
-  categoryPlugins: (slug: string, page = 1, limit = 20) =>
-    request<{ items: PluginListItem[]; total: number }>(
-      `/categories/${slug}/plugins${buildQuery({ page, limit })}`
-    ),
+  categoryPlugins: async (slug: string, page = 1, limit = 20) => {
+    const res = await apiClient.api.categories[':slug'].plugins.$get({
+      param: { slug },
+      query: { page: String(page), limit: String(limit) },
+    })
+    return res.json()
+  },
 
-  stats: () => request<MarketplaceStats>('/stats'),
+  stats: async () => {
+    const res = await apiClient.api.stats.$get()
+    return res.json()
+  },
 }

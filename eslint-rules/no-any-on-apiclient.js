@@ -1,4 +1,8 @@
 /**
+ * @framework-baseline 32f4fd087a4b4f85
+ */
+
+/**
  * 自定义 ESLint 规则：禁止对 apiClient 使用 `as any` 类型断言
  *
  * apiClient 是类型安全的 API 客户端，使用 `as any` 会破坏类型安全。

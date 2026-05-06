@@ -1,6 +1,7 @@
 import { config } from 'dotenv';
 import { resolve } from 'path';
 import { existsSync } from 'fs';
+import { join } from 'path';
 import { isCloudflare } from './utils/env';
 
 export type DatabaseDriver = 'sqlite' | 'mysql' | 'd1';
@@ -21,6 +22,18 @@ export interface AppConfig {
   port: number;
   enableDocs: boolean;
   database: DatabaseConfig;
+  authSecretKey: string;
+  enableDevTokens: boolean;
+  mockPasswordHash: string;
+  publicUrl: string;
+  corsOrigin: string[];
+  fileStorage: {
+    storagePath: string;
+    tempPath: string;
+    tempFileTTL: number;
+    privateUrlExpiry: number;
+    secretKey: string;
+  };
 }
 
 function loadEnvFileSync(): void {
@@ -61,11 +74,85 @@ export function getAppConfig(): AppConfig {
   const dbDriver = typeof process !== 'undefined'
     ? (process.env.DB_DRIVER as DatabaseDriver) || 'sqlite'
     : 'd1';
+
+  const isTest = nodeEnv === 'test';
+  const isDev = nodeEnv === 'development';
+  const isProd = nodeEnv === 'production';
+
+  const authSecretKeyRaw = typeof process !== 'undefined'
+    ? process.env.AUTH_SECRET_KEY
+    : '';
+
+  if (isProd && !authSecretKeyRaw) {
+    throw new Error('AUTH_SECRET_KEY environment variable is required in production');
+  }
+
+  if (isDev && !authSecretKeyRaw) {
+    console.warn('[WARN] AUTH_SECRET_KEY not set, using insecure dev default. Set AUTH_SECRET_KEY in production!');
+  }
+
+  const authSecretKey: string = authSecretKeyRaw || 'dev-secret-key-change-in-production';
+
+  const enableDevTokens = typeof process !== 'undefined'
+    ? process.env.ENABLE_DEV_TOKENS === 'true' && !isProd
+    : false;
+
+  if (enableDevTokens) {
+    console.warn('⚠️  WARNING: Dev tokens are ENABLED. Do not use in production!');
+  }
+
+  const mockPasswordHash = typeof process !== 'undefined'
+    ? (process.env.MOCK_PASSWORD_HASH || '$2b$10$9iWkIfjDcJ7Kv4wHSb8ONONnrlfGb6rcfiJlZuuY4G2xQMG78DBbm')
+    : '';
+
+  if (typeof process !== 'undefined' && !process.env.MOCK_PASSWORD_HASH && !isTest) {
+    console.warn('[WARN] MOCK_PASSWORD_HASH not set, using insecure default');
+  }
+
+  const publicUrl = typeof process !== 'undefined'
+    ? (process.env.PUBLIC_URL || '')
+    : '';
+
+  const corsOrigin = isProd
+    ? (typeof process !== 'undefined' ? (process.env.CORS_ORIGIN?.split(',') || []) : [])
+    : ['http://localhost:5173', 'http://localhost:3010'];
+
+  const fileStorageBaseDir = typeof process !== 'undefined'
+    ? (process.env.FILE_STORAGE_PATH || join(process.cwd(), 'uploads'))
+    : '';
+
+  const fileSecretKeyRaw = typeof process !== 'undefined'
+    ? process.env.FILE_SECRET_KEY
+    : '';
+
+  if (!isTest && !fileSecretKeyRaw) {
+    throw new Error('FILE_SECRET_KEY environment variable is required in production');
+  }
+
+  const fileSecretKey: string = fileSecretKeyRaw || 'test-secret-key';
   
   return {
     nodeEnv,
     port,
     enableDocs,
+    authSecretKey,
+    enableDevTokens,
+    mockPasswordHash,
+    publicUrl,
+    corsOrigin,
+    fileStorage: {
+      storagePath: fileStorageBaseDir,
+      tempPath: typeof process !== 'undefined'
+        ? (process.env.FILE_TEMP_PATH || join(fileStorageBaseDir, 'temp'))
+        : '',
+      tempFileTTL: typeof process !== 'undefined'
+        ? parseInt(process.env.FILE_TEMP_TTL || '3600000', 10)
+        : 3600000,
+      privateUrlExpiry: typeof process !== 'undefined'
+        ? parseInt(process.env.FILE_PRIVATE_URL_EXPIRY || '3600', 10)
+        : 3600,
+      secretKey: fileSecretKey,
+    },
     database: {
       driver: isCloudflare ? 'd1' : dbDriver,
       sqlitePath: typeof process !== 'undefined' ? process.env.SQLITE_PATH || `./data/${nodeEnv}.db` : undefined,
@@ -81,4 +168,17 @@ export function getAppConfig(): AppConfig {
 
 export function getDatabaseConfig(): DatabaseConfig {
   return getAppConfig().database;
+}
+
+let _cachedConfig: AppConfig | null = null;
+
+export function getConfig(): AppConfig {
+  if (!_cachedConfig) {
+    _cachedConfig = getAppConfig();
+  }
+  return _cachedConfig;
+}
+
+export function resetConfig(): void {
+  _cachedConfig = null;
 }

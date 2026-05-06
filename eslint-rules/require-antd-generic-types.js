@@ -1,4 +1,8 @@
 /**
+ * @framework-baseline 116dec37dbe7f2ca
+ */
+
+/**
  * 自定义 ESLint 规则：强制 Antd 泛型组件必须传入类型参数
  *
  * Form.useForm<T>() 必须传入泛型类型
