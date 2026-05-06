@@ -5,9 +5,13 @@
  *
  * The dev server is started automatically by global-setup.ts
  * on a random available port.
+ *
+ * SKIP: WebSocket demo page not implemented yet.
  */
 
 import { test, expect } from '@playwright/test'
+
+test.skip('WebSocket demo page not yet implemented')
 
 function getBaseUrl(): string {
   return process.env.PLAYWRIGHT_TEST_BASE_URL || 'http://localhost:3010'

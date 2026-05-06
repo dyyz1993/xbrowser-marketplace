@@ -49,7 +49,7 @@ test.describe('Plugin Marketplace', () => {
   test.describe('Page Load', () => {
     test('should load marketplace homepage and display plugin list', async ({ page }) => {
       await seedPlugins(page)
-      await page.goto(`${getBaseUrl()}/marketplace`)
+      await page.goto(`${getBaseUrl()}/`)
       await page.waitForLoadState('load')
       await page.waitForSelector('[data-testid="marketplace-container"]', { timeout: 25000 })
 
@@ -61,7 +61,7 @@ test.describe('Plugin Marketplace', () => {
     })
 
     test('should display empty state when no plugins exist', async ({ page }) => {
-      await page.goto(`${getBaseUrl()}/marketplace`)
+      await page.goto(`${getBaseUrl()}/`)
       await page.waitForLoadState('load')
       await page.waitForSelector('[data-testid="marketplace-container"]', { timeout: 25000 })
 
@@ -72,7 +72,7 @@ test.describe('Plugin Marketplace', () => {
   test.describe('Search Plugins', () => {
     test('should search plugins by keyword', async ({ page }) => {
       await seedPlugins(page)
-      await page.goto(`${getBaseUrl()}/marketplace`)
+      await page.goto(`${getBaseUrl()}/`)
       await page.waitForSelector('[data-testid="marketplace-container"]', { timeout: 25000 })
 
       await page.fill('[data-testid="plugin-search-input"]', 'Logger')
@@ -85,7 +85,7 @@ test.describe('Plugin Marketplace', () => {
 
     test('should show empty result for non-existent plugin', async ({ page }) => {
       await seedPlugins(page)
-      await page.goto(`${getBaseUrl()}/marketplace`)
+      await page.goto(`${getBaseUrl()}/`)
       await page.waitForSelector('[data-testid="marketplace-container"]', { timeout: 25000 })
 
       await page.fill('[data-testid="plugin-search-input"]', 'NonExistentPlugin12345')
@@ -99,7 +99,7 @@ test.describe('Plugin Marketplace', () => {
   test.describe('Category Filter', () => {
     test('should filter plugins by category', async ({ page }) => {
       await seedPlugins(page)
-      await page.goto(`${getBaseUrl()}/marketplace`)
+      await page.goto(`${getBaseUrl()}/`)
       await page.waitForSelector('[data-testid="marketplace-container"]', { timeout: 25000 })
 
       await page.click('[data-testid="category-filter-developer-tools"]')
@@ -112,7 +112,7 @@ test.describe('Plugin Marketplace', () => {
 
     test('should reset category filter when clicking all', async ({ page }) => {
       await seedPlugins(page)
-      await page.goto(`${getBaseUrl()}/marketplace`)
+      await page.goto(`${getBaseUrl()}/`)
       await page.waitForSelector('[data-testid="marketplace-container"]', { timeout: 25000 })
 
       await page.click('[data-testid="category-filter-developer-tools"]')
@@ -128,11 +128,11 @@ test.describe('Plugin Marketplace', () => {
   test.describe('Plugin Detail', () => {
     test('should navigate to plugin detail page', async ({ page }) => {
       await seedPlugins(page)
-      await page.goto(`${getBaseUrl()}/marketplace`)
+      await page.goto(`${getBaseUrl()}/`)
       await page.waitForSelector('[data-testid="marketplace-container"]', { timeout: 25000 })
 
       await page.locator('[data-testid="plugin-card"]').first().click()
-      await page.waitForURL('**/marketplace/**', { timeout: 10000 })
+      await page.waitForURL('**/plugin/**', { timeout: 10000 })
 
       await expect(page.locator('[data-testid="plugin-detail-container"]')).toBeVisible()
       await expect(page.locator('[data-testid="plugin-detail-name"]')).toBeVisible()
@@ -141,11 +141,11 @@ test.describe('Plugin Marketplace', () => {
 
     test('should display install command on detail page', async ({ page }) => {
       await seedPlugins(page)
-      await page.goto(`${getBaseUrl()}/marketplace`)
+      await page.goto(`${getBaseUrl()}/`)
       await page.waitForSelector('[data-testid="marketplace-container"]', { timeout: 25000 })
 
       await page.locator('[data-testid="plugin-card"]').first().click()
-      await page.waitForURL('**/marketplace/**', { timeout: 10000 })
+      await page.waitForURL('**/plugin/**', { timeout: 10000 })
 
       await expect(page.locator('[data-testid="install-command"]')).toBeVisible()
       await expect(page.locator('[data-testid="copy-install-command-button"]')).toBeVisible()
@@ -153,11 +153,11 @@ test.describe('Plugin Marketplace', () => {
 
     test('should display ratings and reviews on detail page', async ({ page }) => {
       await seedPlugins(page)
-      await page.goto(`${getBaseUrl()}/marketplace`)
+      await page.goto(`${getBaseUrl()}/`)
       await page.waitForSelector('[data-testid="marketplace-container"]', { timeout: 25000 })
 
       await page.locator('[data-testid="plugin-card"]').first().click()
-      await page.waitForURL('**/marketplace/**', { timeout: 10000 })
+      await page.waitForURL('**/plugin/**', { timeout: 10000 })
 
       await expect(page.locator('[data-testid="plugin-rating"]')).toBeVisible()
       await expect(page.locator('[data-testid="plugin-reviews-section"]')).toBeVisible()
@@ -167,7 +167,7 @@ test.describe('Plugin Marketplace', () => {
   test.describe('Sorting', () => {
     test('should sort plugins by download count', async ({ page }) => {
       await seedPlugins(page)
-      await page.goto(`${getBaseUrl()}/marketplace`)
+      await page.goto(`${getBaseUrl()}/`)
       await page.waitForSelector('[data-testid="marketplace-container"]', { timeout: 25000 })
 
       await page.click('[data-testid="sort-select"]')
@@ -181,7 +181,7 @@ test.describe('Plugin Marketplace', () => {
 
     test('should sort plugins by rating', async ({ page }) => {
       await seedPlugins(page)
-      await page.goto(`${getBaseUrl()}/marketplace`)
+      await page.goto(`${getBaseUrl()}/`)
       await page.waitForSelector('[data-testid="marketplace-container"]', { timeout: 25000 })
 
       await page.click('[data-testid="sort-select"]')
@@ -201,7 +201,7 @@ test.describe('Plugin Marketplace', () => {
           data: { name: `Plugin ${i}`, category: 'general', description: `Desc ${i}` },
         })
       }
-      await page.goto(`${getBaseUrl()}/marketplace`)
+      await page.goto(`${getBaseUrl()}/`)
       await page.waitForSelector('[data-testid="marketplace-container"]', { timeout: 25000 })
 
       const firstPageCount = await page.locator('[data-testid="plugin-card"]').count()
@@ -218,7 +218,7 @@ test.describe('Plugin Marketplace', () => {
     test('should adapt layout for mobile viewport', async ({ page }) => {
       await page.setViewportSize({ width: 375, height: 667 })
       await seedPlugins(page)
-      await page.goto(`${getBaseUrl()}/marketplace`)
+      await page.goto(`${getBaseUrl()}/`)
       await page.waitForSelector('[data-testid="marketplace-container"]', { timeout: 25000 })
 
       await expect(page.locator('[data-testid="marketplace-container"]')).toBeVisible()

@@ -57,7 +57,7 @@ test.describe('Admin Review', () => {
   test.describe('Pending List', () => {
     test('should display pending plugins in review list', async ({ page }) => {
       await seedPendingPlugins(page)
-      await page.goto(`${getBaseUrl()}/admin/reviews`)
+      await page.goto(`${getBaseUrl()}/admin/plugins/review`)
       await page.waitForSelector('[data-testid="review-list-container"]', { timeout: 15000 })
 
       await expect(page.locator('[data-testid="review-list-container"]')).toBeVisible()
@@ -66,7 +66,7 @@ test.describe('Admin Review', () => {
     })
 
     test('should show empty state when no pending plugins', async ({ page }) => {
-      await page.goto(`${getBaseUrl()}/admin/reviews`)
+      await page.goto(`${getBaseUrl()}/admin/plugins/review`)
       await page.waitForSelector('[data-testid="review-list-container"]', { timeout: 15000 })
 
       await expect(page.locator('[data-testid="review-empty-state"]')).toBeVisible()
@@ -78,7 +78,7 @@ test.describe('Admin Review', () => {
         data: { name: 'Approved Plugin', status: 'approved', category: 'tools' },
       })
 
-      await page.goto(`${getBaseUrl()}/admin/reviews`)
+      await page.goto(`${getBaseUrl()}/admin/plugins/review`)
       await page.waitForSelector('[data-testid="review-list-container"]', { timeout: 15000 })
 
       await page.click('[data-testid="status-filter-pending"]')
@@ -95,7 +95,7 @@ test.describe('Admin Review', () => {
   test.describe('Approve Plugin', () => {
     test('should approve a pending plugin', async ({ page }) => {
       await seedPendingPlugins(page)
-      await page.goto(`${getBaseUrl()}/admin/reviews`)
+      await page.goto(`${getBaseUrl()}/admin/plugins/review`)
       await page.waitForSelector('[data-testid="review-list-container"]', { timeout: 15000 })
 
       await page
@@ -115,7 +115,7 @@ test.describe('Admin Review', () => {
   test.describe('Reject Plugin', () => {
     test('should reject a pending plugin with reason', async ({ page }) => {
       await seedPendingPlugins(page)
-      await page.goto(`${getBaseUrl()}/admin/reviews`)
+      await page.goto(`${getBaseUrl()}/admin/plugins/review`)
       await page.waitForSelector('[data-testid="review-list-container"]', { timeout: 15000 })
 
       await page
@@ -139,7 +139,7 @@ test.describe('Admin Review', () => {
   test.describe('Batch Operations', () => {
     test('should batch approve selected plugins', async ({ page }) => {
       await seedPendingPlugins(page)
-      await page.goto(`${getBaseUrl()}/admin/reviews`)
+      await page.goto(`${getBaseUrl()}/admin/plugins/review`)
       await page.waitForSelector('[data-testid="review-list-container"]', { timeout: 15000 })
 
       await page
@@ -162,7 +162,7 @@ test.describe('Admin Review', () => {
 
     test('should batch reject selected plugins', async ({ page }) => {
       await seedPendingPlugins(page)
-      await page.goto(`${getBaseUrl()}/admin/reviews`)
+      await page.goto(`${getBaseUrl()}/admin/plugins/review`)
       await page.waitForSelector('[data-testid="review-list-container"]', { timeout: 15000 })
 
       await page
@@ -202,7 +202,7 @@ test.describe('Admin Review', () => {
         },
       })
 
-      await page.goto(`${getBaseUrl()}/admin/plugins`)
+      await page.goto(`${getBaseUrl()}/admin/plugins/manage`)
       await page.waitForSelector('[data-testid="plugin-management-list"]', { timeout: 15000 })
 
       await page.locator('[data-testid="featured-toggle"]').first().click()
@@ -216,7 +216,7 @@ test.describe('Admin Review', () => {
   test.describe('Delete Plugin', () => {
     test('should delete a plugin with confirmation', async ({ page }) => {
       await seedPendingPlugins(page)
-      await page.goto(`${getBaseUrl()}/admin/reviews`)
+      await page.goto(`${getBaseUrl()}/admin/plugins/review`)
       await page.waitForSelector('[data-testid="review-list-container"]', { timeout: 15000 })
 
       const initialCount = await page.locator('[data-testid="review-item"]').count()

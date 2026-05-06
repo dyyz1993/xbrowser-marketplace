@@ -12,6 +12,11 @@ const CategoriesPage = lazy(() =>
   import('./pages/Categories').then(m => ({ default: m.CategoriesPage }))
 )
 const CLIPage = lazy(() => import('./pages/CLI').then(m => ({ default: m.CLIPage })))
+const NotificationPage = lazy(() =>
+  import('./pages/NotificationPage/NotificationPageView').then(m => ({
+    default: m.NotificationPage,
+  }))
+)
 
 function PageLoader() {
   return (
@@ -32,6 +37,7 @@ export const App: React.FC = () => {
             <Route path="/plugin/:slug" element={<PluginDetailPage />} />
             <Route path="/categories" element={<CategoriesPage />} />
             <Route path="/cli" element={<CLIPage />} />
+            <Route path="/notifications" element={<NotificationPage />} />
           </Routes>
         </Suspense>
       </Layout>

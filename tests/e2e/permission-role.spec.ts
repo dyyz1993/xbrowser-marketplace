@@ -266,12 +266,12 @@ test.describe('Permission & Role Management', () => {
         sessionStorage.clear()
       })
 
-      await page.goto(`${getBaseUrl()}/login`)
-      await page.waitForSelector('[data-testid="login-form"]', { timeout: 15000 })
-      await page.fill('[data-testid="login-email"]', 'restricted@test.com')
-      await page.fill('[data-testid="login-password"]', 'TestPass123!')
-      await page.click('[data-testid="login-submit"]')
-      await page.waitForURL('**/dashboard', { timeout: 15000 })
+      await page.goto(`${getBaseUrl()}/admin/login`)
+      await page.waitForSelector('[data-testid="admin-login-form"]', { timeout: 15000 })
+      await page.fill('[data-testid="admin-login-username"]', 'restricted_user')
+      await page.fill('[data-testid="admin-login-password"]', 'TestPass123!')
+      await page.getByTestId('admin-login-submit').click()
+      await page.waitForURL('**/admin/dashboard', { timeout: 15000 })
 
       await page.goto(`${getBaseUrl()}/admin/system/roles`)
       await page.waitForTimeout(2000)
