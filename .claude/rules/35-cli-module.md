@@ -36,10 +36,10 @@ src/cli/
 ### 嵌套命令格式
 
 ```bash
-biomimic --help                    # 查看所有模块
-biomimic todo --help               # 查看 todo 模块命令
-biomimic todo create --help        # 查看 create 命令详情
-biomimic todo create --title "x"   # 执行命令
+xbrowser-marketplace --help                    # 查看所有模块
+xbrowser-marketplace todo --help               # 查看 todo 模块命令
+xbrowser-marketplace todo create --help        # 查看 create 命令详情
+xbrowser-marketplace todo create --title "x"   # 执行命令
 ```
 
 ### 模块注册
@@ -127,8 +127,8 @@ type RouteConfig = {
 ### 自动生成效果
 
 ```bash
-$ biomimic todo create --help
-Usage: biomimic todo create [options]
+$ xbrowser-marketplace todo create --help
+Usage: xbrowser-marketplace todo create [options]
 
 Create a new todo
 
@@ -156,10 +156,10 @@ logger.success('操作成功') // 带 ✓ 前缀
 
 ```bash
 # 通过 --verbose
-biomimic --verbose todo list
+xbrowser-marketplace --verbose todo list
 
 # 通过环境变量
-BIOMIMIC_VERBOSE=true biomimic todo list
+XBROWSER_MARKETPLACE_VERBOSE=true xbrowser-marketplace todo list
 ```
 
 ## ⚙️ 配置管理
@@ -167,7 +167,7 @@ BIOMIMIC_VERBOSE=true biomimic todo list
 ### 配置文件路径
 
 ```
-~/.biomimic/config.json
+~/.xbrowser-marketplace/config.json
 ```
 
 ### 配置结构
@@ -189,11 +189,11 @@ BIOMIMIC_VERBOSE=true biomimic todo list
 ### 配置命令
 
 ```bash
-biomimic config get              # 查看配置
-biomimic config url              # 查看当前 URL
-biomimic config url http://...   # 设置 URL
-biomimic config status           # 检查服务状态
-biomimic config path             # 查看配置文件路径
+xbrowser-marketplace config get              # 查看配置
+xbrowser-marketplace config url              # 查看当前 URL
+xbrowser-marketplace config url http://...   # 设置 URL
+xbrowser-marketplace config status           # 检查服务状态
+xbrowser-marketplace config path             # 查看配置文件路径
 ```
 
 ## 🚫 禁止事项

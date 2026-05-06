@@ -5,7 +5,7 @@ import fs from 'fs'
 import path from 'path'
 import os from 'os'
 
-const CONFIG_DIR = path.join(os.homedir(), '.biomimic')
+const CONFIG_DIR = path.join(os.homedir(), '.xbrowser-marketplace')
 const CONFIG_FILE = path.join(CONFIG_DIR, 'config.json')
 
 interface Config {
