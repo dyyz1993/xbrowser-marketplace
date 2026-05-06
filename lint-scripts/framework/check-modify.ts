@@ -16,7 +16,7 @@ function getStagedFiles(): string[] {
     return output
       .split('\n')
       .filter(Boolean)
-      .filter((f) => f.endsWith('.ts'))
+      .filter(f => f.endsWith('.ts'))
   } catch {
     return []
   }
@@ -67,7 +67,12 @@ function checkFile(filePath: string): CheckResult {
     }
   }
 
-  return { file: filePath, status: 'ok', baseline: info.baseline, current: currentHash || undefined }
+  return {
+    file: filePath,
+    status: 'ok',
+    baseline: info.baseline,
+    current: currentHash || undefined,
+  }
 }
 
 function main(): void {

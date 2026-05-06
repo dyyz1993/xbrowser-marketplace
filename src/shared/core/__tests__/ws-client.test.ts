@@ -63,7 +63,9 @@ describe('WSClientImpl', () => {
     const sentData = JSON.parse(ws.send.mock.calls[0][0] as string)
     expect(sentData.method).toBe('echo')
 
-    ws.onmessage!({ data: JSON.stringify({ id: sentData.id, result: { echoed: 'hello' } }) } as MessageEvent)
+    ws.onmessage!({
+      data: JSON.stringify({ id: sentData.id, result: { echoed: 'hello' } }),
+    } as MessageEvent)
 
     const result = await callPromise
     expect(result).toEqual({ echoed: 'hello' })
@@ -77,7 +79,9 @@ describe('WSClientImpl', () => {
     const callPromise = client.call('fail' as never, undefined as never, 5000)
 
     const sentData = JSON.parse(ws.send.mock.calls[0][0] as string)
-    ws.onmessage!({ data: JSON.stringify({ id: sentData.id, error: 'Something went wrong' }) } as MessageEvent)
+    ws.onmessage!({
+      data: JSON.stringify({ id: sentData.id, error: 'Something went wrong' }),
+    } as MessageEvent)
 
     await expect(callPromise).rejects.toThrow('Something went wrong')
   })
@@ -104,7 +108,9 @@ describe('WSClientImpl', () => {
     const handler = vi.fn()
     client.on('notification' as never, handler)
 
-    ws.onmessage!({ data: JSON.stringify({ type: 'notification', payload: { text: 'new msg' } }) } as MessageEvent)
+    ws.onmessage!({
+      data: JSON.stringify({ type: 'notification', payload: { text: 'new msg' } }),
+    } as MessageEvent)
 
     expect(handler).toHaveBeenCalledWith({ text: 'new msg' })
   })
@@ -116,9 +122,7 @@ describe('WSClientImpl', () => {
 
     client.emit('chat' as never, { text: 'hi' } as never)
 
-    expect(ws.send).toHaveBeenCalledWith(
-      JSON.stringify({ type: 'chat', payload: { text: 'hi' } })
-    )
+    expect(ws.send).toHaveBeenCalledWith(JSON.stringify({ type: 'chat', payload: { text: 'hi' } }))
   })
 
   it('should report status changes via onStatusChange', async () => {

@@ -1,25 +1,7 @@
 import { useEffect, useState } from 'react'
 import { pluginAdminApi } from '../services/plugin-admin-api'
-import {
-  Card,
-  Table,
-  Tag,
-  Button,
-  Space,
-  Statistic,
-  Row,
-  Col,
-  message,
-  Popconfirm,
-} from 'antd'
-import {
-  CheckCircle,
-  Clock,
-  Download,
-  Users,
-  Star,
-  ArrowRight,
-} from 'lucide-react'
+import { Card, Table, Tag, Button, Space, Statistic, Row, Col, message, Popconfirm } from 'antd'
+import { CheckCircle, Clock, Download, Users, Star, ArrowRight } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 
 interface DashboardData {
@@ -158,7 +140,10 @@ export const PluginDashboardPage: React.FC = () => {
       render: (_: unknown, record: DashboardData['recentSubmissions'][0]) =>
         record.status === 'pending' ? (
           <Space>
-            <Popconfirm title={`Approve ${record.name}?`} onConfirm={() => handleQuickApprove(record.slug)}>
+            <Popconfirm
+              title={`Approve ${record.name}?`}
+              onConfirm={() => handleQuickApprove(record.slug)}
+            >
               <Button type="primary" size="small" icon={<CheckCircle className="w-3 h-3" />}>
                 Approve
               </Button>

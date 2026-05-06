@@ -30,6 +30,7 @@
 ```
 
 **特点**：
+
 - `timestamp` 是毫秒级时间戳（数字）
 - 按时间顺序排列
 - 不同 session 文件的时间戳可能重叠
@@ -45,6 +46,7 @@
 ```
 
 **特点**：
+
 - `createdAt` 是 ISO 8601 字符串
 - 由 `timestamp` 转换而来
 
@@ -99,17 +101,17 @@ offset/limit 分页：
 ```typescript
 // 请求参数
 interface GetMessagesQuery {
-  limit?: number           // 每页数量，默认 20
-  before?: string         // 加载此时间戳之前的消息（用于向上翻页）
-  after?: string          // 加载此时间戳之后的消息（用于向下翻页）
+  limit?: number // 每页数量，默认 20
+  before?: string // 加载此时间戳之前的消息（用于向上翻页）
+  after?: string // 加载此时间戳之后的消息（用于向下翻页）
 }
 
 // 响应数据
 interface MessagesResponse {
   messages: ChatMessage[]
   hasMore: boolean
-  nextCursor?: string     // 下一页的游标（时间戳）
-  prevCursor?: string     // 上一页的游标（时间戳）
+  nextCursor?: string // 下一页的游标（时间戳）
+  prevCursor?: string // 上一页的游标（时间戳）
 }
 ```
 
@@ -137,43 +139,39 @@ export async function getMessages(
   after?: string
 ): Promise<MessagesResponse> {
   const { messages: allMessages, toolCallMap } = parseSessionJsonl(userId)
-  
+
   // 转换为 ChatMessage
-  let chatMessages = allMessages.map((msg, index) => {
-    // ... 转换逻辑
-  }).filter(Boolean) as ChatMessage[]
-  
+  let chatMessages = allMessages
+    .map((msg, index) => {
+      // ... 转换逻辑
+    })
+    .filter(Boolean) as ChatMessage[]
+
   // 按时间戳排序（降序，最新的在前）
-  chatMessages.sort((a, b) => 
-    new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-  )
-  
+  chatMessages.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+
   // 应用游标过滤
   if (before) {
     const beforeTime = new Date(before).getTime()
-    chatMessages = chatMessages.filter(msg => 
-      new Date(msg.createdAt).getTime() < beforeTime
-    )
+    chatMessages = chatMessages.filter(msg => new Date(msg.createdAt).getTime() < beforeTime)
   }
-  
+
   if (after) {
     const afterTime = new Date(after).getTime()
-    chatMessages = chatMessages.filter(msg => 
-      new Date(msg.createdAt).getTime() > afterTime
-    )
+    chatMessages = chatMessages.filter(msg => new Date(msg.createdAt).getTime() > afterTime)
   }
-  
+
   // 分页
   const pageSize = limit || 20
   const pagedMessages = chatMessages.slice(0, pageSize)
-  
+
   // 判断是否有更多
   const hasMore = chatMessages.length > pageSize
-  
+
   // 计算游标
   const oldestMessage = pagedMessages[pagedMessages.length - 1]
   const newestMessage = pagedMessages[0]
-  
+
   return {
     messages: pagedMessages,
     hasMore,
@@ -189,10 +187,10 @@ export async function getMessages(
 // agentStore.ts
 interface AgentState {
   // ...
-  oldestMessageTime?: string    // 最老消息的时间戳
-  newestMessageTime?: string    // 最新消息的时间戳
+  oldestMessageTime?: string // 最老消息的时间戳
+  newestMessageTime?: string // 最新消息的时间戳
   hasMoreMessages: boolean
-  
+
   loadOlderMessages: () => Promise<void>
   loadNewerMessages: () => Promise<void>
 }
@@ -232,30 +230,32 @@ export async function getMessages(
   offset?: number
 ): Promise<ChatMessage[]> {
   const { messages: allMessages, toolCallMap } = parseSessionJsonl(userId)
-  
+
   // 转换为 ChatMessage
-  let chatMessages = allMessages.map((msg, index) => {
-    // ... 转换逻辑
-  }).filter(Boolean) as ChatMessage[]
-  
+  let chatMessages = allMessages
+    .map((msg, index) => {
+      // ... 转换逻辑
+    })
+    .filter(Boolean) as ChatMessage[]
+
   // 按时间戳排序（降序，最新的在前）
-  chatMessages.sort((a, b) => 
-    new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-  )
-  
+  chatMessages.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+
   // 应用分页
   const start = offset || 0
   const end = limit !== undefined ? start + limit : undefined
-  
+
   return chatMessages.slice(start, end)
 }
 ```
 
 #### 优点
+
 - ✅ API 不变，向后兼容
 - ✅ 实现简单
 
 #### 缺点
+
 - ⚠️ 如果新消息插入，offset 会错位
 - ⚠️ 可能导致消息重复或遗漏
 
@@ -266,6 +266,7 @@ export async function getMessages(
 ### 🎯 推荐：方案1（基于时间戳的游标分页）
 
 **理由**：
+
 1. **正确性**：避免消息重复和遗漏
 2. **性能**：不需要读取所有消息再分页
 3. **扩展性**：支持双向分页（向上/向下）
@@ -287,7 +288,8 @@ export function parseSessionJsonl(userId: string): ParseSessionResult {
   }
 
   try {
-    const sessionFiles = fs.readdirSync(sessionDir)
+    const sessionFiles = fs
+      .readdirSync(sessionDir)
       .filter(f => f.endsWith('.jsonl'))
       .map(f => ({
         name: f,
@@ -366,64 +368,60 @@ export async function getMessages(
   after?: string
 ): Promise<MessagesResponse> {
   const { messages: piMessages, toolCallMap } = parseSessionJsonl(userId)
-  
+
   // 转换为 ChatMessage
-  let chatMessages = piMessages.map((msg, index) => {
-    if (msg.role === 'user') {
-      return {
-        id: `msg-${msg.timestamp}-${index}`,
-        agentId,
-        role: 'user',
-        content: extractTextContent(msg.content),
-        createdAt: new Date(msg.timestamp).toISOString(),
+  let chatMessages = piMessages
+    .map((msg, index) => {
+      if (msg.role === 'user') {
+        return {
+          id: `msg-${msg.timestamp}-${index}`,
+          agentId,
+          role: 'user',
+          content: extractTextContent(msg.content),
+          createdAt: new Date(msg.timestamp).toISOString(),
+        }
+      } else if (msg.role === 'assistant') {
+        const content = extractTextContent(msg.content)
+        const subRounds = parseAssistantSubRounds(msg, msg.timestamp, toolCallMap)
+
+        return {
+          id: `msg-${msg.timestamp}-${index}`,
+          agentId,
+          role: 'agent',
+          content,
+          subRounds: subRounds.length > 0 ? subRounds : undefined,
+          createdAt: new Date(msg.timestamp).toISOString(),
+        }
       }
-    } else if (msg.role === 'assistant') {
-      const content = extractTextContent(msg.content)
-      const subRounds = parseAssistantSubRounds(msg, msg.timestamp, toolCallMap)
-      
-      return {
-        id: `msg-${msg.timestamp}-${index}`,
-        agentId,
-        role: 'agent',
-        content,
-        subRounds: subRounds.length > 0 ? subRounds : undefined,
-        createdAt: new Date(msg.timestamp).toISOString(),
-      }
-    }
-    return null
-  }).filter(Boolean) as ChatMessage[]
-  
+      return null
+    })
+    .filter(Boolean) as ChatMessage[]
+
   // 按时间戳降序排序（最新的在前）
-  chatMessages.sort((a, b) => 
-    new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-  )
-  
+  chatMessages.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+
   // 应用游标过滤
   if (before) {
     const beforeTime = new Date(before).getTime()
-    chatMessages = chatMessages.filter(msg => 
-      new Date(msg.createdAt).getTime() < beforeTime
-    )
+    chatMessages = chatMessages.filter(msg => new Date(msg.createdAt).getTime() < beforeTime)
   }
-  
+
   if (after) {
     const afterTime = new Date(after).getTime()
-    chatMessages = chatMessages.filter(msg => 
-      new Date(msg.createdAt).getTime() > afterTime
-    )
+    chatMessages = chatMessages.filter(msg => new Date(msg.createdAt).getTime() > afterTime)
   }
-  
+
   // 分页
   const pageSize = limit || 20
   const pagedMessages = chatMessages.slice(0, pageSize)
-  
+
   // 判断是否有更多
   const hasMore = chatMessages.length > pageSize
-  
+
   // 计算游标
   const oldestMessage = pagedMessages[pagedMessages.length - 1]
   const newestMessage = pagedMessages[0]
-  
+
   return {
     messages: pagedMessages,
     hasMore,
@@ -448,7 +446,7 @@ loadOlderMessages: async () => {
       before: oldestMessageTime,
     },
   })
-  
+
   const result = await response.json()
   if (result.success) {
     set(state => ({

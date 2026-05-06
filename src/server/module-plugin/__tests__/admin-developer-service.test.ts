@@ -83,7 +83,12 @@ describe('Admin Developer Service', () => {
 
     it('should list all developers with roles', async () => {
       await seedDeveloper({ id: 'dev-1', username: 'user1', email: 'a@test.com', role: 'user' })
-      await seedDeveloper({ id: 'dev-2', username: 'user2', email: 'b@test.com', role: 'super_admin' })
+      await seedDeveloper({
+        id: 'dev-2',
+        username: 'user2',
+        email: 'b@test.com',
+        role: 'super_admin',
+      })
       const devs = await adminDevService.listAllDevelopers()
       expect(devs).toHaveLength(2)
       expect(devs.map(d => d.role)).toContain('user')
@@ -99,7 +104,10 @@ describe('Admin Developer Service', () => {
       expect(result.reset).toBe(2)
       const client = await getRawClient()
       if (client && 'execute' in client) {
-        const rows = await client.execute({ sql: `SELECT download_count, view_count FROM plugins WHERE slug = ?`, args: ['plugin-a'] })
+        const rows = await client.execute({
+          sql: `SELECT download_count, view_count FROM plugins WHERE slug = ?`,
+          args: ['plugin-a'],
+        })
         const row = rows.rows?.[0] as Record<string, unknown> | undefined
         expect(Number(row?.download_count ?? 0)).toBe(0)
         expect(Number(row?.view_count ?? 0)).toBe(0)

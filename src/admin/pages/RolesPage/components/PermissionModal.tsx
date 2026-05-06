@@ -13,7 +13,16 @@ export const PermissionModal: React.FC<{
   onSelectionChange: (perms: string[]) => void
   onOk: () => void
   onCancel: () => void
-}> = ({ visible, roleLabel, selectedPermissions, allPermissions, categories, onSelectionChange, onOk, onCancel }) => (
+}> = ({
+  visible,
+  roleLabel,
+  selectedPermissions,
+  allPermissions,
+  categories,
+  onSelectionChange,
+  onOk,
+  onCancel,
+}) => (
   <Modal
     title={`管理角色权限 - ${roleLabel || ''}`}
     open={visible}

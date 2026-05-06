@@ -11,6 +11,7 @@
 **位置**：`/Users/xuyingzhou/Project/create-biomimic-app/template/.pi/sessions/3/`
 
 **格式示例**：
+
 ```jsonl
 {"type":"message","id":"f045add6","timestamp":"2026-03-25T04:03:15.493Z","message":{"role":"assistant","content":[{"type":"thinking","thinking":"..."},{"type":"toolCall","id":"call_function_ossi13uz06zb_1","name":"bash","arguments":{"command":"ls -la"}}]}}
 {"type":"message","id":"9cc64a07","timestamp":"2026-03-25T04:03:15.510Z","message":{"role":"toolResult","toolCallId":"call_function_ossi13uz06zb_1","content":[{"type":"text","text":"..."}]}}
@@ -21,11 +22,13 @@
 **文件**：[session-parser.ts](../../src/server/module-agent/services/session-parser.ts)
 
 **关键函数**：
+
 - `parseSessionJsonl()`: 解析 JSONL 文件，构建消息列表和工具调用映射
 - `parseAssistantSubRounds()`: 将 assistant 消息解析为 subRounds 结构
 - `extractTextContent()`: 提取文本内容
 
 **解析逻辑**：
+
 ```typescript
 // 1. 解析消息
 if (msg.role === 'assistant') {
@@ -55,9 +58,9 @@ if (block.type === 'toolCall') {
   if (!currentSubRound.toolCalls) {
     currentSubRound.toolCalls = []
   }
-  
+
   const toolCallWithResult = toolCallMap?.get(toolCallBlock.id)
-  
+
   currentSubRound.toolCalls.push({
     id: toolCallBlock.id,
     name: toolCallBlock.name,
@@ -71,6 +74,7 @@ if (block.type === 'toolCall') {
 ### 3. API 返回数据
 
 **实际返回示例**：
+
 ```json
 {
   "success": true,
@@ -86,8 +90,8 @@ if (block.type === 'toolCall') {
             {
               "id": "call_function_ossi13uz06zb_1",
               "name": "bash",
-              "args": {"command": "ls -la"},
-              "result": [{"type": "text", "text": "..."}]
+              "args": { "command": "ls -la" },
+              "result": [{ "type": "text", "text": "..." }]
             }
           ]
         }
@@ -102,23 +106,24 @@ if (block.type === 'toolCall') {
 **文件**：[RoundCard.tsx](../../src/client/components/RoundCard.tsx)
 
 **渲染逻辑**：
+
 ```tsx
-{subRound.toolCalls && subRound.toolCalls.length > 0 && (
-  <div className="mb-3 space-y-2">
-    <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-      Tools
+{
+  subRound.toolCalls && subRound.toolCalls.length > 0 && (
+    <div className="mb-3 space-y-2">
+      <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Tools</div>
+      {subRound.toolCalls.map(toolCall => (
+        <div key={toolCall.id} className="p-3 bg-white border border-gray-200 rounded-lg">
+          <span className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded font-mono">
+            {toolCall.name}
+          </span>
+          <pre>{JSON.stringify(toolCall.args, null, 2)}</pre>
+          {toolCall.result && renderToolResult(toolCall.result)}
+        </div>
+      ))}
     </div>
-    {subRound.toolCalls.map(toolCall => (
-      <div key={toolCall.id} className="p-3 bg-white border border-gray-200 rounded-lg">
-        <span className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded font-mono">
-          {toolCall.name}
-        </span>
-        <pre>{JSON.stringify(toolCall.args, null, 2)}</pre>
-        {toolCall.result && renderToolResult(toolCall.result)}
-      </div>
-    ))}
-  </div>
-)}
+  )
+}
 ```
 
 ## 问题诊断
@@ -126,6 +131,7 @@ if (block.type === 'toolCall') {
 ### ✅ API 数据正确
 
 从实际测试来看，API **确实返回了工具调用信息**：
+
 - `toolCalls` 数组存在
 - 包含 `name`, `args`, `result` 字段
 - 数据结构完整
@@ -133,6 +139,7 @@ if (block.type === 'toolCall') {
 ### ✅ 前端代码正确
 
 前端 `RoundCard.tsx` 的渲染逻辑是正确的：
+
 - 检查 `subRound.toolCalls` 是否存在
 - 遍历并渲染每个工具调用
 - 显示工具名称、参数和结果
@@ -144,6 +151,7 @@ if (block.type === 'toolCall') {
 **现象**：API 返回的消息顺序可能导致工具调用和文本内容分离
 
 **示例**：
+
 ```json
 [
   {"role": "agent", "subRounds": [{"toolCalls": [...]}]},  // 第一个 agent 消息
@@ -152,6 +160,7 @@ if (block.type === 'toolCall') {
 ```
 
 **原因**：`parseAssistantSubRounds()` 会为每个 assistant 消息创建独立的 subRounds，导致：
+
 - 第一个消息只有 toolCalls
 - 第二个消息只有 content
 
@@ -171,7 +180,7 @@ const rounds = useMemo<MessageRound[]>(() => {
       currentRound = { userMessage: msg, agentMessage: null }
       result.push(currentRound)
     } else if (msg.role === 'agent' && currentRound) {
-      currentRound.agentMessage = msg  // ⚠️ 只取第一个 agent 消息
+      currentRound.agentMessage = msg // ⚠️ 只取第一个 agent 消息
     }
   }
 
@@ -184,6 +193,7 @@ const rounds = useMemo<MessageRound[]>(() => {
 #### 3. **空 content 导致的渲染问题**
 
 **示例**：
+
 ```json
 {
   "role": "agent",
@@ -193,6 +203,7 @@ const rounds = useMemo<MessageRound[]>(() => {
 ```
 
 **前端逻辑**：
+
 ```tsx
 const hasSubRounds = subRounds.length > 0
 const isUserStreaming = agentMessage?.isStreaming && !hasSubRounds
@@ -215,7 +226,7 @@ for (const msg of messages) {
     currentRound = { userMessage: msg, agentMessage: null }
     result.push(currentRound)
   } else if (msg.role === 'agent' && currentRound) {
-    currentRound.agentMessage = msg  // ⚠️ 后续的 agent 消息被忽略
+    currentRound.agentMessage = msg // ⚠️ 后续的 agent 消息被忽略
   }
 }
 ```
@@ -264,10 +275,11 @@ export function parseAssistantSubRounds(
 **修改文件**：[ChatArea.tsx](../../src/client/components/ChatArea.tsx)
 
 **修改思路**：
+
 ```tsx
 interface MessageRound {
   userMessage: ChatMessage
-  agentMessages: ChatMessage[]  // 改为数组
+  agentMessages: ChatMessage[] // 改为数组
 }
 
 const rounds = useMemo<MessageRound[]>(() => {
@@ -279,7 +291,7 @@ const rounds = useMemo<MessageRound[]>(() => {
       currentRound = { userMessage: msg, agentMessages: [] }
       result.push(currentRound)
     } else if (msg.role === 'agent' && currentRound) {
-      currentRound.agentMessages.push(msg)  // 收集所有 agent 消息
+      currentRound.agentMessages.push(msg) // 收集所有 agent 消息
     }
   }
 
@@ -288,6 +300,7 @@ const rounds = useMemo<MessageRound[]>(() => {
 ```
 
 **优点**：
+
 - 最小改动
 - 保持现有数据结构
 - 立即生效
@@ -297,19 +310,20 @@ const rounds = useMemo<MessageRound[]>(() => {
 **修改文件**：[agent-service.ts](../../src/server/module-agent/services/agent-service.ts)
 
 **修改思路**：
+
 ```typescript
 export async function getMessages(...): Promise<ChatMessage[]> {
   const { messages: piMessages, toolCallMap } = parseSessionJsonl(userId)
-  
+
   // 合并连续的 assistant 消息
   const mergedMessages = mergeAssistantMessages(piMessages)
-  
+
   return mergedMessages.map(...)
 }
 
 function mergeAssistantMessages(messages: PiMessage[]): PiMessage[] {
   const result: PiMessage[] = []
-  
+
   for (const msg of messages) {
     if (msg.role === 'assistant') {
       const lastMsg = result[result.length - 1]
@@ -323,17 +337,19 @@ function mergeAssistantMessages(messages: PiMessage[]): PiMessage[] {
       result.push(msg)
     }
   }
-  
+
   return result
 }
 ```
 
 **优点**：
+
 - 数据更合理
 - 减少前端复杂度
 - 符合用户直觉
 
 **缺点**：
+
 - 需要修改解析逻辑
 - 可能影响其他功能
 
@@ -342,6 +358,7 @@ function mergeAssistantMessages(messages: PiMessage[]): PiMessage[] {
 **修改文件**：[session-parser.ts](../../src/server/module-agent/services/session-parser.ts)
 
 **修改思路**：
+
 ```typescript
 export function parseAssistantSubRounds(
   msg: PiAssistantMessage,
@@ -353,7 +370,7 @@ export function parseAssistantSubRounds(
     id: `subround-${timestamp}-0`,
     createdAt: new Date(timestamp).toISOString(),
   }
-  
+
   for (const block of msg.content) {
     // 修改逻辑：只有遇到新的 thinking 才创建新 subRound
     // toolCall 和 text 都添加到当前 subRound
@@ -373,7 +390,7 @@ export function parseAssistantSubRounds(
       currentSubRound.thinking = thinkingBlock.thinking
     }
   }
-  
+
   return subRounds
 }
 ```
@@ -410,6 +427,7 @@ export function parseAssistantSubRounds(
 **输入**：用户发送 "ls"
 
 **预期**：
+
 - 显示工具调用（bash ls -la）
 - 显示工具结果
 - 显示最终文本回复
@@ -419,6 +437,7 @@ export function parseAssistantSubRounds(
 **输入**：用户发送复杂请求
 
 **预期**：
+
 - 显示所有工具调用
 - 按顺序显示工具结果
 - 显示最终回复
@@ -428,6 +447,7 @@ export function parseAssistantSubRounds(
 **输入**：用户发送简单问题
 
 **预期**：
+
 - 直接显示文本回复
 - 不显示工具区域
 

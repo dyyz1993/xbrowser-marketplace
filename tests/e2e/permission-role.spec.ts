@@ -74,8 +74,12 @@ test.describe('Permission & Role Management', () => {
       await page.fill('[data-testid="role-name-input"]', 'E2E Test Role')
       await page.fill('[data-testid="role-code-input"]', 'e2e_test_role')
 
-      await page.click('[data-testid="permission-node-plugins"] [data-testid="permission-checkbox-read"]')
-      await page.click('[data-testid="permission-node-plugins"] [data-testid="permission-checkbox-write"]')
+      await page.click(
+        '[data-testid="permission-node-plugins"] [data-testid="permission-checkbox-read"]'
+      )
+      await page.click(
+        '[data-testid="permission-node-plugins"] [data-testid="permission-checkbox-write"]'
+      )
 
       await page.click('[data-testid="save-role-button"]')
 
@@ -94,7 +98,9 @@ test.describe('Permission & Role Management', () => {
       await page.click('[data-testid="save-role-button"]')
 
       await page.waitForSelector('[data-testid="form-error"]', { timeout: 10000 })
-      await expect(page.locator('[data-testid="form-error"]')).toContainText(/required|cannot be empty/i)
+      await expect(page.locator('[data-testid="form-error"]')).toContainText(
+        /required|cannot be empty/i
+      )
     })
 
     test('should show validation error for duplicate role code', async ({ page }) => {
@@ -113,7 +119,9 @@ test.describe('Permission & Role Management', () => {
       await page.click('[data-testid="save-role-button"]')
 
       await page.waitForSelector('[data-testid="form-error"]', { timeout: 10000 })
-      await expect(page.locator('[data-testid="form-error"]')).toContainText(/already.*exist|duplicate/i)
+      await expect(page.locator('[data-testid="form-error"]')).toContainText(
+        /already.*exist|duplicate/i
+      )
     })
   })
 
@@ -126,12 +134,20 @@ test.describe('Permission & Role Management', () => {
       await page.goto(`${getBaseUrl()}/admin/system/roles`)
       await page.waitForSelector('[data-testid="roles-container"]', { timeout: 15000 })
 
-      await page.locator('[data-testid="role-table"] tbody tr').first().locator('[data-testid="edit-role-button"]').click()
+      await page
+        .locator('[data-testid="role-table"] tbody tr')
+        .first()
+        .locator('[data-testid="edit-role-button"]')
+        .click()
 
       await page.waitForSelector('[data-testid="role-form-dialog"]', { timeout: 10000 })
 
-      await page.click('[data-testid="permission-node-plugins"] [data-testid="permission-checkbox-write"]')
-      await page.click('[data-testid="permission-node-plugins"] [data-testid="permission-checkbox-delete"]')
+      await page.click(
+        '[data-testid="permission-node-plugins"] [data-testid="permission-checkbox-write"]'
+      )
+      await page.click(
+        '[data-testid="permission-node-plugins"] [data-testid="permission-checkbox-delete"]'
+      )
 
       await page.click('[data-testid="save-role-button"]')
 
@@ -150,7 +166,11 @@ test.describe('Permission & Role Management', () => {
 
       const initialCount = await page.locator('[data-testid="role-table"] tbody tr').count()
 
-      await page.locator('[data-testid="role-table"] tbody tr').first().locator('[data-testid="delete-role-button"]').click()
+      await page
+        .locator('[data-testid="role-table"] tbody tr')
+        .first()
+        .locator('[data-testid="delete-role-button"]')
+        .click()
 
       await page.waitForSelector('[data-testid="confirm-delete-dialog"]', { timeout: 10000 })
       await page.click('[data-testid="confirm-delete-button"]')
@@ -185,10 +205,14 @@ test.describe('Permission & Role Management', () => {
       await page.click('[data-testid="permission-group-plugins"]')
       await page.waitForTimeout(500)
 
-      await page.click('[data-testid="permission-node-plugins-read"] [data-testid="permission-checkbox"]')
+      await page.click(
+        '[data-testid="permission-node-plugins-read"] [data-testid="permission-checkbox"]'
+      )
       await page.waitForTimeout(300)
 
-      const checkbox = page.locator('[data-testid="permission-node-plugins-read"] [data-testid="permission-checkbox"]')
+      const checkbox = page.locator(
+        '[data-testid="permission-node-plugins-read"] [data-testid="permission-checkbox"]'
+      )
       await expect(checkbox).toBeChecked()
     })
   })
@@ -205,7 +229,11 @@ test.describe('Permission & Role Management', () => {
       await page.goto(`${getBaseUrl()}/admin/system/roles`)
       await page.waitForSelector('[data-testid="roles-container"]', { timeout: 15000 })
 
-      await page.locator('[data-testid="role-table"] tbody tr').first().locator('[data-testid="assign-role-button"]').click()
+      await page
+        .locator('[data-testid="role-table"] tbody tr')
+        .first()
+        .locator('[data-testid="assign-role-button"]')
+        .click()
 
       await page.waitForSelector('[data-testid="assign-role-dialog"]', { timeout: 10000 })
 

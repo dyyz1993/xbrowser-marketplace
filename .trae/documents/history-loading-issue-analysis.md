@@ -36,13 +36,14 @@ ls -lh .pi/sessions/3/*.jsonl | wc -l
 # 结果：有 48 个 session 文件
 
 # 检查每个文件的消息数量
-for f in .pi/sessions/3/*.jsonl; do 
+for f in .pi/sessions/3/*.jsonl; do
   echo "=== $f ==="
   cat "$f" | jq 'select(.type == "message")' | wc -l
 done
 ```
 
 **结果**：
+
 ```
 session-1.jsonl: 2 条消息
 session-2.jsonl: 2 条消息
@@ -72,14 +73,15 @@ export function parseSessionJsonl(userId: string): ParseSessionResult {
   }
 
   try {
-    const sessionFiles = fs.readdirSync(sessionDir)
+    const sessionFiles = fs
+      .readdirSync(sessionDir)
       .filter(f => f.endsWith('.jsonl'))
       .map(f => ({
         name: f,
         path: path.join(sessionDir, f),
         mtime: fs.statSync(path.join(sessionDir, f)).mtime.getTime(),
       }))
-      .sort((a, b) => b.mtime - a.mtime)  // 按修改时间倒序
+      .sort((a, b) => b.mtime - a.mtime) // 按修改时间倒序
 
     if (sessionFiles.length === 0) {
       return { messages: [], toolCallMap: new Map() }
@@ -120,6 +122,7 @@ export function parseSessionJsonl(userId: string): ParseSessionResult {
 ```
 
 **关键问题**：
+
 - ❌ 第48行：`const latestSessionFile = sessionFiles[0].path`
 - ❌ 只读取最新的一个 session 文件
 - ❌ 忽略了其他 47 个历史 session 文件
@@ -131,6 +134,7 @@ export function parseSessionJsonl(userId: string): ParseSessionResult {
 ### 🔴 核心问题：只读取最新的 session 文件
 
 **数据流**：
+
 ```
 文件系统：
   session-1.jsonl (2 条消息)
@@ -168,7 +172,7 @@ const handleScroll = useCallback(() => {
 
   // 滚动到顶部时加载更多
   if (scrollTop <= 10 && hasMoreMessages && !loadingMore) {
-    loadMoreMessages()  // ✅ 逻辑正确
+    loadMoreMessages() // ✅ 逻辑正确
   }
 }, [hasMoreMessages, loadingMore, loadMoreMessages])
 ```
@@ -182,16 +186,18 @@ const hasMore = newMessages.length === (limit || 20)
 
 set(state => ({
   messages: append ? [...newMessages, ...state.messages] : newMessages,
-  hasMoreMessages: hasMore,  // ✅ 逻辑正确
+  hasMoreMessages: hasMore, // ✅ 逻辑正确
   [isLoading]: false,
 }))
 ```
 
 **判断逻辑**：
+
 - 如果返回的消息数量 === limit，说明可能还有更多消息
 - 如果返回的消息数量 < limit，说明已经到底了
 
 **当前情况**：
+
 - limit = 20
 - 返回 3 条消息
 - 3 < 20，所以 `hasMoreMessages = false`
@@ -233,11 +239,13 @@ loadMoreMessages: async () => {
 ### 方案1：读取所有 session 文件 ⭐ 推荐
 
 **优点**：
+
 - ✅ 完整的历史数据
 - ✅ 支持分页加载
 - ✅ 用户体验好
 
 **缺点**：
+
 - ⚠️ 文件较多时可能影响性能
 - ⚠️ 需要优化读取策略
 
@@ -254,14 +262,15 @@ export function parseSessionJsonl(userId: string): ParseSessionResult {
   }
 
   try {
-    const sessionFiles = fs.readdirSync(sessionDir)
+    const sessionFiles = fs
+      .readdirSync(sessionDir)
       .filter(f => f.endsWith('.jsonl'))
       .map(f => ({
         name: f,
         path: path.join(sessionDir, f),
         mtime: fs.statSync(path.join(sessionDir, f)).mtime.getTime(),
       }))
-      .sort((a, b) => b.mtime - a.mtime)  // 按修改时间倒序
+      .sort((a, b) => b.mtime - a.mtime) // 按修改时间倒序
 
     if (sessionFiles.length === 0) {
       return { messages: [], toolCallMap: new Map() }
@@ -327,11 +336,13 @@ export function parseSessionJsonl(userId: string): ParseSessionResult {
 ### 方案2：读取最近的 N 个 session 文件
 
 **优点**：
+
 - ✅ 平衡性能和功能
 - ✅ 支持分页加载
 - ✅ 限制内存使用
 
 **缺点**：
+
 - ⚠️ 不是完整历史
 - ⚠️ 需要确定 N 的值
 
@@ -351,11 +362,13 @@ for (const sessionFile of recentSessionFiles) {
 ### 方案3：按需加载 session 文件
 
 **优点**：
+
 - ✅ 最佳性能
 - ✅ 支持无限历史
 - ✅ 内存占用小
 
 **缺点**：
+
 - ⚠️ 实现复杂
 - ⚠️ 需要缓存机制
 
@@ -386,12 +399,14 @@ export function parseSessionJsonl(
 ### 🎯 推荐：方案1（读取所有 session 文件）
 
 **理由**：
+
 1. **实现简单**：只需修改一个函数
 2. **完整数据**：用户可以看到所有历史
 3. **性能可接受**：48 个文件，每个 2-6KB，总共约 200KB
 4. **用户体验好**：完整的历史记录
 
 **优化建议**：
+
 - 如果文件数量超过 100 个，可以考虑方案2
 - 如果单个文件超过 1MB，可以考虑方案3
 

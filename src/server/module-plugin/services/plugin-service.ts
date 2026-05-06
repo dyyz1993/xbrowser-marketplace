@@ -9,18 +9,32 @@ import { type PluginRow, serializeJsonField } from './plugin-utils'
 
 export type { PluginListItem, PluginDetail } from './plugin-utils'
 
-export { listPlugins, searchPlugins, getPluginBySlug, getPluginVersions, listCategories, getPluginsByCategory, getStats } from './plugin-query-service'
-export { getReviewStatsForPlugin, getReviewStatsBatch, submitReview, getReviews, deleteReview } from './plugin-review-service'
+export {
+  listPlugins,
+  searchPlugins,
+  getPluginBySlug,
+  getPluginVersions,
+  listCategories,
+  getPluginsByCategory,
+  getStats,
+} from './plugin-query-service'
+export {
+  getReviewStatsForPlugin,
+  getReviewStatsBatch,
+  submitReview,
+  getReviews,
+  deleteReview,
+} from './plugin-review-service'
 
-export async function createPlugin(
-  data: CreatePluginInput,
-  authorId: string,
-  authorName: string
-) {
+export async function createPlugin(data: CreatePluginInput, authorId: string, authorName: string) {
   const { getPluginBySlug } = await import('./plugin-query-service')
   const db = await getDb()
 
-  const existing: PluginRow[] = await db.select().from(plugins).where(eq(plugins.slug, data.slug)).limit(1)
+  const existing: PluginRow[] = await db
+    .select()
+    .from(plugins)
+    .where(eq(plugins.slug, data.slug))
+    .limit(1)
 
   if (existing.length > 0) {
     throw new ConflictError(`Plugin slug '${data.slug}' already exists`)
@@ -66,15 +80,15 @@ export async function createPlugin(
   return getPluginBySlug(data.slug)
 }
 
-export async function updatePlugin(
-  slug: string,
-  data: UpdatePluginInput,
-  authorId: string
-) {
+export async function updatePlugin(slug: string, data: UpdatePluginInput, authorId: string) {
   const { getPluginBySlug } = await import('./plugin-query-service')
   const db = await getDb()
 
-  const existing: PluginRow[] = await db.select().from(plugins).where(eq(plugins.slug, slug)).limit(1)
+  const existing: PluginRow[] = await db
+    .select()
+    .from(plugins)
+    .where(eq(plugins.slug, slug))
+    .limit(1)
 
   if (existing.length === 0) {
     throw new NotFoundError('Plugin', slug)
@@ -93,9 +107,11 @@ export async function updatePlugin(
   if (data.npmPackage !== undefined) updateData.npmPackage = data.npmPackage
   if (data.license !== undefined) updateData.license = data.license
   if (data.screenshotUrl !== undefined) updateData.screenshotUrl = data.screenshotUrl ?? undefined
-  if (data.siteUrls !== undefined) updateData.siteUrls = serializeJsonField(data.siteUrls ?? undefined)
+  if (data.siteUrls !== undefined)
+    updateData.siteUrls = serializeJsonField(data.siteUrls ?? undefined)
   if (data.tags !== undefined) updateData.tags = serializeJsonField(data.tags ?? undefined)
-  if (data.commands !== undefined) updateData.commands = serializeJsonField(data.commands ?? undefined)
+  if (data.commands !== undefined)
+    updateData.commands = serializeJsonField(data.commands ?? undefined)
 
   await db.update(plugins).set(updateData).where(eq(plugins.id, existing[0].id))
 
@@ -105,7 +121,11 @@ export async function updatePlugin(
 export async function deletePlugin(slug: string, authorId: string): Promise<{ id: string }> {
   const db = await getDb()
 
-  const existing: PluginRow[] = await db.select().from(plugins).where(eq(plugins.slug, slug)).limit(1)
+  const existing: PluginRow[] = await db
+    .select()
+    .from(plugins)
+    .where(eq(plugins.slug, slug))
+    .limit(1)
 
   if (existing.length === 0) {
     throw new NotFoundError('Plugin', slug)
@@ -126,7 +146,11 @@ export async function deletePlugin(slug: string, authorId: string): Promise<{ id
 export async function trackInstall(slug: string): Promise<{ downloadCount: number }> {
   const db = await getDb()
 
-  const existing: PluginRow[] = await db.select().from(plugins).where(eq(plugins.slug, slug)).limit(1)
+  const existing: PluginRow[] = await db
+    .select()
+    .from(plugins)
+    .where(eq(plugins.slug, slug))
+    .limit(1)
 
   if (existing.length === 0) {
     throw new NotFoundError('Plugin', slug)
@@ -140,7 +164,11 @@ export async function trackInstall(slug: string): Promise<{ downloadCount: numbe
     })
     .where(eq(plugins.id, existing[0].id))
 
-  const result: PluginRow[] = await db.select().from(plugins).where(eq(plugins.id, existing[0].id)).limit(1)
+  const result: PluginRow[] = await db
+    .select()
+    .from(plugins)
+    .where(eq(plugins.id, existing[0].id))
+    .limit(1)
 
   return { downloadCount: result[0]?.downloadCount ?? 0 }
 }

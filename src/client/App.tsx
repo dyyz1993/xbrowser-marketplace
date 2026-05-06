@@ -5,8 +5,12 @@ import { LoadingSpinner } from './components/LoadingSpinner'
 
 const HomePage = lazy(() => import('./pages/Home').then(m => ({ default: m.HomePage })))
 const SearchPage = lazy(() => import('./pages/Search').then(m => ({ default: m.SearchPage })))
-const PluginDetailPage = lazy(() => import('./pages/PluginDetail').then(m => ({ default: m.PluginDetailPage })))
-const CategoriesPage = lazy(() => import('./pages/Categories').then(m => ({ default: m.CategoriesPage })))
+const PluginDetailPage = lazy(() =>
+  import('./pages/PluginDetail').then(m => ({ default: m.PluginDetailPage }))
+)
+const CategoriesPage = lazy(() =>
+  import('./pages/Categories').then(m => ({ default: m.CategoriesPage }))
+)
 const CLIPage = lazy(() => import('./pages/CLI').then(m => ({ default: m.CLIPage })))
 
 function PageLoader() {

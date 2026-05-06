@@ -106,10 +106,11 @@ describe('notificationStore', () => {
       notifications: [mockNotification()],
       unreadCount: 1,
     })
-
-    ;(apiClient.api.notifications[':id'].read.$patch as ReturnType<typeof vi.fn>).mockResolvedValue({
-      json: () => Promise.resolve({ success: true }),
-    })
+    ;(apiClient.api.notifications[':id'].read.$patch as ReturnType<typeof vi.fn>).mockResolvedValue(
+      {
+        json: () => Promise.resolve({ success: true }),
+      }
+    )
 
     await useNotificationStore.getState().markAsRead('noti-1')
 
@@ -120,16 +121,14 @@ describe('notificationStore', () => {
 
   it('should mark all as read', async () => {
     useNotificationStore.setState({
-      notifications: [
-        mockNotification(),
-        mockNotification({ id: 'noti-2', read: true }),
-      ],
+      notifications: [mockNotification(), mockNotification({ id: 'noti-2', read: true })],
       unreadCount: 1,
     })
-
-    ;(apiClient.api.notifications['read-all'].$patch as ReturnType<typeof vi.fn>).mockResolvedValue({
-      json: () => Promise.resolve({ success: true }),
-    })
+    ;(apiClient.api.notifications['read-all'].$patch as ReturnType<typeof vi.fn>).mockResolvedValue(
+      {
+        json: () => Promise.resolve({ success: true }),
+      }
+    )
 
     await useNotificationStore.getState().markAllAsRead()
 
@@ -143,7 +142,6 @@ describe('notificationStore', () => {
       notifications: [mockNotification()],
       unreadCount: 1,
     })
-
     ;(apiClient.api.notifications[':id'].$delete as ReturnType<typeof vi.fn>).mockResolvedValue({
       json: () => Promise.resolve({ success: true }),
     })
@@ -156,7 +154,9 @@ describe('notificationStore', () => {
   })
 
   it('should fetch unread count', async () => {
-    ;(apiClient.api.notifications['unread-count'].$get as ReturnType<typeof vi.fn>).mockResolvedValue({
+    ;(
+      apiClient.api.notifications['unread-count'].$get as ReturnType<typeof vi.fn>
+    ).mockResolvedValue({
       json: () => Promise.resolve({ success: true, data: { count: 5 } }),
     })
 

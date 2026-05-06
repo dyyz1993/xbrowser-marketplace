@@ -38,7 +38,10 @@ export const noAmbiguousFilePaths = {
     if (pathParts.length < 2) return {}
 
     const fileName = pathParts[pathParts.length - 1]
-    const fileNameWithoutExt = fileName.replace(/\.ts$/, '').replace(/\.tsx$/, '').replace(/\.js$/, '')
+    const fileNameWithoutExt = fileName
+      .replace(/\.ts$/, '')
+      .replace(/\.tsx$/, '')
+      .replace(/\.js$/, '')
 
     const parentDir = pathParts[pathParts.length - 2]
 

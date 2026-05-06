@@ -1,8 +1,8 @@
-import { sqliteTable, integer, text, uniqueIndex, index } from 'drizzle-orm/sqlite-core';
-import { sql } from 'drizzle-orm';
+import { sqliteTable, integer, text, uniqueIndex, index } from 'drizzle-orm/sqlite-core'
+import { sql } from 'drizzle-orm'
 
-export const pluginStatuses = ['pending', 'approved', 'rejected', 'removed'] as const;
-export type PluginStatus = (typeof pluginStatuses)[number];
+export const pluginStatuses = ['pending', 'approved', 'rejected', 'removed'] as const
+export type PluginStatus = (typeof pluginStatuses)[number]
 
 export const plugins = sqliteTable('plugins', {
   id: text('id').primaryKey(),
@@ -32,7 +32,7 @@ export const plugins = sqliteTable('plugins', {
   updatedAt: integer('updated_at', { mode: 'timestamp_ms' })
     .notNull()
     .default(sql`(unixepoch() * 1000)`),
-});
+})
 
 export const pluginVersions = sqliteTable('plugin_versions', {
   id: text('id').primaryKey(),
@@ -48,7 +48,7 @@ export const pluginVersions = sqliteTable('plugin_versions', {
   publishedAt: integer('published_at', { mode: 'timestamp_ms' })
     .notNull()
     .default(sql`(unixepoch() * 1000)`),
-});
+})
 
 export const pluginReviews = sqliteTable('plugin_reviews', {
   id: text('id').primaryKey(),
@@ -63,7 +63,7 @@ export const pluginReviews = sqliteTable('plugin_reviews', {
   createdAt: integer('created_at', { mode: 'timestamp_ms' })
     .notNull()
     .default(sql`(unixepoch() * 1000)`),
-});
+})
 
 export const pluginCategories = sqliteTable('plugin_categories', {
   id: text('id').primaryKey(),
@@ -72,7 +72,7 @@ export const pluginCategories = sqliteTable('plugin_categories', {
   description: text('description'),
   icon: text('icon'),
   sortOrder: integer('sort_order').default(0),
-});
+})
 
 export const pluginCategoryMappings = sqliteTable(
   'plugin_category_mappings',
@@ -84,17 +84,17 @@ export const pluginCategoryMappings = sqliteTable(
       .notNull()
       .references(() => pluginCategories.id),
   },
-  (table) => [
+  table => [
     uniqueIndex('idx_plugin_category_unique').on(table.pluginId, table.categoryId),
     index('idx_pcm_category').on(table.categoryId),
   ]
-);
+)
 
-export type PluginTable = typeof plugins.$inferSelect;
-export type NewPlugin = typeof plugins.$inferInsert;
-export type PluginVersionTable = typeof pluginVersions.$inferSelect;
-export type NewPluginVersion = typeof pluginVersions.$inferInsert;
-export type PluginReviewTable = typeof pluginReviews.$inferSelect;
-export type NewPluginReview = typeof pluginReviews.$inferInsert;
-export type PluginCategoryTable = typeof pluginCategories.$inferSelect;
-export type NewPluginCategory = typeof pluginCategories.$inferInsert;
+export type PluginTable = typeof plugins.$inferSelect
+export type NewPlugin = typeof plugins.$inferInsert
+export type PluginVersionTable = typeof pluginVersions.$inferSelect
+export type NewPluginVersion = typeof pluginVersions.$inferInsert
+export type PluginReviewTable = typeof pluginReviews.$inferSelect
+export type NewPluginReview = typeof pluginReviews.$inferInsert
+export type PluginCategoryTable = typeof pluginCategories.$inferSelect
+export type NewPluginCategory = typeof pluginCategories.$inferInsert

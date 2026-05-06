@@ -42,7 +42,7 @@ export const noAnyOnApiclient = {
         '   ✅ const route = createRoute({...}); export const routes = new OpenAPIHono().openapi(route, ...)\n' +
         '   ❌ export const routes = new OpenAPIHono(); const route = createRoute({...})\n\n' +
         '3. 路由是否在 app.ts 中正确注册？\n' +
-        '   ✅ .route(\'/api\', xxxRoutes)\n\n' +
+        "   ✅ .route('/api', xxxRoutes)\n\n" +
         '4. 路由是否正确导出类型？\n' +
         '   ✅ export type XxxRoutesType = typeof xxxRoutes\n\n' +
         '📖 相关文档：\n' +

@@ -34,7 +34,11 @@ describe('CaptchaModal', () => {
     mockUseCaptchaStore.resolve = mockResolve
     ;(window as unknown as Record<string, unknown>).fetch = mockFetch
     mockFetch.mockResolvedValue({
-      json: () => Promise.resolve({ success: true, data: { id: 'cap-1', image: 'data:image/png;base64,test' } }),
+      json: () =>
+        Promise.resolve({
+          success: true,
+          data: { id: 'cap-1', image: 'data:image/png;base64,test' },
+        }),
     })
   })
 
@@ -97,7 +101,11 @@ describe('CaptchaModal', () => {
   it('should submit captcha code and resolve(true) on success', async () => {
     mockUseCaptchaStore.isOpen = true
     mockFetch.mockResolvedValueOnce({
-      json: () => Promise.resolve({ success: true, data: { id: 'cap-1', image: 'data:image/png;base64,test' } }),
+      json: () =>
+        Promise.resolve({
+          success: true,
+          data: { id: 'cap-1', image: 'data:image/png;base64,test' },
+        }),
     })
     mockFetch.mockResolvedValueOnce({
       json: () => Promise.resolve({ success: true }),
@@ -123,13 +131,21 @@ describe('CaptchaModal', () => {
   it('should refresh captcha on verification failure', async () => {
     mockUseCaptchaStore.isOpen = true
     mockFetch.mockResolvedValueOnce({
-      json: () => Promise.resolve({ success: true, data: { id: 'cap-1', image: 'data:image/png;base64,test' } }),
+      json: () =>
+        Promise.resolve({
+          success: true,
+          data: { id: 'cap-1', image: 'data:image/png;base64,test' },
+        }),
     })
     mockFetch.mockResolvedValueOnce({
       json: () => Promise.resolve({ success: false, error: '验证码错误' }),
     })
     mockFetch.mockResolvedValueOnce({
-      json: () => Promise.resolve({ success: true, data: { id: 'cap-2', image: 'data:image/png;base64,new' } }),
+      json: () =>
+        Promise.resolve({
+          success: true,
+          data: { id: 'cap-2', image: 'data:image/png;base64,new' },
+        }),
     })
 
     render(<CaptchaModal />)

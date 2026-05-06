@@ -113,18 +113,14 @@ export async function validateNpmPackage(
   const encodedName = encodeURIComponent(packageName)
   const res = await fetch(`https://registry.npmjs.org/${encodedName}/${version}`)
   if (!res.ok) {
-    throw new Error(
-      `Package ${packageName}@${version} not found on npm (HTTP ${res.status})`
-    )
+    throw new Error(`Package ${packageName}@${version} not found on npm (HTTP ${res.status})`)
   }
   return res.json() as Promise<NpmPackageInfo>
 }
 
 export type StorageType = 'npm' | 'r2'
 
-export function parsePackageUrl(
-  packageUrl: string
-): { type: StorageType; key: string } | null {
+export function parsePackageUrl(packageUrl: string): { type: StorageType; key: string } | null {
   if (packageUrl.startsWith('npm://')) {
     return { type: 'npm', key: packageUrl }
   }

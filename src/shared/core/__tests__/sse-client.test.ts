@@ -10,7 +10,11 @@ describe('SSEClientImpl', () => {
         getReader: () => ({
           read: vi.fn().mockImplementation(() => {
             readCount++
-            if (readCount === 1) return Promise.resolve({ done: false, value: new TextEncoder().encode('event:ping\ndata:{}\n\n') })
+            if (readCount === 1)
+              return Promise.resolve({
+                done: false,
+                value: new TextEncoder().encode('event:ping\ndata:{}\n\n'),
+              })
             return new Promise(() => {})
           }),
         }),
@@ -50,7 +54,8 @@ describe('SSEClientImpl', () => {
       ok: true,
       body: {
         getReader: () => ({
-          read: vi.fn()
+          read: vi
+            .fn()
             .mockResolvedValueOnce({ done: false, value: new TextEncoder().encode(stream) })
             .mockResolvedValueOnce({ done: true, value: undefined }),
         }),
@@ -139,7 +144,8 @@ describe('SSEClientImpl', () => {
       ok: true,
       body: {
         getReader: () => ({
-          read: vi.fn()
+          read: vi
+            .fn()
             .mockResolvedValueOnce({ done: false, value: new TextEncoder().encode(stream) })
             .mockResolvedValueOnce({ done: true, value: undefined }),
         }),

@@ -18,6 +18,7 @@
 ```
 
 **问题**：
+
 1. ❌ 在轮次中间断开，导致轮次不完整
 2. ❌ 工具调用被截断，无法正确展示
 3. ❌ 无法正确闭合轮次
@@ -48,24 +49,24 @@
 ```typescript
 // 请求参数
 interface GetRoundsQuery {
-  limit?: number      // 加载轮次数，默认 10
-  before?: string    // 加载此时间之前的轮次（基于最早消息的时间戳）
-  after?: string     // 加载此时间之后的轮次
+  limit?: number // 加载轮次数，默认 10
+  before?: string // 加载此时间之前的轮次（基于最早消息的时间戳）
+  after?: string // 加载此时间之后的轮次
 }
 
 // 响应数据
 interface RoundsResponse {
   rounds: MessageRound[]
   hasMore: boolean
-  oldestTimestamp?: string   // 最老轮次的时间戳
-  newestTimestamp?: string   // 最新轮次的时间戳
+  oldestTimestamp?: string // 最老轮次的时间戳
+  newestTimestamp?: string // 最新轮次的时间戳
 }
 
 // MessageRound 结构
 interface MessageRound {
   userMessage: ChatMessage
   agentMessages: ChatMessage[]
-  timestamp: string  // 轮次的时间戳（user 消息的时间）
+  timestamp: string // 轮次的时间戳（user 消息的时间）
 }
 ```
 
@@ -98,6 +99,7 @@ GET /api/agents/{id}/rounds?limit=10&before=2026-03-25T09:40:03.099Z
 #### 思路
 
 保持当前的扁平消息结构，但确保：
+
 1. 加载时包含完整的轮次
 2. 避免在轮次中间断开
 
@@ -107,17 +109,17 @@ GET /api/agents/{id}/rounds?limit=10&before=2026-03-25T09:40:03.099Z
 // 后端：确保返回完整的轮次
 export async function getMessages(..., limit?: number, offset?: number) {
   const allMessages = parseSessionJsonl(userId)
-  
+
   // 按时间排序（降序）
   allMessages.sort((a, b) => b.timestamp - a.timestamp)
-  
+
   // 按 user-agent 分组
   const rounds = groupIntoRounds(allMessages)
-  
+
   // 计算起始位置（基于轮次，而不是消息）
   const startRound = Math.floor(offset / roundsPerPage)
   const startMessageIndex = findFirstMessageIndexOfRound(rounds, startRound)
-  
+
   // 确保加载完整的轮次
   const messages = []
   let roundCount = 0
@@ -127,7 +129,7 @@ export async function getMessages(..., limit?: number, offset?: number) {
       roundCount++
     }
   }
-  
+
   return messages
 }
 ```
@@ -149,6 +151,7 @@ export async function getMessages(..., limit?: number, offset?: number) {
 ### 🎯 方案1：按轮次加载
 
 **理由**：
+
 1. **正确性**：确保每轮加载都是完整的
 2. **用户体验**：不会在轮次中间断开
 3. **数据完整性**：工具调用总是完整的
@@ -163,24 +166,21 @@ export async function getMessages(..., limit?: number, offset?: number) {
 
 ```typescript
 // agent-routes.ts
-router.get(
-  '/:agentId/rounds',
-  async (ctx) => {
-    const { agentId } = ctx.params
-    const { limit = '10', before, after } = ctx.query
-    
-    const rounds = await getRounds(agentId, userId, {
-      limit: parseInt(limit),
-      before,
-      after,
-    })
-    
-    ctx.body = {
-      success: true,
-      data: rounds,
-    }
+router.get('/:agentId/rounds', async ctx => {
+  const { agentId } = ctx.params
+  const { limit = '10', before, after } = ctx.query
+
+  const rounds = await getRounds(agentId, userId, {
+    limit: parseInt(limit),
+    before,
+    after,
+  })
+
+  ctx.body = {
+    success: true,
+    data: rounds,
   }
-)
+})
 ```
 
 #### 按轮次分组
@@ -190,44 +190,42 @@ router.get(
 export async function getRounds(
   agentId: string,
   userId: string,
-  options: { limit?: number, before?: string, after?: string }
+  options: { limit?: number; before?: string; after?: string }
 ): Promise<RoundsResponse> {
   const { messages: piMessages, toolCallMap } = parseSessionJsonl(userId)
-  
+
   // 转换为 ChatMessage
-  const chatMessages = piMessages.map((msg, index) => {
-    // ... 转换逻辑
-  }).filter(Boolean) as ChatMessage[]
-  
+  const chatMessages = piMessages
+    .map((msg, index) => {
+      // ... 转换逻辑
+    })
+    .filter(Boolean) as ChatMessage[]
+
   // 按时间排序（降序）
-  chatMessages.sort((a, b) => 
-    new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-  )
-  
+  chatMessages.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+
   // 应用时间过滤
   let filteredMessages = chatMessages
   if (options.before) {
     const beforeTime = new Date(options.before).getTime()
-    filteredMessages = filteredMessages.filter(msg => 
-      new Date(msg.createdAt).getTime() < beforeTime
+    filteredMessages = filteredMessages.filter(
+      msg => new Date(msg.createdAt).getTime() < beforeTime
     )
   }
   if (options.after) {
     const afterTime = new Date(options.after).getTime()
-    filteredMessages = filteredMessages.filter(msg => 
-      new Date(msg.createdAt).getTime() > afterTime
-    )
+    filteredMessages = filteredMessages.filter(msg => new Date(msg.createdAt).getTime() > afterTime)
   }
-  
+
   // 按轮次分组
   const rounds = groupMessagesIntoRounds(filteredMessages)
-  
+
   // 应用 limit
   const limitedRounds = rounds.slice(0, options.limit || 10)
-  
+
   // 判断是否有更多
   const hasMore = rounds.length > (options.limit || 10)
-  
+
   return {
     rounds: limitedRounds,
     hasMore,
@@ -239,7 +237,7 @@ export async function getRounds(
 function groupMessagesIntoRounds(messages: ChatMessage[]): MessageRound[] {
   const rounds: MessageRound[] = []
   let currentRound: MessageRound | null = null
-  
+
   for (const msg of messages) {
     if (msg.role === 'user') {
       currentRound = {
@@ -252,7 +250,7 @@ function groupMessagesIntoRounds(messages: ChatMessage[]): MessageRound[] {
       currentRound.agentMessages.push(msg)
     }
   }
-  
+
   return rounds
 }
 ```
@@ -269,13 +267,13 @@ interface AgentState {
   oldestTimestamp?: string
   newestTimestamp?: string
   hasMoreRounds: boolean
-  
+
   loadRounds: async (limit?: number) => {
     const response = await apiClient.api.agents[':id'].rounds.$get({
       param: { id: agentId },
       query: { limit: limit.toString() },
     })
-    
+
     const result = await response.json()
     if (result.success) {
       set(state => ({
@@ -286,11 +284,11 @@ interface AgentState {
       }))
     }
   }
-  
+
   loadMoreRounds: async () => {
     const { rounds, oldestTimestamp, hasMoreRounds, loadingMore } = get()
     if (!hasMoreRounds || loadingMore) return
-    
+
     const response = await apiClient.api.agents[':id'].rounds.$get({
       param: { id: agentId },
       query: {
@@ -298,7 +296,7 @@ interface AgentState {
         before: oldestTimestamp,
       },
     })
-    
+
     const result = await response.json()
     if (result.success) {
       set(state => ({

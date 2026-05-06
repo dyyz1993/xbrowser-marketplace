@@ -133,12 +133,8 @@
           "name": "todo_attachments_todo_id_todos_id_fk",
           "tableFrom": "todo_attachments",
           "tableTo": "todos",
-          "columnsFrom": [
-            "todo_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["todo_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -280,9 +276,7 @@
       "indexes": {
         "permissions_code_unique": {
           "name": "permissions_code_unique",
-          "columns": [
-            "code"
-          ],
+          "columns": ["code"],
           "isUnique": true
         }
       },
@@ -371,9 +365,7 @@
       "indexes": {
         "roles_code_unique": {
           "name": "roles_code_unique",
-          "columns": [
-            "code"
-          ],
+          "columns": ["code"],
           "isUnique": true
         }
       },
@@ -413,12 +405,8 @@
           "name": "role_permissions_role_id_roles_id_fk",
           "tableFrom": "role_permissions",
           "tableTo": "roles",
-          "columnsFrom": [
-            "role_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["role_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -426,22 +414,15 @@
           "name": "role_permissions_permission_id_permissions_id_fk",
           "tableFrom": "role_permissions",
           "tableTo": "permissions",
-          "columnsFrom": [
-            "permission_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["permission_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {
         "role_permissions_role_id_permission_id_pk": {
-          "columns": [
-            "role_id",
-            "permission_id"
-          ],
+          "columns": ["role_id", "permission_id"],
           "name": "role_permissions_role_id_permission_id_pk"
         }
       },
@@ -508,12 +489,8 @@
           "name": "user_roles_role_id_roles_id_fk",
           "tableFrom": "user_roles",
           "tableTo": "roles",
-          "columnsFrom": [
-            "role_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["role_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -601,10 +578,7 @@
       "indexes": {
         "routes_path_method_unique": {
           "name": "routes_path_method_unique",
-          "columns": [
-            "path",
-            "method"
-          ],
+          "columns": ["path", "method"],
           "isUnique": true
         }
       },
@@ -644,12 +618,8 @@
           "name": "permission_routes_permission_id_permissions_id_fk",
           "tableFrom": "permission_routes",
           "tableTo": "permissions",
-          "columnsFrom": [
-            "permission_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["permission_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -657,22 +627,15 @@
           "name": "permission_routes_route_id_routes_id_fk",
           "tableFrom": "permission_routes",
           "tableTo": "routes",
-          "columnsFrom": [
-            "route_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["route_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {
         "permission_routes_permission_id_route_id_pk": {
-          "columns": [
-            "permission_id",
-            "route_id"
-          ],
+          "columns": ["permission_id", "route_id"],
           "name": "permission_routes_permission_id_route_id_pk"
         }
       },
@@ -809,16 +772,12 @@
       "indexes": {
         "plugin_categories_name_unique": {
           "name": "plugin_categories_name_unique",
-          "columns": [
-            "name"
-          ],
+          "columns": ["name"],
           "isUnique": true
         },
         "plugin_categories_slug_unique": {
           "name": "plugin_categories_slug_unique",
-          "columns": [
-            "slug"
-          ],
+          "columns": ["slug"],
           "isUnique": true
         }
       },
@@ -848,17 +807,12 @@
       "indexes": {
         "idx_plugin_category_unique": {
           "name": "idx_plugin_category_unique",
-          "columns": [
-            "plugin_id",
-            "category_id"
-          ],
+          "columns": ["plugin_id", "category_id"],
           "isUnique": true
         },
         "idx_pcm_category": {
           "name": "idx_pcm_category",
-          "columns": [
-            "category_id"
-          ],
+          "columns": ["category_id"],
           "isUnique": false
         }
       },
@@ -867,12 +821,8 @@
           "name": "plugin_category_mappings_plugin_id_plugins_id_fk",
           "tableFrom": "plugin_category_mappings",
           "tableTo": "plugins",
-          "columnsFrom": [
-            "plugin_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["plugin_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -880,12 +830,8 @@
           "name": "plugin_category_mappings_category_id_plugin_categories_id_fk",
           "tableFrom": "plugin_category_mappings",
           "tableTo": "plugin_categories",
-          "columnsFrom": [
-            "category_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["category_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -961,12 +907,8 @@
           "name": "plugin_reviews_plugin_id_plugins_id_fk",
           "tableFrom": "plugin_reviews",
           "tableTo": "plugins",
-          "columnsFrom": [
-            "plugin_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["plugin_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1050,12 +992,8 @@
           "name": "plugin_versions_plugin_id_plugins_id_fk",
           "tableFrom": "plugin_versions",
           "tableTo": "plugins",
-          "columnsFrom": [
-            "plugin_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["plugin_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1232,9 +1170,7 @@
       "indexes": {
         "plugins_slug_unique": {
           "name": "plugins_slug_unique",
-          "columns": [
-            "slug"
-          ],
+          "columns": ["slug"],
           "isUnique": true
         }
       },

@@ -181,9 +181,7 @@ describe('PluginManagementPage', () => {
     await user.type(screen.getByPlaceholderText('Search plugins...'), 'test')
 
     await waitFor(() => {
-      expect(mockListAllPlugins).toHaveBeenCalledWith(
-        expect.objectContaining({ search: 'test' }),
-      )
+      expect(mockListAllPlugins).toHaveBeenCalledWith(expect.objectContaining({ search: 'test' }))
     })
   })
 
@@ -197,9 +195,9 @@ describe('PluginManagementPage', () => {
       expect(screen.getByText('Search Plugin')).toBeInTheDocument()
     })
 
-    const featuredButtons = screen.getAllByRole('button').filter(btn =>
-      btn.querySelector('svg') && btn.closest('td')
-    )
+    const featuredButtons = screen
+      .getAllByRole('button')
+      .filter(btn => btn.querySelector('svg') && btn.closest('td'))
 
     if (featuredButtons.length > 0) {
       await user.click(featuredButtons[0])
@@ -220,9 +218,9 @@ describe('PluginManagementPage', () => {
       expect(screen.getByText('Search Plugin')).toBeInTheDocument()
     })
 
-    const featuredButtons = screen.getAllByRole('button').filter(btn =>
-      btn.querySelector('svg') && btn.closest('td')
-    )
+    const featuredButtons = screen
+      .getAllByRole('button')
+      .filter(btn => btn.querySelector('svg') && btn.closest('td'))
 
     if (featuredButtons.length > 0) {
       await user.click(featuredButtons[0])

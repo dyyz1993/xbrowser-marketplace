@@ -68,7 +68,9 @@ test.describe('File Upload', () => {
       await page.click('[data-testid="upload-button"]')
 
       await page.waitForSelector('[data-testid="upload-error"]', { timeout: 10000 })
-      await expect(page.locator('[data-testid="upload-error"]')).toContainText(/file type|not allowed/i)
+      await expect(page.locator('[data-testid="upload-error"]')).toContainText(
+        /file type|not allowed/i
+      )
     })
 
     test('should reject files exceeding size limit', async ({ page }) => {
@@ -78,7 +80,9 @@ test.describe('File Upload', () => {
       await page.click('[data-testid="upload-button"]')
 
       await page.waitForSelector('[data-testid="upload-error"]', { timeout: 10000 })
-      await expect(page.locator('[data-testid="upload-error"]')).toContainText(/size|too large|exceed/i)
+      await expect(page.locator('[data-testid="upload-error"]')).toContainText(
+        /size|too large|exceed/i
+      )
     })
 
     test('should show upload progress', async ({ page }) => {
@@ -87,7 +91,9 @@ test.describe('File Upload', () => {
       await page.setInputFiles('[data-testid="file-input"]', testFilePath)
       await page.click('[data-testid="upload-button"]')
 
-      await page.waitForSelector('[data-testid="upload-progress"]', { timeout: 5000 }).catch(() => {})
+      await page
+        .waitForSelector('[data-testid="upload-progress"]', { timeout: 5000 })
+        .catch(() => {})
       await page.waitForSelector('[data-testid="file-item"]', { timeout: 15000 })
       await expect(page.locator('[data-testid="file-item"]').first()).toBeVisible()
     })
@@ -114,14 +120,23 @@ test.describe('File Upload', () => {
   test.describe('Download File', () => {
     test('should download file via download link', async ({ page }) => {
       await page.request.post(`${getBaseUrl()}/api/__test__/seed-file`, {
-        data: { name: 'download-test.txt', size: 256, mimeType: 'text/plain', content: 'hello world' },
+        data: {
+          name: 'download-test.txt',
+          size: 256,
+          mimeType: 'text/plain',
+          content: 'hello world',
+        },
       })
 
       await page.goto(`${getBaseUrl()}/files`)
       await page.waitForSelector('[data-testid="file-item"]', { timeout: 15000 })
 
       const downloadPromise = page.waitForEvent('download', { timeout: 10000 })
-      await page.locator('[data-testid="file-item"]').first().locator('[data-testid="download-button"]').click()
+      await page
+        .locator('[data-testid="file-item"]')
+        .first()
+        .locator('[data-testid="download-button"]')
+        .click()
       const download = await downloadPromise
 
       expect(download.suggestedFilename()).toContain('download-test.txt')
@@ -137,7 +152,11 @@ test.describe('File Upload', () => {
       await page.goto(`${getBaseUrl()}/files`)
       await page.waitForSelector('[data-testid="file-item"]', { timeout: 15000 })
 
-      await page.locator('[data-testid="file-item"]').first().locator('[data-testid="delete-file-button"]').click()
+      await page
+        .locator('[data-testid="file-item"]')
+        .first()
+        .locator('[data-testid="delete-file-button"]')
+        .click()
 
       await page.waitForSelector('[data-testid="confirm-delete-dialog"]', { timeout: 10000 })
       await page.click('[data-testid="confirm-delete-button"]')
@@ -168,7 +187,9 @@ test.describe('File Upload', () => {
       })
       const seedData = await seedResp.json()
 
-      const response = await page.request.get(`${getBaseUrl()}/api/files/${seedData.data.id}/download`)
+      const response = await page.request.get(
+        `${getBaseUrl()}/api/files/${seedData.data.id}/download`
+      )
 
       expect(response.status()).toBe(403)
     })

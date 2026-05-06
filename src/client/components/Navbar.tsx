@@ -39,11 +39,11 @@ export const Navbar: React.FC = () => {
   )
 }
 
-const NavLinkItem: React.FC<{ to: string; icon: React.FC<{ className?: string }>; label: string }> = ({
-  to,
-  icon: Icon,
-  label,
-}) => (
+const NavLinkItem: React.FC<{
+  to: string
+  icon: React.FC<{ className?: string }>
+  label: string
+}> = ({ to, icon: Icon, label }) => (
   <NavLink
     to={to}
     className={({ isActive }) =>

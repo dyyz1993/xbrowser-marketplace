@@ -96,14 +96,20 @@ function parseServiceFunctions(filePath: string): ServiceFunction[] {
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i]
 
-    // 匹配 export function xxx() 或 export const xxx = 
-    const funcMatch = line.match(/export\s+(?:function\s+(\w+)|const\s+(\w+)\s*=\s*(?:async\s+)?\()/)
+    // 匹配 export function xxx() 或 export const xxx =
+    const funcMatch = line.match(
+      /export\s+(?:function\s+(\w+)|const\s+(\w+)\s*=\s*(?:async\s+)?\()/
+    )
     if (funcMatch) {
       const funcName = funcMatch[1] || funcMatch[2]
 
       if (funcName) {
         // 排除类型导出和测试辅助函数
-        if (!funcName.startsWith('type') && !funcName.includes('Test') && !funcName.includes('Mock')) {
+        if (
+          !funcName.startsWith('type') &&
+          !funcName.includes('Test') &&
+          !funcName.includes('Mock')
+        ) {
           functions.push({ name: funcName, line: i + 1 })
         }
       }
@@ -232,7 +238,9 @@ function checkModuleCoverage(modulePath: string, testsDir: string): CoverageResu
   let functions: ServiceFunction[] = []
 
   if (existsSync(servicesDir)) {
-    const serviceFiles = readdirSync(servicesDir).filter(f => f.endsWith('-service.ts') || f.endsWith('.ts'))
+    const serviceFiles = readdirSync(servicesDir).filter(
+      f => f.endsWith('-service.ts') || f.endsWith('.ts')
+    )
 
     for (const serviceFile of serviceFiles) {
       const filePath = join(servicesDir, serviceFile)
@@ -269,7 +277,10 @@ function checkModuleCoverage(modulePath: string, testsDir: string): CoverageResu
   }
 }
 
-export function validateAPICoverage(config: ModuleTestsConfig, rootPath: string): ModuleTestError[] {
+export function validateAPICoverage(
+  config: ModuleTestsConfig,
+  rootPath: string
+): ModuleTestError[] {
   const errors: ModuleTestError[] = []
   const modules: string[] = []
 

@@ -1,4 +1,4 @@
-const now = new Date();
+const now = new Date()
 
 export const seedCategories = [
   {
@@ -49,7 +49,7 @@ export const seedCategories = [
     icon: 'database',
     sortOrder: 6,
   },
-];
+]
 
 export const seedPlugins = [
   {
@@ -177,7 +177,8 @@ Extract comments from a video.
         id: 'pver_douyin_1.0.0',
         pluginId: 'plugin_douyin',
         version: '1.0.0',
-        changelog: 'Initial release with AI summary, user info, video info, and comments extraction.',
+        changelog:
+          'Initial release with AI summary, user info, video info, and comments extraction.',
         packageUrl: null,
         fileSize: null,
         checksum: null,
@@ -295,7 +296,8 @@ Capture screenshots of webpages or specific elements.
         id: 'pver_web-automation_1.0.0',
         pluginId: 'plugin_web-automation',
         version: '1.0.0',
-        changelog: 'Initial release with extract, paginate, fill-and-submit, and screenshot commands.',
+        changelog:
+          'Initial release with extract, paginate, fill-and-submit, and screenshot commands.',
         packageUrl: null,
         fileSize: null,
         checksum: null,
@@ -305,22 +307,22 @@ Capture screenshots of webpages or specific elements.
     ],
     categoryIds: ['cat_web-automation'],
   },
-];
+]
 
 export function buildSeedData() {
-  const allPlugins = seedPlugins.map((s) => s.plugin);
-  const allVersions = seedPlugins.flatMap((s) => s.versions);
-  const allCategoryMappings = seedPlugins.flatMap((s) =>
-    s.categoryIds.map((categoryId) => ({
+  const allPlugins = seedPlugins.map(s => s.plugin)
+  const allVersions = seedPlugins.flatMap(s => s.versions)
+  const allCategoryMappings = seedPlugins.flatMap(s =>
+    s.categoryIds.map(categoryId => ({
       pluginId: s.plugin.id,
       categoryId,
     }))
-  );
+  )
 
   return {
     categories: seedCategories,
     plugins: allPlugins,
     versions: allVersions,
     categoryMappings: allCategoryMappings,
-  };
+  }
 }

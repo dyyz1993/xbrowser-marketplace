@@ -12,7 +12,9 @@ interface InstallModalProps {
 export const InstallModal: React.FC<InstallModalProps> = ({ open, onClose, npmPackage, slug }) => {
   const [copied, setCopied] = useState<string | null>(null)
 
-  const xbrowserCmd = npmPackage ? `xbrowser plugin install ${npmPackage}` : `xbrowser plugin install ${slug}`
+  const xbrowserCmd = npmPackage
+    ? `xbrowser plugin install ${npmPackage}`
+    : `xbrowser plugin install ${slug}`
   const npmCmd = npmPackage ? `npm install ${npmPackage}` : null
 
   const handleCopy = (text: string, key: string) => {
@@ -26,7 +28,9 @@ export const InstallModal: React.FC<InstallModalProps> = ({ open, onClose, npmPa
     <Modal open={open} onCancel={onClose} footer={null} title="Install Plugin" width={520}>
       <div className="space-y-4 py-2">
         <div>
-          <label className="text-xs font-medium text-gray-500 uppercase tracking-wider">xbrowser CLI</label>
+          <label className="text-xs font-medium text-gray-500 uppercase tracking-wider">
+            xbrowser CLI
+          </label>
           <div className="mt-1 flex items-center gap-2 bg-gray-900 text-green-400 px-4 py-3 rounded-lg font-mono text-sm">
             <span className="flex-1 truncate">{xbrowserCmd}</span>
             <button
@@ -40,7 +44,9 @@ export const InstallModal: React.FC<InstallModalProps> = ({ open, onClose, npmPa
 
         {npmCmd && (
           <div>
-            <label className="text-xs font-medium text-gray-500 uppercase tracking-wider">npm</label>
+            <label className="text-xs font-medium text-gray-500 uppercase tracking-wider">
+              npm
+            </label>
             <div className="mt-1 flex items-center gap-2 bg-gray-900 text-green-400 px-4 py-3 rounded-lg font-mono text-sm">
               <span className="flex-1 truncate">{npmCmd}</span>
               <button

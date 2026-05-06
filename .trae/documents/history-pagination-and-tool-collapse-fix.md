@@ -1,6 +1,7 @@
 # 历史消息分页和工具折叠修复总结
 
 ## 修复时间
+
 2026-03-25
 
 ## 修复内容
@@ -10,6 +11,7 @@
 **问题**：历史消息中的工具调用没有默认折叠，直接显示所有内容。
 
 **修复**：
+
 - 在 `SubRoundView` 组件中添加 `toolsCollapsed` 状态
 - 将工具调用区域改为可折叠的
 - 默认状态：`true`（折叠）
@@ -17,6 +19,7 @@
 - 点击标题可展开/折叠
 
 **代码**：
+
 ```tsx
 const [toolsCollapsed, setToolsCollapsed] = useState(true)
 
@@ -46,6 +49,7 @@ const [toolsCollapsed, setToolsCollapsed] = useState(true)
 ### 2. ✅ 历史消息分页
 
 **问题**：
+
 - 后端只读取最新的 session 文件
 - 忽略了其他 47 个历史文件
 - 无法加载更多历史消息
@@ -59,6 +63,7 @@ const [toolsCollapsed, setToolsCollapsed] = useState(true)
 - 返回完整的消息列表
 
 **代码**：
+
 ```typescript
 for (const sessionFile of sessionFiles) {
   const content = fs.readFileSync(sessionFile.path, 'utf-8')
@@ -73,11 +78,13 @@ messages.sort((a, b) => a.timestamp - b.timestamp)
 ```
 
 #### 修改 agent-service.ts
+
 - 使用 `offset` 和 `limit` 进行分页
 - 先排序所有消息
 - 再应用分页
 
 **代码**：
+
 ```typescript
 piMessages.sort((a, b) => a.timestamp - b.timestamp)
 
@@ -129,11 +136,13 @@ npm run typecheck
 ### 巉️ 工具折叠
 
 **修复前**：
+
 - 工具调用直接显示所有内容
 - 占用大量屏幕空间
 - 影响阅读体验
 
 **修复后**：
+
 - 工具默认折叠
 - 点击标题可展开/折叠
 - 显示工具数量
@@ -142,10 +151,12 @@ npm run typecheck
 ### 🎉 历史消息分页
 
 **修复前**：
+
 - 只显示最新 session 的 3 条消息
 - 无法加载历史消息
 
 **修复后**：
+
 - 显示所有 session 的消息（20 条）
 - 支持分页加载
 - 完整的历史记录
@@ -180,6 +191,7 @@ npm run typecheck
 > 然后分页你自己看着办，你觉得哪种合适就用哪种就行了我之前有听说说，用时间戳会不会好一点，无非就是时间戳还是按行嘛，因为它它那个历史消息是往下追的嘛，那你暗行的话，前面都不变的话，应该还好吧
 
 **答案**：完全正确！我采用了你建议的简单方案：
+
 - 读取所有 session 文件
 - 按时间戳排序
 - 使用 offset/limit 分页

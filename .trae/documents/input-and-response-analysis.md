@@ -11,10 +11,10 @@
 ```typescript
 const handleSubmit = async (e?: React.FormEvent) => {
   e?.preventDefault()
-  if (!input.trim() || loading) return  // 条件检查
+  if (!input.trim() || loading) return // 条件检查
 
   const messageContent = input.trim()
-  setInput('')  // ✅ 清空输入框
+  setInput('') // ✅ 清空输入框
 
   if (isRunning) {
     addPendingMessage(messageContent)
@@ -26,11 +26,11 @@ const handleSubmit = async (e?: React.FormEvent) => {
 
 ### 清空执行条件
 
-| 条件 | 是否清空 |
-|------|----------|
-| 输入非空 + 非 loading | ✅ 清空 |
-| 输入为空或只有空白 | ❌ 不清空（直接返回） |
-| 正在 loading | ❌ 不清空（直接返回） |
+| 条件                  | 是否清空              |
+| --------------------- | --------------------- |
+| 输入非空 + 非 loading | ✅ 清空               |
+| 输入为空或只有空白    | ❌ 不清空（直接返回） |
+| 正在 loading          | ❌ 不清空（直接返回） |
 
 ### 设计策略
 
@@ -44,12 +44,12 @@ const handleSubmit = async (e?: React.FormEvent) => {
 
 ### 当前状态
 
-| 项目 | 状态 |
-|------|------|
-| LLM 调用 | **Mock 数据** - 5 个预设文本随机选择 |
-| 消息响应方式 | **同步 HTTP** - 非 SSE 流式传输 |
-| SSE 连接 | **已实现但未使用** - 只发送心跳 |
-| 流式输出 | **代码存在但未启用** |
+| 项目         | 状态                                 |
+| ------------ | ------------------------------------ |
+| LLM 调用     | **Mock 数据** - 5 个预设文本随机选择 |
+| 消息响应方式 | **同步 HTTP** - 非 SSE 流式传输      |
+| SSE 连接     | **已实现但未使用** - 只发送心跳      |
+| 流式输出     | **代码存在但未启用**                 |
 
 ### 数据流
 
@@ -80,10 +80,10 @@ HTTP POST → /agents/{id}/chat
 
 ```typescript
 const mockResponses = [
-  "I understand your question. Let me help you with that!",
+  'I understand your question. Let me help you with that!',
   "That's an interesting point. Here's what I think...",
   "I'd be happy to assist you with this. Let me explain...",
-  "Great question! Based on my analysis...",
+  'Great question! Based on my analysis...',
   "I see what you're asking. Here's my perspective...",
 ]
 ```
@@ -117,7 +117,7 @@ SSE 端点独立存在，只发送 `connected` 和 `heartbeat` 事件，`sendMes
 sseManager.send(agentId, 'pi-agent-start', { messageId, agentId })
 
 // 流式生成响应
-await mockLLMService.generateResponse((delta) => {
+await mockLLMService.generateResponse(delta => {
   sseManager.send(agentId, 'pi-text-delta', { messageId, delta })
 })
 
@@ -130,14 +130,16 @@ sseManager.send(agentId, 'pi-agent-end', { messageId })
 修改 `sendMessage` 响应 schema，直接返回 agent 的回复：
 
 ```typescript
-return c.json(success({
-  userMessage,
-  agentMessage: {
-    id: agentMessageId,
-    content: response,
-    thinking,
-  }
-}))
+return c.json(
+  success({
+    userMessage,
+    agentMessage: {
+      id: agentMessageId,
+      content: response,
+      thinking,
+    },
+  })
+)
 ```
 
 ### 方案 C：集成真实 LLM API

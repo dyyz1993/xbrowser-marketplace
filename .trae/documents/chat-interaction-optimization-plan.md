@@ -7,10 +7,10 @@
 根据用户需求，聊天界面需要支持以下交互状态：
 
 #### 1. 运行状态（Agent 正在响应）
+
 - **输入框为空**：
   - 按钮显示红色暂停按钮
   - 点击可以暂停当前响应
-  
 - **输入框有内容**：
   - 按钮变成发送按钮
   - 可以发送 follow-up 消息
@@ -18,9 +18,9 @@
   - 每条 follow-up 消息右侧有删除按钮
 
 #### 2. 非运行状态（Agent 空闲）
+
 - **输入框为空**：
   - 按钮显示灰色发送按钮（禁用状态）
-  
 - **输入框有内容**：
   - 按钮显示蓝色发送按钮（可点击）
 
@@ -38,16 +38,16 @@ interface AgentState {
   loading: boolean
   error: string | null
   sseStatus: 'connecting' | 'open' | 'closed'
-  
+
   // 新增状态
-  isRunning: boolean  // Agent 是否正在响应
-  pendingMessages: string[]  // follow-up 消息队列
-  
+  isRunning: boolean // Agent 是否正在响应
+  pendingMessages: string[] // follow-up 消息队列
+
   // 新增方法
-  stopGeneration: () => void  // 停止生成
-  addPendingMessage: (content: string) => void  // 添加 follow-up
-  removePendingMessage: (index: number) => void  // 删除 follow-up
-  sendPendingMessages: () => Promise<void>  // 发送所有 follow-up
+  stopGeneration: () => void // 停止生成
+  addPendingMessage: (content: string) => void // 添加 follow-up
+  removePendingMessage: (index: number) => void // 删除 follow-up
+  sendPendingMessages: () => Promise<void> // 发送所有 follow-up
 }
 ```
 
@@ -74,6 +74,7 @@ ChatArea
 ### 第一阶段：状态管理增强
 
 #### 1.1 更新 agentStore
+
 - 添加 `isRunning` 状态
 - 添加 `pendingMessages` 数组
 - 实现 `stopGeneration()` 方法
@@ -83,6 +84,7 @@ ChatArea
 - 更新 `sendMessage()` 以支持 follow-up
 
 #### 1.2 SSE 连接管理
+
 - 在 SSE 事件处理中更新 `isRunning` 状态
 - `pi-agent-start` 事件：设置 `isRunning = true`
 - `pi-agent-end` 事件：设置 `isRunning = false`
@@ -91,17 +93,20 @@ ChatArea
 ### 第二阶段：UI 组件开发
 
 #### 2.1 创建 PendingMessages 组件
+
 - 显示所有 follow-up 消息
 - 每条消息显示内容和删除按钮
 - 样式：小卡片，带阴影，可删除
 
 #### 2.2 创建动态按钮组件
+
 - 根据状态显示不同按钮：
   - 暂停按钮（红色，带暂停图标）
   - 发送按钮（蓝色，带发送图标）
   - 发送按钮（灰色，禁用状态）
 
 #### 2.3 更新 ChatArea 组件
+
 - 集成 PendingMessages 组件
 - 更新按钮逻辑
 - 添加 follow-up 发送逻辑
@@ -109,6 +114,7 @@ ChatArea
 ### 第三阶段：交互逻辑实现
 
 #### 3.1 按钮状态转换
+
 ```
 状态转换图：
 ┌─────────────┐
@@ -139,6 +145,7 @@ ChatArea
 ```
 
 #### 3.2 Follow-up 消息流程
+
 ```
 用户输入 follow-up
     ↓
@@ -158,17 +165,20 @@ Agent 完成当前响应
 ### 第四阶段：样式和动画
 
 #### 4.1 按钮样式
+
 - **暂停按钮**：红色背景，白色暂停图标
 - **发送按钮（激活）**：蓝色背景，白色发送图标
 - **发送按钮（禁用）**：灰色背景，灰色发送图标
 
 #### 4.2 Follow-up 消息样式
+
 - 小卡片样式
 - 浅蓝色背景
 - 右侧删除按钮（X 图标）
 - 淡入淡出动画
 
 #### 4.3 过渡动画
+
 - 按钮状态切换：平滑过渡
 - Follow-up 消息：滑入动画
 - 删除消息：滑出动画
@@ -176,10 +186,12 @@ Agent 完成当前响应
 ## 文件修改清单
 
 ### 新建文件
+
 1. `src/client/components/PendingMessages.tsx` - Follow-up 消息队列组件
 2. `src/client/components/DynamicButton.tsx` - 动态按钮组件
 
 ### 修改文件
+
 1. `src/client/stores/agentStore.ts` - 添加新状态和方法
 2. `src/client/components/ChatArea.tsx` - 集成新组件和逻辑
 3. `src/client/hooks/useChatSSEConnection.ts` - 更新运行状态
@@ -187,19 +199,23 @@ Agent 完成当前响应
 ## 技术要点
 
 ### 1. 状态同步
+
 - `isRunning` 状态需要与 SSE 连接状态同步
 - Follow-up 消息队列需要持久化（可选）
 
 ### 2. 性能优化
+
 - 使用 `useMemo` 优化按钮状态计算
 - 使用 `useCallback` 优化事件处理函数
 
 ### 3. 用户体验
+
 - 按钮状态切换要有平滑过渡
 - Follow-up 消息要有清晰的视觉反馈
 - 暂停功能要立即生效
 
 ### 4. 错误处理
+
 - 网络错误时的状态恢复
 - SSE 连接断开时的处理
 - Follow-up 发送失败的重试机制
@@ -207,16 +223,19 @@ Agent 完成当前响应
 ## 测试计划
 
 ### 单元测试
+
 - [ ] agentStore 的新方法测试
 - [ ] PendingMessages 组件测试
 - [ ] DynamicButton 组件测试
 
 ### 集成测试
+
 - [ ] 完整的交互流程测试
 - [ ] Follow-up 消息发送测试
 - [ ] 暂停功能测试
 
 ### E2E 测试
+
 - [ ] 用户发送消息流程
 - [ ] 添加和删除 follow-up
 - [ ] 暂停和恢复生成
@@ -224,16 +243,19 @@ Agent 完成当前响应
 ## 实现优先级
 
 ### P0（必须实现）
+
 1. 状态管理增强（isRunning, pendingMessages）
 2. 动态按钮组件
 3. 基本的 follow-up 功能
 
 ### P1（重要功能）
+
 1. 暂停功能
 2. Follow-up 消息删除
 3. 样式优化
 
 ### P2（锦上添花）
+
 1. 动画效果
 2. 键盘快捷键
 3. 消息持久化

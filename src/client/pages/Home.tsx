@@ -76,7 +76,10 @@ export const HomePage: React.FC = () => {
         <section className="max-w-7xl mx-auto px-4 sm:px-6 py-10">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-bold text-gray-900">Recently Added</h2>
-            <Link to="/search" className="text-sm text-blue-500 hover:text-blue-700 flex items-center gap-1">
+            <Link
+              to="/search"
+              className="text-sm text-blue-500 hover:text-blue-700 flex items-center gap-1"
+            >
               Browse all <ArrowRight className="w-4 h-4" />
             </Link>
           </div>

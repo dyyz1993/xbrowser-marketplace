@@ -1,6 +1,7 @@
 # SSE 连接没有发起请求 - 深度分析
 
 ## 问题现象
+
 刷新页面后，没有看到 SSE 连接请求（`/api/agents/{id}/chat/stream`）
 
 ## 深度推导
@@ -12,11 +13,12 @@
    - `isInitialized` = false
 
 2. **第一个 useEffect 执行**
+
    ```tsx
    useEffect(() => {
      const init = async () => {
        if (!agent) {
-         await fetchAgent()  // 发起请求获取 agent
+         await fetchAgent() // 发起请求获取 agent
        }
        setIsInitialized(true)
      }
@@ -32,17 +34,19 @@
 5. **关键问题：useEffect 执行顺序**
 
    `useSSE` 内部有这个 useEffect：
+
    ```tsx
    useEffect(() => {
-     depsRef.current = deps  // 更新 depsRef
+     depsRef.current = deps // 更新 depsRef
    }, [deps])
    ```
 
    `ChatPage` 有这个 useEffect：
+
    ```tsx
    useEffect(() => {
      if (agent && isInitialized) {
-       connectSSE()  // 调用 connect
+       connectSSE() // 调用 connect
      }
      return () => {
        disconnectSSE()
@@ -55,11 +59,13 @@
 **React 的 useEffect 是异步执行的！**
 
 当 `agent` 从 null 变成有值时：
+
 1. 组件重新渲染
 2. React 调度所有 useEffect 执行
 3. **执行顺序不确定** - `ChatPage` 的 useEffect 可能在 `useSSE` 的 useEffect 之前执行
 
 如果 `ChatPage` 的 useEffect 先执行：
+
 - 调用 `connectSSE()`
 - `connect` 内部使用 `depsRef.current`
 - **但 `depsRef.current` 还是旧值（null）！**
@@ -70,6 +76,7 @@
 ### 验证方法
 
 在浏览器控制台应该能看到：
+
 ```
 Failed to connect SSE: Error: Agent not initialized
 ```
@@ -87,13 +94,14 @@ export function useSSE<T extends SSEProtocol, D = unknown>(
 ): UseSSEReturn<T> {
   // 同步更新 - 在渲染期间执行，不依赖 useEffect
   const depsRef = useRef<D | undefined>(deps)
-  depsRef.current = deps  // 关键：同步更新
-  
+  depsRef.current = deps // 关键：同步更新
+
   // ... 其他代码
 }
 ```
 
 **为什么这样是安全的？**
+
 - ref 的更新不会触发重新渲染
 - 在渲染期间更新 ref 是 React 允许的模式
 - 确保 `connect` 被调用时，`depsRef.current` 已经是最新的值

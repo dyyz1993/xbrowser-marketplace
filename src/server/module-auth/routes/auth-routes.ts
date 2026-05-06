@@ -45,17 +45,17 @@ const verifyRoute = createRoute({
 })
 
 export const authRoutes = new OpenAPIHono()
-  .openapi(registerRoute, async (c) => {
+  .openapi(registerRoute, async c => {
     const data = c.req.valid('json')
     const profile = await authService.registerDeveloper(data)
     return c.json(created(profile), 201)
   })
-  .openapi(loginRoute, async (c) => {
+  .openapi(loginRoute, async c => {
     const data = c.req.valid('json')
     const result = await authService.loginDeveloper(data)
     return c.json(success(result), 200)
   })
-  .openapi(verifyRoute, async (c) => {
+  .openapi(verifyRoute, async c => {
     const user = c.get('authUser')
     return c.json(
       success({

@@ -5,14 +5,16 @@ import { getRawClient } from '../../db'
 import { ConflictError, AuthenticationError, NotFoundError } from '../../utils/app-error'
 import { hashSync } from 'bcryptjs'
 
-async function seedDeveloper(overrides: {
-  id?: string
-  username?: string
-  email?: string
-  password?: string
-  apiKey?: string
-  role?: string
-} = {}) {
+async function seedDeveloper(
+  overrides: {
+    id?: string
+    username?: string
+    email?: string
+    password?: string
+    apiKey?: string
+    role?: string
+  } = {}
+) {
   const client = await getRawClient()
   if (!client || !('execute' in client)) return null
 
@@ -273,9 +275,7 @@ describe('Auth Service', () => {
     })
 
     it('should throw AuthenticationError for invalid API key', async () => {
-      await expect(authService.verifyApiKey('nonexistent-key')).rejects.toThrow(
-        AuthenticationError
-      )
+      await expect(authService.verifyApiKey('nonexistent-key')).rejects.toThrow(AuthenticationError)
 
       await expect(authService.verifyApiKey('nonexistent-key')).rejects.toThrow('Invalid API key')
     })

@@ -291,7 +291,10 @@ export const AdminBulkRejectResultSchema = z.object({ rejected: z.number() })
 
 export const RejectBodySchema = z.object({ reason: z.string().min(1).max(500) })
 export const BulkSlugsBodySchema = z.object({ slugs: z.array(z.string()).min(1) })
-export const BulkRejectBodySchema = z.object({ slugs: z.array(z.string()).min(1), reason: z.string().optional().nullable() })
+export const BulkRejectBodySchema = z.object({
+  slugs: z.array(z.string()).min(1),
+  reason: z.string().optional().nullable(),
+})
 
 export const AdminPluginQuerySchema = z.object({
   page: z.string().default('1'),
@@ -321,7 +324,11 @@ export const CreateCategoryBodySchema = z.object({
 
 export const UpdateCategoryBodySchema = z.object({
   name: z.string().min(1).max(50).optional().nullable(),
-  slug: z.string().regex(/^[a-z0-9-]+$/).optional().nullable(),
+  slug: z
+    .string()
+    .regex(/^[a-z0-9-]+$/)
+    .optional()
+    .nullable(),
   description: z.string().max(200).optional().nullable(),
   icon: z.string().max(50).optional().nullable(),
   sortOrder: z.number().int().optional().nullable(),

@@ -1,6 +1,11 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { Hono } from 'hono'
-import { captchaMiddleware, verifyCaptchaMiddleware, markCaptchaVerifiedMiddleware, clearCaptchaSessionMiddleware } from '../captcha'
+import {
+  captchaMiddleware,
+  verifyCaptchaMiddleware,
+  markCaptchaVerifiedMiddleware,
+  clearCaptchaSessionMiddleware,
+} from '../captcha'
 
 const setNodeEnv = (value: string) => {
   ;(process.env as Record<string, string>).NODE_ENV = value

@@ -111,9 +111,7 @@ describe('Admin Routes', () => {
   describe('GET /api/admin/activity', () => {
     it('should return recent activity for admin', async () => {
       const client = authedClient('admin-token')
-      const res = await client.api.admin.activity.$get(
-        { query: {} },
-      )
+      const res = await client.api.admin.activity.$get({ query: {} })
 
       expect(res.status).toBe(200)
       const data = await res.json()
@@ -135,9 +133,7 @@ describe('Admin Routes', () => {
         }
 
         const client = authedClient('admin-token')
-        const res = await client.api.admin.activity.$get(
-          { query: { limit: '3' } },
-        )
+        const res = await client.api.admin.activity.$get({ query: { limit: '3' } })
 
         const data = await res.json()
         expect(data.success).toBe(true)
@@ -251,26 +247,22 @@ describe('Admin Routes', () => {
   describe('PUT /api/admin/users/:id', () => {
     it('should update user by super admin', async () => {
       const client = authedClient('test-super-admin-1')
-      const createRes = await client.api.admin.users.$post(
-        {
-          json: {
-            username: 'testuser',
-            email: 'testuser@example.com',
-            password: 'password123',
-            role: Role.USER,
-          },
+      const createRes = await client.api.admin.users.$post({
+        json: {
+          username: 'testuser',
+          email: 'testuser@example.com',
+          password: 'password123',
+          role: Role.USER,
         },
-      )
+      })
 
       if (createRes.status === 200) {
         const createData = await createRes.json()
         if (createData.success && createData.data?.id) {
-          const res = await client.api.admin.users[':id'].$put(
-            {
-              param: { id: createData.data.id },
-              json: { status: 'locked' },
-            },
-          )
+          const res = await client.api.admin.users[':id'].$put({
+            param: { id: createData.data.id },
+            json: { status: 'locked' },
+          })
 
           expect(res.status).toBe(200)
           const data = await res.json()
@@ -284,16 +276,14 @@ describe('Admin Routes', () => {
     it('should create user by super admin', async () => {
       const client = authedClient('test-super-admin-1')
       const uniqueId = Date.now()
-      const res = await client.api.admin.users.$post(
-        {
-          json: {
-            username: `testuser${uniqueId}`,
-            email: `testuser${uniqueId}@example.com`,
-            password: 'password123',
-            role: Role.USER,
-          },
+      const res = await client.api.admin.users.$post({
+        json: {
+          username: `testuser${uniqueId}`,
+          email: `testuser${uniqueId}@example.com`,
+          password: 'password123',
+          role: Role.USER,
         },
-      )
+      })
 
       expect([200, 201, 400]).toContain(res.status)
       const data = await res.json()
@@ -312,11 +302,9 @@ describe('Admin Routes', () => {
         message: 'Test notification',
       })
       const client = authedClient('admin-token')
-      const res = await client.api.admin.notifications[':id'].read.$put(
-        {
-          param: { id: notif.id },
-        },
-      )
+      const res = await client.api.admin.notifications[':id'].read.$put({
+        param: { id: notif.id },
+      })
 
       expect(res.status).toBe(200)
       const data = await res.json()
@@ -338,13 +326,11 @@ describe('Admin Routes', () => {
   describe('POST /api/admin/notifications/test', () => {
     it('should send test notification', async () => {
       const client = authedClient('admin-token')
-      const res = await client.api.admin.notifications.test.$post(
-        {
-          json: {
-            type: 'info',
-          },
+      const res = await client.api.admin.notifications.test.$post({
+        json: {
+          type: 'info',
         },
-      )
+      })
 
       expect([200, 500]).toContain(res.status)
       if (res.status === 200) {

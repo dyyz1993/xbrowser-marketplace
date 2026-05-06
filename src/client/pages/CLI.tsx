@@ -1,4 +1,14 @@
-import { Terminal, Copy, Check, Download, BookOpen, Zap, Sparkles, Upload, LogIn } from 'lucide-react'
+import {
+  Terminal,
+  Copy,
+  Check,
+  Download,
+  BookOpen,
+  Zap,
+  Sparkles,
+  Upload,
+  LogIn,
+} from 'lucide-react'
 import { useState } from 'react'
 
 function CodeBlock({ children }: { children: string }) {
@@ -34,7 +44,9 @@ export const CLIPage: React.FC = () => {
         <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-2xl mb-4">
           <Terminal className="w-8 h-8 text-blue-600" />
         </div>
-        <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">Get Started with xbrowser CLI</h1>
+        <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+          Get Started with xbrowser CLI
+        </h1>
         <p className="text-lg text-gray-500 max-w-2xl mx-auto">
           Install the xbrowser CLI and start using plugins from the marketplace in minutes
         </p>
@@ -46,7 +58,9 @@ export const CLIPage: React.FC = () => {
           <div className="ml-12 space-y-3">
             <p className="text-gray-600">Install globally via npm:</p>
             <CodeBlock>npm install -g xbrowser</CodeBlock>
-            <p className="text-sm text-gray-400">Or using yarn: <code className="text-gray-600">yarn global add xbrowser</code></p>
+            <p className="text-sm text-gray-400">
+              Or using yarn: <code className="text-gray-600">yarn global add xbrowser</code>
+            </p>
           </div>
         </section>
 
@@ -84,7 +98,10 @@ xbrowser plugin publish
 # Check your account
 xbrowser plugin whoami`}</CodeBlock>
             <p className="text-sm text-gray-400">
-              Get an API key from your <a href="/account" className="text-blue-600 hover:underline">developer settings</a>
+              Get an API key from your{' '}
+              <a href="/account" className="text-blue-600 hover:underline">
+                developer settings
+              </a>
             </p>
           </div>
         </section>
@@ -113,10 +130,12 @@ xbrowser record`}</CodeBlock>
               <Sparkles className="w-5 h-5 text-purple-600" />
             </div>
             <div className="flex-1">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">AI-Assisted Plugin Development</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                AI-Assisted Plugin Development
+              </h3>
               <p className="text-gray-600 mb-4">
-                Load the xbrowser skill into your AI coding agent to build plugins faster. The skill provides
-                templates, best practices, command patterns, and automated scaffolding.
+                Load the xbrowser skill into your AI coding agent to build plugins faster. The skill
+                provides templates, best practices, command patterns, and automated scaffolding.
               </p>
               <div className="space-y-3">
                 <div>
@@ -138,7 +157,9 @@ xbrowser record`}</CodeBlock>
                   </div>
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-gray-700 mb-1">2. Place in your skills directory:</p>
+                  <p className="text-sm font-medium text-gray-700 mb-1">
+                    2. Place in your skills directory:
+                  </p>
                   <CodeBlock>{`# For Claude Code / OpenCode
 mv plugin-dev.md .opencode/skills/
 
@@ -208,9 +229,7 @@ const WorkflowStep: React.FC<{
   </div>
 )
 
-const WorkflowArrow = () => (
-  <span className="text-blue-400 font-bold">&rarr;</span>
-)
+const WorkflowArrow = () => <span className="text-blue-400 font-bold">&rarr;</span>
 
 const StepHeader: React.FC<{
   number: number

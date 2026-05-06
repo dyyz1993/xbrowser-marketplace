@@ -18,25 +18,25 @@ my-plugin/
 The plugin entry point must export a default function:
 
 ```typescript
-import type { XCLIAPI } from 'xbrowser';
+import type { XCLIAPI } from 'xbrowser'
 
 export default function (xcli: XCLIAPI): void {
   const site = xcli.createSite({
     name: 'my-plugin',
     url: 'https://example.com',
-  });
+  })
 
   site.command('scrape', {
     description: 'Scrape data from the page',
     handler: async (params, ctx) => {
-      const { page } = ctx;
+      const { page } = ctx
       const data = await page.evaluate(() => {
-        const items = document.querySelectorAll('.item');
-        return Array.from(items).map(el => el.textContent);
-      });
-      return { data, tips: [] };
+        const items = document.querySelectorAll('.item')
+        return Array.from(items).map(el => el.textContent)
+      })
+      return { data, tips: [] }
     },
-  });
+  })
 }
 ```
 
@@ -65,16 +65,16 @@ Include xbrowser metadata in the `xbrowser` field:
 
 ### xbrowser Metadata Fields
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `slug` | string | Yes | Unique identifier (kebab-case, `[a-z0-9-]+`) |
-| `commands` | string[] | No | List of commands the plugin provides |
-| `tags` | string[] | No | Tags for discovery |
-| `sites` | string[] | No | Supported site URLs |
-| `category` | string | No | Primary category slug |
-| `license` | string | No | License identifier (default: `MIT`) |
-| `repositoryUrl` | string | No | Source repository URL |
-| `homepageUrl` | string | No | Plugin homepage URL |
+| Field           | Type     | Required | Description                                  |
+| --------------- | -------- | -------- | -------------------------------------------- |
+| `slug`          | string   | Yes      | Unique identifier (kebab-case, `[a-z0-9-]+`) |
+| `commands`      | string[] | No       | List of commands the plugin provides         |
+| `tags`          | string[] | No       | Tags for discovery                           |
+| `sites`         | string[] | No       | Supported site URLs                          |
+| `category`      | string   | No       | Primary category slug                        |
+| `license`       | string   | No       | License identifier (default: `MIT`)          |
+| `repositoryUrl` | string   | No       | Source repository URL                        |
+| `homepageUrl`   | string   | No       | Plugin homepage URL                          |
 
 ## Creating a Plugin
 
@@ -96,14 +96,15 @@ Each command has a name, description, and handler:
 site.command('extract-prices', {
   description: 'Extract product prices from the current page',
   handler: async (params, ctx) => {
-    const { page } = ctx;
+    const { page } = ctx
     const prices = await page.evaluate(() => {
-      return Array.from(document.querySelectorAll('.price'))
-        .map(el => parseFloat(el.textContent?.replace(/[^0-9.]/g, '') || '0'));
-    });
-    return { data: prices, tips: ['Found ' + prices.length + ' prices'] };
+      return Array.from(document.querySelectorAll('.price')).map(el =>
+        parseFloat(el.textContent?.replace(/[^0-9.]/g, '') || '0')
+      )
+    })
+    return { data: prices, tips: ['Found ' + prices.length + ' prices'] }
   },
-});
+})
 ```
 
 ### 3. Handle Parameters
@@ -119,11 +120,11 @@ site.command('search', {
     maxResults: { type: 'number', required: false, default: 10 },
   },
   handler: async (params, ctx) => {
-    const { query, maxResults = 10 } = params;
+    const { query, maxResults = 10 } = params
     // ... implementation
-    return { data: results, tips: [] };
+    return { data: results, tips: [] }
   },
-});
+})
 ```
 
 ## Testing Locally
@@ -185,6 +186,7 @@ The marketplace detects the existing plugin by slug and creates a new version en
 ### Version Naming
 
 Follow [semver](https://semver.org/):
+
 - `1.0.0` → `1.0.1`: Bug fixes (patch)
 - `1.0.0` → `1.1.0`: New features (minor)
 - `1.0.0` → `2.0.0`: Breaking changes (major)
@@ -223,6 +225,7 @@ The marketplace provides an AI skill for plugin development. When using an AI co
 4. It helps test and publish the plugin
 
 Example prompt:
+
 ```
 Create an xbrowser plugin for amazon.com that:
 1. Searches for a product by keyword

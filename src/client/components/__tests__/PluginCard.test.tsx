@@ -4,8 +4,11 @@ import { PluginCard } from '../PluginCard'
 import type { PluginListItem } from '../../services/plugin-api'
 
 vi.mock('react-router-dom', () => ({
-  Link: ({ children, to, ...props }: { children: React.ReactNode; to: string }) =>
-    <a href={to} {...props}>{children}</a>,
+  Link: ({ children, to, ...props }: { children: React.ReactNode; to: string }) => (
+    <a href={to} {...props}>
+      {children}
+    </a>
+  ),
 }))
 
 const mockPlugin: PluginListItem = {
@@ -74,7 +77,10 @@ describe('PluginCard', () => {
   })
 
   it('should render screenshot when provided', () => {
-    const withScreenshot = { ...mockPlugin, screenshotUrl: 'https://img.example.com/screenshot.png' }
+    const withScreenshot = {
+      ...mockPlugin,
+      screenshotUrl: 'https://img.example.com/screenshot.png',
+    }
     render(<PluginCard plugin={withScreenshot} />)
     const img = screen.getByRole('img')
     expect(img).toHaveAttribute('src', 'https://img.example.com/screenshot.png')

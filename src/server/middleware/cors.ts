@@ -11,7 +11,8 @@ export type CorsOptions = {
   maxAge?: number
 }
 
-function getDefaultCorsOptions(): Required<Omit<CorsOptions, 'exposeHeaders' | 'maxAge'>> & CorsOptions {
+function getDefaultCorsOptions(): Required<Omit<CorsOptions, 'exposeHeaders' | 'maxAge'>> &
+  CorsOptions {
   return {
     origin: getConfig().corsOrigin,
     credentials: true,

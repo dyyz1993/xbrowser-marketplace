@@ -60,7 +60,12 @@ export const LoginPage: React.FC = () => {
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <Card className="w-full max-w-md" title="管理后台登录">
         <Spin spinning={loading}>
-          <Form form={form} onFinish={handleSubmit} layout="vertical" data-testid="admin-login-form">
+          <Form
+            form={form}
+            onFinish={handleSubmit}
+            layout="vertical"
+            data-testid="admin-login-form"
+          >
             <Form.Item name="username" rules={[{ required: true, message: '请输入用户名！' }]}>
               <Input
                 prefix={<UserOutlined />}

@@ -42,7 +42,9 @@ describe('useCRUD', () => {
   })
 
   it('should auto-fetch items on mount', async () => {
-    const { result } = renderHook(() => useCRUD<TestItem, { name: string }, { name: string }>(createOptions()))
+    const { result } = renderHook(() =>
+      useCRUD<TestItem, { name: string }, { name: string }>(createOptions())
+    )
 
     expect(result.current.loading).toBe(true)
 
@@ -57,7 +59,9 @@ describe('useCRUD', () => {
   it('should set error when fetch fails', async () => {
     mockFetchFn.mockRejectedValueOnce(new Error('Network error'))
 
-    const { result } = renderHook(() => useCRUD<TestItem, { name: string }, { name: string }>(createOptions()))
+    const { result } = renderHook(() =>
+      useCRUD<TestItem, { name: string }, { name: string }>(createOptions())
+    )
 
     await act(() => Promise.resolve())
 
@@ -66,7 +70,9 @@ describe('useCRUD', () => {
   })
 
   it('should open and close create modal', async () => {
-    const { result } = renderHook(() => useCRUD<TestItem, { name: string }, { name: string }>(createOptions()))
+    const { result } = renderHook(() =>
+      useCRUD<TestItem, { name: string }, { name: string }>(createOptions())
+    )
 
     await act(() => Promise.resolve())
 
@@ -84,7 +90,9 @@ describe('useCRUD', () => {
   })
 
   it('should open and close edit modal with editing item', async () => {
-    const { result } = renderHook(() => useCRUD<TestItem, { name: string }, { name: string }>(createOptions()))
+    const { result } = renderHook(() =>
+      useCRUD<TestItem, { name: string }, { name: string }>(createOptions())
+    )
 
     await act(() => Promise.resolve())
 
@@ -104,7 +112,9 @@ describe('useCRUD', () => {
   })
 
   it('should handle create and refetch items', async () => {
-    const { result } = renderHook(() => useCRUD<TestItem, { name: string }, { name: string }>(createOptions()))
+    const { result } = renderHook(() =>
+      useCRUD<TestItem, { name: string }, { name: string }>(createOptions())
+    )
 
     await act(() => Promise.resolve())
 
@@ -123,7 +133,9 @@ describe('useCRUD', () => {
   })
 
   it('should handle update and refetch items', async () => {
-    const { result } = renderHook(() => useCRUD<TestItem, { name: string }, { name: string }>(createOptions()))
+    const { result } = renderHook(() =>
+      useCRUD<TestItem, { name: string }, { name: string }>(createOptions())
+    )
 
     await act(() => Promise.resolve())
 
@@ -142,7 +154,9 @@ describe('useCRUD', () => {
   })
 
   it('should not call updateFn when no editingItem', async () => {
-    const { result } = renderHook(() => useCRUD<TestItem, { name: string }, { name: string }>(createOptions()))
+    const { result } = renderHook(() =>
+      useCRUD<TestItem, { name: string }, { name: string }>(createOptions())
+    )
 
     await act(() => Promise.resolve())
 
@@ -154,7 +168,9 @@ describe('useCRUD', () => {
   })
 
   it('should handle delete and refetch items', async () => {
-    const { result } = renderHook(() => useCRUD<TestItem, { name: string }, { name: string }>(createOptions()))
+    const { result } = renderHook(() =>
+      useCRUD<TestItem, { name: string }, { name: string }>(createOptions())
+    )
 
     await act(() => Promise.resolve())
 
@@ -169,7 +185,9 @@ describe('useCRUD', () => {
   it('should handle create error and show error message', async () => {
     mockCreateFn.mockRejectedValueOnce(new Error('Create failed'))
 
-    const { result } = renderHook(() => useCRUD<TestItem, { name: string }, { name: string }>(createOptions()))
+    const { result } = renderHook(() =>
+      useCRUD<TestItem, { name: string }, { name: string }>(createOptions())
+    )
 
     await act(() => Promise.resolve())
 
@@ -187,7 +205,9 @@ describe('useCRUD', () => {
   it('should handle delete error', async () => {
     mockDeleteFn.mockRejectedValueOnce(new Error('Delete failed'))
 
-    const { result } = renderHook(() => useCRUD<TestItem, { name: string }, { name: string }>(createOptions()))
+    const { result } = renderHook(() =>
+      useCRUD<TestItem, { name: string }, { name: string }>(createOptions())
+    )
 
     await act(() => Promise.resolve())
 

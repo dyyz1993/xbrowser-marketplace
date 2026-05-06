@@ -49,18 +49,13 @@ describe('Audit Log Routes', () => {
   describe('GET /api/audit-logs', () => {
     it('should require authentication', async () => {
       const client = createTestClient()
-      const res = await client.api['audit-logs'].$get(
-        { query: {} }
-      )
+      const res = await client.api['audit-logs'].$get({ query: {} })
       expect(res.status).toBe(401)
     })
 
     it('should return empty list when no logs exist', async () => {
       const client = createTestClient()
-      const res = await client.api['audit-logs'].$get(
-        { query: {} },
-        { headers: authHeaders }
-      )
+      const res = await client.api['audit-logs'].$get({ query: {} }, { headers: authHeaders })
 
       expect(res.status).toBe(200)
       const data = await res.json()
@@ -76,10 +71,7 @@ describe('Audit Log Routes', () => {
       await insertTestAuditLog()
 
       const client = createTestClient()
-      const res = await client.api['audit-logs'].$get(
-        { query: {} },
-        { headers: authHeaders }
-      )
+      const res = await client.api['audit-logs'].$get({ query: {} }, { headers: authHeaders })
 
       expect(res.status).toBe(200)
       const data = await res.json()
@@ -189,10 +181,7 @@ describe('Audit Log Routes', () => {
       await insertTestAuditLog()
 
       const client = createTestClient()
-      const res = await client.api['audit-logs'].$get(
-        { query: {} },
-        { headers: authHeaders }
-      )
+      const res = await client.api['audit-logs'].$get({ query: {} }, { headers: authHeaders })
 
       expect(res.status).toBe(200)
       const data = await res.json()
@@ -211,9 +200,7 @@ describe('Audit Log Routes', () => {
   describe('GET /api/audit-logs/:id', () => {
     it('should require authentication', async () => {
       const client = createTestClient()
-      const res = await client.api['audit-logs'][':id'].$get(
-        { param: { id: 'some-id' } }
-      )
+      const res = await client.api['audit-logs'][':id'].$get({ param: { id: 'some-id' } })
       expect(res.status).toBe(401)
     })
 

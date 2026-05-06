@@ -25,7 +25,21 @@ async function seedPlugin() {
   const now = Date.now()
   await client.execute({
     sql: `INSERT INTO plugins (id, name, slug, description, author_id, author_name, version, status, tags, site_urls, commands, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    args: ['plugin-1', 'Cat Plugin', 'cat-plugin', 'A plugin', 'dev-1', 'dev', '1.0.0', 'approved', '[]', '[]', '[]', now, now],
+    args: [
+      'plugin-1',
+      'Cat Plugin',
+      'cat-plugin',
+      'A plugin',
+      'dev-1',
+      'dev',
+      '1.0.0',
+      'approved',
+      '[]',
+      '[]',
+      '[]',
+      now,
+      now,
+    ],
   })
 }
 
@@ -80,9 +94,7 @@ describe('Admin Category Service', () => {
     })
 
     it('should throw NotFoundError for missing category', async () => {
-      await expect(
-        adminCatService.updateCategory('nonexistent', { name: 'X' })
-      ).rejects.toThrow()
+      await expect(adminCatService.updateCategory('nonexistent', { name: 'X' })).rejects.toThrow()
     })
   })
 

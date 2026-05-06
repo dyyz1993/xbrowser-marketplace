@@ -129,12 +129,17 @@ describe('tryCatch', () => {
   })
 
   it('should convert error with default mapper', async () => {
-    await expect(tryCatch(() => Promise.reject(new Error('fail')))).rejects.toBeInstanceOf(SystemError)
+    await expect(tryCatch(() => Promise.reject(new Error('fail')))).rejects.toBeInstanceOf(
+      SystemError
+    )
   })
 
   it('should use custom error mapper', async () => {
     await expect(
-      tryCatch(() => Promise.reject('custom'), () => new ValidationError('mapped'))
+      tryCatch(
+        () => Promise.reject('custom'),
+        () => new ValidationError('mapped')
+      )
     ).rejects.toBeInstanceOf(ValidationError)
   })
 })

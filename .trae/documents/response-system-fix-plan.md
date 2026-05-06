@@ -3,6 +3,7 @@
 ## 问题诊断
 
 ### 1. 类型与 Schema 不一致
+
 ```typescript
 // api-schemas.ts
 ApiSuccessSchema<T> → { success: true, data: T, timestamp: string }  // Schema
@@ -10,15 +11,17 @@ ApiSuccess<T>       → { success: true; data: T }                    // 类型 
 ```
 
 ### 2. 文件职责
-| 文件 | 职责 | 问题 |
-|------|------|------|
-| `api-schemas.ts` | Zod Schema + TypeScript 类型 | 类型定义不完整 |
-| `response.ts` | 运行时响应包装函数 | 职责清晰 |
-| `route-helpers.ts` | OpenAPI 响应配置 + 重导出 | 重导出造成语义混淆 |
+
+| 文件               | 职责                         | 问题               |
+| ------------------ | ---------------------------- | ------------------ |
+| `api-schemas.ts`   | Zod Schema + TypeScript 类型 | 类型定义不完整     |
+| `response.ts`      | 运行时响应包装函数           | 职责清晰           |
+| `route-helpers.ts` | OpenAPI 响应配置 + 重导出    | 重导出造成语义混淆 |
 
 ## 整理方案
 
 ### 方案 A：最小改动（推荐）
+
 只修复 `ApiSuccess<T>` 类型定义，添加 `timestamp` 字段：
 
 ```typescript
@@ -30,20 +33,22 @@ export type ApiSuccess<T> = { success: true; data: T; timestamp: string }
 **缺点**：导入路径语义问题保留
 
 ### 方案 B：重构导入路径
+
 1. 修复类型定义
 2. 路由文件直接从 `response.ts` 导入运行时函数
 3. 从 `route-helpers.ts` 只导入 OpenAPI 配置函数
 
 ```typescript
 // 路由文件中
-import { success, list, deleted } from '../../utils/response'        // 运行时
-import { successResponse, defineResponses } from '../../utils/route-helpers'  // OpenAPI 配置
+import { success, list, deleted } from '../../utils/response' // 运行时
+import { successResponse, defineResponses } from '../../utils/route-helpers' // OpenAPI 配置
 ```
 
 **优点**：职责清晰，语义明确
 **缺点**：需要修改所有路由文件的导入语句
 
 ### 方案 C：合并文件
+
 将 `response.ts` 和 `route-helpers.ts` 合并为一个文件：
 
 ```

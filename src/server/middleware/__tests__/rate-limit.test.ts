@@ -98,7 +98,10 @@ describe('Rate Limit Middleware', () => {
 
       const limitedApp = new Hono()
       limitedApp.onError((err, c) => c.json({ success: false, error: err.message }, 500))
-      limitedApp.use('/limited', rateLimitMiddleware({ max: 1, windowMs: 60000, message: 'Custom limit' }))
+      limitedApp.use(
+        '/limited',
+        rateLimitMiddleware({ max: 1, windowMs: 60000, message: 'Custom limit' })
+      )
       limitedApp.get('/limited', c => c.json({ success: true }))
 
       await limitedApp.request('/limited')

@@ -137,9 +137,7 @@ describe('Plugin Review Service', () => {
     })
 
     it('should throw NotFoundError for non-existent plugin', async () => {
-      await expect(
-        reviewService.getReviews('nonexistent', { page: 1 })
-      ).rejects.toThrow()
+      await expect(reviewService.getReviews('nonexistent', { page: 1 })).rejects.toThrow()
     })
 
     it('should respect pagination limit', async () => {
@@ -165,7 +163,12 @@ describe('Plugin Review Service', () => {
     it('should allow admin to delete any review', async () => {
       await seedPlugin()
       await seedReview()
-      const result = await reviewService.deleteReview('review-plugin', 'review-1', 'admin-1', 'super_admin')
+      const result = await reviewService.deleteReview(
+        'review-plugin',
+        'review-1',
+        'admin-1',
+        'super_admin'
+      )
       expect(result.id).toBe('review-1')
     })
 

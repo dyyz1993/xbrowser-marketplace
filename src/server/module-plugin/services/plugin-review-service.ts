@@ -1,8 +1,5 @@
 import { getDb } from '../../db'
-import {
-  plugins,
-  pluginReviews,
-} from '../../db/schema'
+import { plugins, pluginReviews } from '../../db/schema'
 import { eq, and, desc, inArray } from 'drizzle-orm'
 import { NotFoundError, ConflictError, AuthorizationError } from '../../utils/app-error'
 import { generateUUID } from '../../utils/uuid'
@@ -11,7 +8,9 @@ import type { PluginRow } from './plugin-utils'
 
 type ReviewRow = typeof pluginReviews.$inferSelect
 
-export async function getReviewStatsForPlugin(pluginId: string): Promise<{ avgRating: number; reviewCount: number }> {
+export async function getReviewStatsForPlugin(
+  pluginId: string
+): Promise<{ avgRating: number; reviewCount: number }> {
   const db = await getDb()
   const allReviews: ReviewRow[] = await db
     .select()
@@ -44,7 +43,12 @@ export async function getReviewStatsBatch(
   const result = new Map<string, { avgRating: number; reviewCount: number }>()
   for (const id of idSet) {
     const entry = grouped.get(id)
-    result.set(id, entry ? { avgRating: entry.sum / entry.count, reviewCount: entry.count } : { avgRating: 0, reviewCount: 0 })
+    result.set(
+      id,
+      entry
+        ? { avgRating: entry.sum / entry.count, reviewCount: entry.count }
+        : { avgRating: 0, reviewCount: 0 }
+    )
   }
   return result
 }
@@ -57,7 +61,11 @@ export async function submitReview(
 ): Promise<ReviewRow> {
   const db = await getDb()
 
-  const pluginRows: PluginRow[] = await db.select().from(plugins).where(eq(plugins.slug, slug)).limit(1)
+  const pluginRows: PluginRow[] = await db
+    .select()
+    .from(plugins)
+    .where(eq(plugins.slug, slug))
+    .limit(1)
 
   if (pluginRows.length === 0) {
     throw new NotFoundError('Plugin', slug)
@@ -91,7 +99,11 @@ export async function submitReview(
     createdAt: now,
   })
 
-  const rows: ReviewRow[] = await db.select().from(pluginReviews).where(eq(pluginReviews.id, id)).limit(1)
+  const rows: ReviewRow[] = await db
+    .select()
+    .from(pluginReviews)
+    .where(eq(pluginReviews.id, id))
+    .limit(1)
 
   return rows[0]
 }
@@ -102,7 +114,11 @@ export async function getReviews(
 ): Promise<{ items: ReviewRow[]; total: number }> {
   const db = await getDb()
 
-  const pluginRows: PluginRow[] = await db.select().from(plugins).where(eq(plugins.slug, slug)).limit(1)
+  const pluginRows: PluginRow[] = await db
+    .select()
+    .from(plugins)
+    .where(eq(plugins.slug, slug))
+    .limit(1)
 
   if (pluginRows.length === 0) {
     throw new NotFoundError('Plugin', slug)
@@ -136,7 +152,11 @@ export async function deleteReview(
 ): Promise<{ id: string }> {
   const db = await getDb()
 
-  const pluginRows: PluginRow[] = await db.select().from(plugins).where(eq(plugins.slug, slug)).limit(1)
+  const pluginRows: PluginRow[] = await db
+    .select()
+    .from(plugins)
+    .where(eq(plugins.slug, slug))
+    .limit(1)
 
   if (pluginRows.length === 0) {
     throw new NotFoundError('Plugin', slug)

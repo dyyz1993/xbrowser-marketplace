@@ -11,6 +11,7 @@
 ### 根本原因
 
 **加载流程**：
+
 1. 用户滚动到顶部
 2. 触发加载
 3. 新消息添加到数组开头：`[...newRounds, ...oldRounds]`
@@ -19,6 +20,7 @@
 6. ❌ 用户看到"闪一下"的效果
 
 **正确的做法**：
+
 1. 记录加载前的滚动位置（距离顶部的高度）
 2. 加载新消息
 3. 计算新增内容的高度
@@ -33,7 +35,7 @@
 **触发条件**：距离顶部一定距离（如 100px）
 
 ```typescript
-const LOAD_MORE_THRESHOLD = 100  // 距离顶部 100px 时触发
+const LOAD_MORE_THRESHOLD = 100 // 距离顶部 100px 时触发
 
 if (scrollTop <= LOAD_MORE_THRESHOLD && hasMoreRounds && !loadingMore) {
   loadMore()
@@ -41,6 +43,7 @@ if (scrollTop <= LOAD_MORE_THRESHOLD && hasMoreRounds && !loadingMore) {
 ```
 
 **优点**：
+
 - ✅ 直观：用户快滚到顶部时就预加载
 - ✅ 体验好：加载完成后用户才到达顶部，感觉流畅
 - ✅ 简单：不需要复杂的百分比计算
@@ -50,6 +53,7 @@ if (scrollTop <= LOAD_MORE_THRESHOLD && hasMoreRounds && !loadingMore) {
 ### 2. 保持滚动位置
 
 **核心思路**：
+
 1. 加载前记录 `scrollTop` 和 `scrollHeight`
 2. 加载后计算新增内容的高度
 3. 调整 `scrollTop`，补偿新增的高度
@@ -70,7 +74,7 @@ const handleScroll = useCallback(() => {
   if (scrollTop <= LOAD_MORE_THRESHOLD && hasMoreRounds) {
     // 记录加载前的高度
     prevScrollHeightRef.current = scrollHeight
-    
+
     if (loadMoreTimeoutRef.current) {
       clearTimeout(loadMoreTimeoutRef.current)
     }
@@ -92,10 +96,10 @@ useEffect(() => {
     // 有新内容添加到顶部
     const heightDiff = currentScrollHeight - prevScrollHeight
     isScrollRestoringRef.current = true
-    
+
     // 调整 scrollTop，保持视觉位置
     container.scrollTop = heightDiff
-    
+
     // 重置标记
     setTimeout(() => {
       isScrollRestoringRef.current = false
@@ -127,10 +131,10 @@ const lastLoadTimeRef = useRef(0)
 const handleLoadMore = useCallback(async () => {
   const now = Date.now()
   if (now - lastLoadTimeRef.current < 1000) {
-    return  // 1 秒内不重复加载
+    return // 1 秒内不重复加载
   }
   lastLoadTimeRef.current = now
-  
+
   await loadMoreRounds()
 }, [loadMoreRounds])
 ```
@@ -140,6 +144,7 @@ const handleLoadMore = useCallback(async () => {
 ### 4. 自动滚动控制
 
 **场景**：
+
 - 用户发送消息：自动滚动到底部
 - 用户查看历史：不自动滚动
 - 用户接近底部：启用自动滚动
@@ -205,7 +210,7 @@ export const ChatArea: React.FC = () => {
 
   const [input, setInput] = useState('')
   const [autoScrollEnabled, setAutoScrollEnabled] = useState(true)
-  
+
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -253,7 +258,7 @@ export const ChatArea: React.FC = () => {
     if (scrollTop <= LOAD_MORE_THRESHOLD && hasMoreRounds) {
       // 记录加载前的高度
       prevScrollHeightRef.current = scrollHeight
-      
+
       if (loadMoreTimeoutRef.current) {
         clearTimeout(loadMoreTimeoutRef.current)
       }
@@ -275,10 +280,10 @@ export const ChatArea: React.FC = () => {
       // 有新内容添加到顶部
       const heightDiff = currentScrollHeight - prevScrollHeight
       isScrollRestoringRef.current = true
-      
+
       // 调整 scrollTop，保持视觉位置
       container.scrollTop = heightDiff
-      
+
       // 重置标记
       setTimeout(() => {
         isScrollRestoringRef.current = false
@@ -311,12 +316,14 @@ export const ChatArea: React.FC = () => {
 ### 测试 1：平滑加载更多历史
 
 **步骤**：
+
 1. 初始加载 5 个轮次
 2. 向上滚动
 3. 距离顶部 100px 时触发加载
 4. 观察滚动位置是否保持
 
 **预期**：
+
 - ✅ 没有"闪一下"的效果
 - ✅ 用户看到的内容保持在同一位置
 - ✅ 加载过程平滑
@@ -324,10 +331,12 @@ export const ChatArea: React.FC = () => {
 ### 测试 2：连续加载
 
 **步骤**：
+
 1. 快速连续向上滚动
 2. 观察是否会连续触发加载
 
 **预期**：
+
 - ✅ 每 1 秒最多触发一次加载
 - ✅ 不会连续触发多次
 - ✅ 每次加载都平滑
@@ -335,10 +344,12 @@ export const ChatArea: React.FC = () => {
 ### 测试 3：自动滚动
 
 **步骤**：
+
 1. 发送新消息
 2. 观察是否自动滚动到底部
 
 **预期**：
+
 - ✅ 新消息自动显示在底部
 - ✅ 如果用户在查看历史，不自动滚动
 

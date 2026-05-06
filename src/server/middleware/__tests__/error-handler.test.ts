@@ -11,7 +11,12 @@ describe('Error Handler Middleware', () => {
   function setupApp(options?: { includeStackTrace?: boolean; logErrors?: boolean }) {
     app = new Hono()
     const middleware = errorHandlerMiddleware(options)
-    app.onError((err, c) => middleware(c, async () => { throw err }) as Promise<Response>)
+    app.onError(
+      (err, c) =>
+        middleware(c, async () => {
+          throw err
+        }) as Promise<Response>
+    )
     app.get('/test', c => c.json({ success: true }))
     app.get('/test/app-error', () => {
       throw new ValidationError('Invalid input')
@@ -22,7 +27,7 @@ describe('Error Handler Middleware', () => {
     app.get('/test/auth-error', () => {
       throw new AuthorizationError('Forbidden')
     })
-    app.get('/test/zod-error', (c) => {
+    app.get('/test/zod-error', c => {
       const result = z.object({ email: z.string().email() }).safeParse({ email: 'invalid' })
       if (!result.success) throw result.error
       return c.json({ success: true })

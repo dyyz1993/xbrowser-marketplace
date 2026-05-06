@@ -54,13 +54,18 @@ const wrappedApp = app
       err instanceof Error && 'status' in err ? (err as { status: number }).status : 500
     const message = err.message || 'Internal server error'
     const responseStatus = statusCode || 500
-    return c.json({ success: false as const, error: message, status: responseStatus }, responseStatus as 500)
+    return c.json(
+      { success: false as const, error: message, status: responseStatus },
+      responseStatus as 500
+    )
   })
 
 export default {
   fetch: async (request: Request, env: CloudflareBindings, ctx: ExecutionContext) => {
     ;(globalThis as unknown as { DB: D1Database }).DB = env.DB
-    ;(globalThis as unknown as { R2_BUCKET: R2Bucket }).R2_BUCKET = (env as unknown as Record<string, unknown>).R2_BUCKET as R2Bucket
+    ;(globalThis as unknown as { R2_BUCKET: R2Bucket }).R2_BUCKET = (
+      env as unknown as Record<string, unknown>
+    ).R2_BUCKET as R2Bucket
     if (env.AUTH_SECRET_KEY) {
       process.env.AUTH_SECRET_KEY = env.AUTH_SECRET_KEY
     }

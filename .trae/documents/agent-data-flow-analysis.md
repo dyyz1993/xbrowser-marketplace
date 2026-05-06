@@ -50,10 +50,12 @@ SQL: SELECT * FROM chatMessages
 ## 当前问题
 
 ### 1. Agent 消息未保存 → 已修复 ✅
+
 - 问题：`processChatMessage` 只保存了 user message，没有保存 agent message
 - 修复：添加 `agentService.createMessage('agent', agentContent, agentThinking)`
 
 ### 2. 可能的获取问题（待验证）
+
 - 前端 `fetchMessages()` 被调用的时机
 - `limit` 和 `offset` 参数是否正确传递
 - `ChatPage` 的 `useEffect` 依赖是否正确

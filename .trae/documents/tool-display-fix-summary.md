@@ -1,6 +1,7 @@
 # 工具展示问题修复总结
 
 ## 修复时间
+
 2026-03-25
 
 ## 问题描述
@@ -14,15 +15,18 @@
 ### 数据流断裂
 
 #### 问题1：后端解析
+
 - 将多个 assistant 消息解析成独立的 ChatMessage
 - 消息1：只有工具调用，没有文本内容
 - 消息2：只有文本内容，没有工具调用
 
 #### 问题2：前端分组 ❌ 致命缺陷
+
 - 只取最后一个 agent 消息，忽略之前的
 - 导致用户只能看到最终回复，看不到工具调用过程
 
 **数据流示例**：
+
 ```
 API 返回：
   [0] user: "ls"
@@ -46,6 +50,7 @@ API 返回：
 ### 选择：修复前端分组逻辑 ⭐
 
 **优点**：
+
 - ✅ 最小改动
 - ✅ 立即生效
 - ✅ 不影响后端
@@ -71,7 +76,7 @@ interface MessageRound {
 // 修改后
 interface MessageRound {
   userMessage: ChatMessage
-  agentMessages: ChatMessage[]  // 改为数组
+  agentMessages: ChatMessage[] // 改为数组
 }
 ```
 
@@ -88,7 +93,7 @@ const rounds = useMemo<MessageRound[]>(() => {
       currentRound = { userMessage: msg, agentMessage: null }
       result.push(currentRound)
     } else if (msg.role === 'agent' && currentRound) {
-      currentRound.agentMessage = msg  // ⚠️ 覆盖
+      currentRound.agentMessage = msg // ⚠️ 覆盖
     }
   }
 
@@ -105,7 +110,7 @@ const rounds = useMemo<MessageRound[]>(() => {
       currentRound = { userMessage: msg, agentMessages: [] }
       result.push(currentRound)
     } else if (msg.role === 'agent' && currentRound) {
-      currentRound.agentMessages.push(msg)  // ✅ 收集所有
+      currentRound.agentMessages.push(msg) // ✅ 收集所有
     }
   }
 
@@ -117,17 +122,17 @@ const rounds = useMemo<MessageRound[]>(() => {
 
 ```typescript
 // 修改前
-<RoundCard 
-  key={round.userMessage.id || index} 
-  userMessage={round.userMessage} 
-  agentMessage={round.agentMessage} 
+<RoundCard
+  key={round.userMessage.id || index}
+  userMessage={round.userMessage}
+  agentMessage={round.agentMessage}
 />
 
 // 修改后
-<RoundCard 
-  key={round.userMessage.id || index} 
-  userMessage={round.userMessage} 
-  agentMessages={round.agentMessages} 
+<RoundCard
+  key={round.userMessage.id || index}
+  userMessage={round.userMessage}
+  agentMessages={round.agentMessages}
 />
 ```
 
@@ -168,7 +173,7 @@ export const RoundCard: React.FC<RoundCardProps> = memo(({ userMessage, agentMes
     <div>
       {/* 用户消息 */}
       <div>{userMessage.content}</div>
-      
+
       {/* Agent 消息 */}
       {agentMessage && (
         <div>
@@ -199,7 +204,7 @@ export const RoundCard: React.FC<RoundCardProps> = memo(({ userMessage, agentMes
     <div>
       {/* 用户消息 */}
       <div>{userMessage.content}</div>
-      
+
       {/* Agent 消息 */}
       {agentMessages.length > 0 && (
         <div>
@@ -220,6 +225,7 @@ export const RoundCard: React.FC<RoundCardProps> = memo(({ userMessage, agentMes
 ```
 
 **关键改进**：
+
 - ✅ 使用 `flatMap` 合并所有 agent 消息的 subRounds
 - ✅ 使用 `some` 检查是否有任何消息正在流式传输
 - ✅ 使用 `lastMessage` 获取最后一条消息的状态
@@ -237,7 +243,7 @@ Agent: Here's the directory structure:
        | Directory | Description |
        |-----------|-------------|
        | src/      | ...         |
-       
+
 ⚠️ 看不到工具调用过程！
 ```
 
@@ -246,17 +252,17 @@ Agent: Here's the directory structure:
 ```
 用户看到：
 User: ls
-Agent: 
+Agent:
   [Thinking Process]
   The user wants to list files in the current working directory.
-  
+
   [Tools]
   bash
   Arguments: {"command": "ls -la"}
   Result: total 2136
           drwxr-xr-x@  68 xuyingzhou  staff    2176 Mar 24 15:14 .
           ...
-  
+
   Here's the directory structure:
   | Directory | Description |
   |-----------|-------------|
@@ -325,6 +331,7 @@ curl -s "http://localhost:5173/api/agents/agent_feee4a5dac6d/messages?limit=3" |
 ```
 
 **结果**：
+
 ```json
 [
   {
@@ -349,6 +356,7 @@ curl -s "http://localhost:5173/api/agents/agent_feee4a5dac6d/messages?limit=3" |
 ```
 
 **验证**：
+
 - ✅ API 正确返回了工具调用信息
 - ✅ 数据结构完整
 
@@ -359,6 +367,7 @@ curl -s "http://localhost:5173/api/agents/agent_feee4a5dac6d/messages?limit=3" |
 **输入**：用户发送 "ls"
 
 **预期**：
+
 - ✅ 显示 Thinking Process
 - ✅ 显示工具调用（bash ls -la）
 - ✅ 显示工具结果
@@ -369,6 +378,7 @@ curl -s "http://localhost:5173/api/agents/agent_feee4a5dac6d/messages?limit=3" |
 **输入**：用户发送复杂请求
 
 **预期**：
+
 - ✅ 显示所有工具调用
 - ✅ 按顺序显示工具结果
 - ✅ 显示最终回复
@@ -378,6 +388,7 @@ curl -s "http://localhost:5173/api/agents/agent_feee4a5dac6d/messages?limit=3" |
 **输入**：用户发送简单问题
 
 **预期**：
+
 - ✅ 直接显示文本回复
 - ✅ 不显示工具区域
 
@@ -386,6 +397,7 @@ curl -s "http://localhost:5173/api/agents/agent_feee4a5dac6d/messages?limit=3" |
 ## 影响范围
 
 ### 修改文件
+
 1. ✅ [ChatArea.tsx](../../src/client/components/ChatArea.tsx)
    - 修改接口定义
    - 修改分组逻辑
@@ -397,6 +409,7 @@ curl -s "http://localhost:5173/api/agents/agent_feee4a5dac6d/messages?limit=3" |
    - 合并多个 agent 消息的 subRounds
 
 ### 不受影响
+
 - ✅ 后端 API
 - ✅ 数据库
 - ✅ 其他组件
@@ -407,16 +420,19 @@ curl -s "http://localhost:5173/api/agents/agent_feee4a5dac6d/messages?limit=3" |
 ## 性能影响
 
 ### 内存使用
+
 - **影响**：轻微增加
 - **原因**：需要存储多个 agent 消息的数组
 - **评估**：可忽略不计
 
 ### 渲染性能
+
 - **影响**：无明显影响
 - **原因**：使用 `flatMap` 和 `some` 进行高效计算
 - **评估**：性能良好
 
 ### 网络传输
+
 - **影响**：无
 - **原因**：不改变 API 数据结构
 - **评估**：无影响
@@ -439,6 +455,7 @@ curl -s "http://localhost:5173/api/agents/agent_feee4a5dac6d/messages?limit=3" |
 ### 风险等级：低 ✅
 
 **理由**：
+
 1. 只修改前端逻辑
 2. 不改变数据结构
 3. 向后兼容
@@ -447,9 +464,11 @@ curl -s "http://localhost:5173/api/agents/agent_feee4a5dac6d/messages?limit=3" |
 ### 潜在问题
 
 #### 问题1：空数组处理
+
 **场景**：`agentMessages` 为空数组
 **处理**：已通过条件渲染处理
 **代码**：
+
 ```typescript
 {agentMessages.length > 0 && (
   <div>...</div>
@@ -457,9 +476,11 @@ curl -s "http://localhost:5173/api/agents/agent_feee4a5dac6d/messages?limit=3" |
 ```
 
 #### 问题2：undefined 处理
+
 **场景**：`lastMessage` 可能为 undefined
 **处理**：使用可选链操作符
 **代码**：
+
 ```typescript
 isStreaming={lastMessage?.isStreaming ?? undefined}
 ```
@@ -469,31 +490,38 @@ isStreaming={lastMessage?.isStreaming ?? undefined}
 ## 后续优化建议
 
 ### 1. 后端优化（可选）
+
 **目标**：合并连续的 assistant 消息
 **优点**：
+
 - 数据结构更合理
 - 减少前端复杂度
 
 **缺点**：
+
 - 需要修改后端逻辑
 - 可能影响其他功能
 
 **优先级**：低（当前方案已足够）
 
 ### 2. 消息去重（可选）
+
 **目标**：避免重复的 thinking 内容
 **实现**：
+
 ```typescript
-const uniqueSubRounds = allSubRounds.filter((subRound, index, self) =>
-  index === self.findIndex(s => s.id === subRound.id)
+const uniqueSubRounds = allSubRounds.filter(
+  (subRound, index, self) => index === self.findIndex(s => s.id === subRound.id)
 )
 ```
 
 **优先级**：低（暂未发现重复问题）
 
 ### 3. 加载优化（可选）
+
 **目标**：优化大量消息的加载性能
 **实现**：
+
 - 虚拟滚动
 - 懒加载 subRounds
 
@@ -514,10 +542,12 @@ const uniqueSubRounds = allSubRounds.filter((subRound, index, self) =>
 ### 🎯 核心改进
 
 **修改前**：
+
 - 只显示最后一个 agent 消息
 - 工具调用被忽略
 
 **修改后**：
+
 - 收集所有 agent 消息
 - 合并所有 subRounds
 - 完整显示工具调用和最终回复
@@ -543,6 +573,7 @@ const uniqueSubRounds = allSubRounds.filter((subRound, index, self) =>
 ### 关键代码片段
 
 #### ChatArea.tsx - 消息分组
+
 ```typescript
 const rounds = useMemo<MessageRound[]>(() => {
   const result: MessageRound[] = []
@@ -562,6 +593,7 @@ const rounds = useMemo<MessageRound[]>(() => {
 ```
 
 #### RoundCard.tsx - 合并 subRounds
+
 ```typescript
 const allSubRounds = agentMessages.flatMap(msg => msg.subRounds || [])
 const hasSubRounds = allSubRounds.length > 0

@@ -18,7 +18,10 @@ describe('Audit Log Middleware', () => {
     app = new Hono()
     app.onError((err, c) => {
       if (AppError.isAppError(err)) {
-        return c.json({ success: false, error: err.message }, err.statusCode as ContentfulStatusCode)
+        return c.json(
+          { success: false, error: err.message },
+          err.statusCode as ContentfulStatusCode
+        )
       }
       return c.json({ success: false, error: err.message }, 500)
     })

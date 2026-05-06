@@ -147,9 +147,7 @@ export const useNotificationStore = create<NotificationState>(set => ({
     if (sseClient) return
 
     try {
-      const conn = createSSEClientFromRoute<AppSSEProtocol>(
-        apiClient.api.notifications.stream
-      )
+      const conn = createSSEClientFromRoute<AppSSEProtocol>(apiClient.api.notifications.stream)
 
       conn.onStatusChange((status: 'connecting' | 'open' | 'closed') => {
         console.log('[SSE] Status changed:', status)

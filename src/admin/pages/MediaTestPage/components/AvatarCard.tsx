@@ -40,8 +40,7 @@ export const AvatarCard: React.FC = () => {
     >
       <Space direction="vertical" style={{ width: '100%' }}>
         <Paragraph>
-          使用 <Text code>$image()</Text> 方法获取图片，返回{' '}
-          <Text code>Promise&lt;Blob&gt;</Text>。
+          使用 <Text code>$image()</Text> 方法获取图片，返回 <Text code>Promise&lt;Blob&gt;</Text>。
         </Paragraph>
         <Space>
           <Input

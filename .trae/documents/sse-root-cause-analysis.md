@@ -1,6 +1,7 @@
 # SSE 连接未发起请求 - 根本原因分析
 
 ## 问题现象
+
 刷新页面后，没有看到 SSE 连接请求（`/api/agents/{id}/chat/stream`）
 
 ## 根本原因
@@ -61,6 +62,7 @@ private _status: 'connecting' | 'open' | 'closed' = 'closed'
 ```
 
 **语义解释**：
+
 - `'closed'` = 未连接/已关闭
 - `'connecting'` = 正在连接中
 - `'open'` = 已连接
@@ -74,6 +76,7 @@ private _status: 'connecting' | 'open' | 'closed' = 'closed'
 ## 验证步骤
 
 修复后：
+
 1. 刷新页面
 2. 检查 Network 面板是否有 `/api/agents/{id}/chat/stream` 请求
 3. 检查 SSE Status 是否显示为 `open`

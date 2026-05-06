@@ -100,10 +100,8 @@ describe('useMenuConfig', () => {
   afterEach(cleanup)
 
   it('should start loading and then show menu config', async () => {
-    const TestComp = createTestComponent(
-      useMenuConfig,
-      'menu',
-      r => (r.menuConfig as { label: string }[]).map((m: { label: string }) => m.label).join(',')
+    const TestComp = createTestComponent(useMenuConfig, 'menu', r =>
+      (r.menuConfig as { label: string }[]).map((m: { label: string }) => m.label).join(',')
     )
 
     render(<TestComp />)
@@ -122,10 +120,8 @@ describe('useMenuConfig', () => {
       new Error('Failed')
     )
 
-    const TestComp = createTestComponent(
-      useMenuConfig,
-      'menu',
-      r => (r.menuConfig as unknown[]).length.toString()
+    const TestComp = createTestComponent(useMenuConfig, 'menu', r =>
+      (r.menuConfig as unknown[]).length.toString()
     )
 
     render(<TestComp />)
@@ -142,10 +138,8 @@ describe('usePagePermissions', () => {
   afterEach(cleanup)
 
   it('should fetch page permissions', async () => {
-    const TestComp = createTestComponent(
-      usePagePermissions,
-      'page',
-      r => (r.pagePermissions as unknown[]).length.toString()
+    const TestComp = createTestComponent(usePagePermissions, 'page', r =>
+      (r.pagePermissions as unknown[]).length.toString()
     )
 
     render(<TestComp />)
@@ -162,10 +156,8 @@ describe('usePermissionCategories', () => {
   afterEach(cleanup)
 
   it('should fetch permission categories', async () => {
-    const TestComp = createTestComponent(
-      usePermissionCategories,
-      'categories',
-      r => Object.keys(r.categories as Record<string, unknown>).join(',')
+    const TestComp = createTestComponent(usePermissionCategories, 'categories', r =>
+      Object.keys(r.categories as Record<string, unknown>).join(',')
     )
 
     render(<TestComp />)
@@ -183,10 +175,8 @@ describe('useRoleLabels', () => {
   afterEach(cleanup)
 
   it('should fetch role labels', async () => {
-    const TestComp = createTestComponent(
-      useRoleLabels,
-      'roles',
-      r => Object.values(r.roleLabels as Record<string, string>).join(',')
+    const TestComp = createTestComponent(useRoleLabels, 'roles', r =>
+      Object.values(r.roleLabels as Record<string, string>).join(',')
     )
 
     render(<TestComp />)
@@ -204,10 +194,8 @@ describe('usePermissionLabels', () => {
   afterEach(cleanup)
 
   it('should fetch permission labels', async () => {
-    const TestComp = createTestComponent(
-      usePermissionLabels,
-      'plabels',
-      r => Object.values(r.permissionLabels as Record<string, string>).join(',')
+    const TestComp = createTestComponent(usePermissionLabels, 'plabels', r =>
+      Object.values(r.permissionLabels as Record<string, string>).join(',')
     )
 
     render(<TestComp />)
@@ -225,10 +213,8 @@ describe('useConfig', () => {
   afterEach(cleanup)
 
   it('should fetch all permissions', async () => {
-    const TestComp = createTestComponent(
-      useConfig,
-      'config',
-      r => (r.permissions as unknown[]).length.toString()
+    const TestComp = createTestComponent(useConfig, 'config', r =>
+      (r.permissions as unknown[]).length.toString()
     )
 
     render(<TestComp />)
@@ -244,10 +230,8 @@ describe('useConfig', () => {
     const { apiClient } = await import('../../services/apiClient')
     vi.mocked(apiClient.api.permissions.$get).mockRejectedValueOnce(new Error('Failed'))
 
-    const TestComp = createTestComponent(
-      useConfig,
-      'config',
-      r => (r.permissions as unknown[]).length.toString()
+    const TestComp = createTestComponent(useConfig, 'config', r =>
+      (r.permissions as unknown[]).length.toString()
     )
 
     render(<TestComp />)

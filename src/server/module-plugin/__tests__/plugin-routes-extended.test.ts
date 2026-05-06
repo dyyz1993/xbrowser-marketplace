@@ -12,7 +12,7 @@ function doFetch(path: string, init?: RequestInit) {
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
     'User-Agent': 'TestClient/1.0',
-    ...(init?.headers as Record<string, string> ?? {}),
+    ...((init?.headers as Record<string, string>) ?? {}),
   }
   const req = new Request(`http://localhost${path}`, { ...init, headers })
   return application.fetch(req)
@@ -74,11 +74,7 @@ async function seedReview(
   return reviewId
 }
 
-async function seedCategory(
-  id = 'cat-ext-1',
-  slug = 'ext-category',
-  name = 'Extended Category'
-) {
+async function seedCategory(id = 'cat-ext-1', slug = 'ext-category', name = 'Extended Category') {
   const client = await getRawClient()
   if (!client || !('execute' in client)) return
   await client.execute({
@@ -197,7 +193,9 @@ describe('Plugin Routes Extended', () => {
       const res = await doFetch('/api/plugins/update-test', {
         method: 'PUT',
         headers: authHeaders('user-token'),
-        body: JSON.stringify({ description: 'Hacked description that is long enough for validation' }),
+        body: JSON.stringify({
+          description: 'Hacked description that is long enough for validation',
+        }),
       })
       expect([403, 409]).toContain(res.status)
     })

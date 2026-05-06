@@ -1,14 +1,6 @@
 import { useEffect, useState, useCallback } from 'react'
 import { pluginAdminApi } from '../services/plugin-admin-api'
-import {
-  Table,
-  Tag,
-  Button,
-  Input,
-  Select,
-  Popconfirm,
-  message,
-} from 'antd'
+import { Table, Tag, Button, Input, Select, Popconfirm, message } from 'antd'
 import { Search, Trash2, Star, RefreshCw } from 'lucide-react'
 
 interface PluginItem {
@@ -113,9 +105,7 @@ export const PluginManagementPage: React.FC = () => {
       title: 'Status',
       dataIndex: 'status',
       key: 'status',
-      render: (status: string) => (
-        <Tag color={statusColorMap[status]}>{status}</Tag>
-      ),
+      render: (status: string) => <Tag color={statusColorMap[status]}>{status}</Tag>,
     },
     {
       title: 'Downloads',
@@ -132,7 +122,7 @@ export const PluginManagementPage: React.FC = () => {
       title: 'Featured',
       dataIndex: 'featured',
       key: 'featured',
-      render: (featured: boolean, record: PluginItem) => (
+      render: (featured: boolean, record: PluginItem) =>
         record.status === 'approved' ? (
           <Button
             type="text"
@@ -146,8 +136,7 @@ export const PluginManagementPage: React.FC = () => {
           />
         ) : (
           <span className="text-gray-300">—</span>
-        )
-      ),
+        ),
     },
     {
       title: 'Created',

@@ -8,7 +8,11 @@ interface SearchBarProps {
   onSearch?: (query: string) => void
 }
 
-export const SearchBar: React.FC<SearchBarProps> = ({ initialQuery = '', size = 'default', onSearch }) => {
+export const SearchBar: React.FC<SearchBarProps> = ({
+  initialQuery = '',
+  size = 'default',
+  onSearch,
+}) => {
   const [query, setQuery] = useState(initialQuery)
   const navigate = useNavigate()
 
@@ -31,7 +35,9 @@ export const SearchBar: React.FC<SearchBarProps> = ({ initialQuery = '', size = 
   return (
     <form onSubmit={handleSubmit} className="w-full max-w-2xl">
       <div className="relative">
-        <Search className={`absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 ${isLarge ? 'w-5 h-5' : 'w-4 h-4'}`} />
+        <Search
+          className={`absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 ${isLarge ? 'w-5 h-5' : 'w-4 h-4'}`}
+        />
         <input
           type="text"
           value={query}

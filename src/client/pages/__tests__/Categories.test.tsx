@@ -122,7 +122,12 @@ describe('CategoriesPage', () => {
     it('should render categories when available', () => {
       mockStore.categories = [
         createMockCategory({ name: 'E-Commerce', slug: 'e-commerce' }),
-        createMockCategory({ id: 'cat-2', name: 'Social Media', slug: 'social-media', pluginCount: 3 }),
+        createMockCategory({
+          id: 'cat-2',
+          name: 'Social Media',
+          slug: 'social-media',
+          pluginCount: 3,
+        }),
       ]
       render(<CategoriesPage />)
       expect(screen.getByText('E-Commerce')).toBeInTheDocument()

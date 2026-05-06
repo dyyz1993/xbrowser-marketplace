@@ -8,7 +8,9 @@ export const pluginAdminApi = {
     return response.json()
   },
 
-  listAllPlugins: async (params: { page?: number; limit?: number; search?: string; status?: string } = {}) => {
+  listAllPlugins: async (
+    params: { page?: number; limit?: number; search?: string; status?: string } = {}
+  ) => {
     const query: Record<string, string> = {
       page: String(params.page ?? 1),
       limit: String(params.limit ?? 20),
@@ -72,12 +74,21 @@ export const pluginAdminApi = {
     return response.json()
   },
 
-  createCategory: async (data: { name: string; slug: string; description?: string; icon?: string; sortOrder?: number }) => {
+  createCategory: async (data: {
+    name: string
+    slug: string
+    description?: string
+    icon?: string
+    sortOrder?: number
+  }) => {
     const response = await apiClient.api.admin.categories.$post({ json: data })
     return response.json()
   },
 
-  updateCategory: async (id: string, data: { name?: string; slug?: string; description?: string; icon?: string; sortOrder?: number }) => {
+  updateCategory: async (
+    id: string,
+    data: { name?: string; slug?: string; description?: string; icon?: string; sortOrder?: number }
+  ) => {
     const response = await apiClient.api.admin.categories[':id'].$put({
       param: { id },
       json: data,

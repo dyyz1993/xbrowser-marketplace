@@ -3,11 +3,7 @@ import { OpenAPIHono } from '@hono/zod-openapi'
 import { authMiddleware } from '../../middleware/auth'
 import { successResponse, errorResponse, success, created } from '../../utils/route-helpers'
 import { ApiSuccessSchema } from '@shared/schemas'
-import {
-  PluginDetailSchema,
-  VersionSchema,
-  TarballInfoSchema,
-} from '@shared/modules/plugins'
+import { PluginDetailSchema, VersionSchema, TarballInfoSchema } from '@shared/modules/plugins'
 import { PluginSlugSchema, PublishMetadataSchema, CreateVersionSchema } from '../plugin.types'
 import * as publishService from '../services/publish-service'
 
@@ -72,13 +68,16 @@ const downloadTarballRoute = createRoute({
 })
 
 export const publishRoutes = new OpenAPIHono()
-  .openapi(publishPluginRoute, async (c) => {
+  .openapi(publishPluginRoute, async c => {
     const user = c.get('authUser')
     const body = await c.req.parseBody()
 
     const metadataStr = body['metadata']
     if (!metadataStr || typeof metadataStr === 'string') {
-      return c.json({ success: false as const, error: 'Missing metadata', timestamp: new Date().toISOString() }, 400)
+      return c.json(
+        { success: false as const, error: 'Missing metadata', timestamp: new Date().toISOString() },
+        400
+      )
     }
     const metadataText = await (metadataStr as File).text()
     const rawMeta = JSON.parse(metadataText)
@@ -130,7 +129,7 @@ export const publishRoutes = new OpenAPIHono()
 
     return c.json(created(plugin), 201)
   })
-  .openapi(publishVersionRoute, async (c) => {
+  .openapi(publishVersionRoute, async c => {
     const { slug } = c.req.valid('param')
     const data = c.req.valid('json')
     const user = c.get('authUser')
@@ -149,7 +148,7 @@ export const publishRoutes = new OpenAPIHono()
       201
     )
   })
-  .openapi(downloadTarballRoute, async (c) => {
+  .openapi(downloadTarballRoute, async c => {
     const { slug } = c.req.valid('param')
     const result = await publishService.getTarballInfo(slug, { R2_BUCKET: getR2Bucket() })
 

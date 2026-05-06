@@ -26,16 +26,30 @@ export async function createCategory(data: {
     sortOrder: data.sortOrder ?? 0,
   })
 
-  const rows: CategoryRow[] = await db.select().from(pluginCategories).where(eq(pluginCategories.id, id)).limit(1)
+  const rows: CategoryRow[] = await db
+    .select()
+    .from(pluginCategories)
+    .where(eq(pluginCategories.id, id))
+    .limit(1)
   return { ...rows[0], pluginCount: 0 }
 }
 
 export async function updateCategory(
   id: string,
-  data: { name?: string | null; slug?: string | null; description?: string | null; icon?: string | null; sortOrder?: number | null }
+  data: {
+    name?: string | null
+    slug?: string | null
+    description?: string | null
+    icon?: string | null
+    sortOrder?: number | null
+  }
 ) {
   const db = await getDb()
-  const existing: CategoryRow[] = await db.select().from(pluginCategories).where(eq(pluginCategories.id, id)).limit(1)
+  const existing: CategoryRow[] = await db
+    .select()
+    .from(pluginCategories)
+    .where(eq(pluginCategories.id, id))
+    .limit(1)
 
   if (existing.length === 0) {
     throw new NotFoundError('Category', id)
@@ -50,13 +64,21 @@ export async function updateCategory(
 
   await db.update(pluginCategories).set(updateData).where(eq(pluginCategories.id, id))
 
-  const rows: CategoryRow[] = await db.select().from(pluginCategories).where(eq(pluginCategories.id, id)).limit(1)
+  const rows: CategoryRow[] = await db
+    .select()
+    .from(pluginCategories)
+    .where(eq(pluginCategories.id, id))
+    .limit(1)
   return { ...rows[0], pluginCount: 0 }
 }
 
 export async function deleteCategory(id: string): Promise<{ id: string }> {
   const db = await getDb()
-  const existing: CategoryRow[] = await db.select().from(pluginCategories).where(eq(pluginCategories.id, id)).limit(1)
+  const existing: CategoryRow[] = await db
+    .select()
+    .from(pluginCategories)
+    .where(eq(pluginCategories.id, id))
+    .limit(1)
 
   if (existing.length === 0) {
     throw new NotFoundError('Category', id)

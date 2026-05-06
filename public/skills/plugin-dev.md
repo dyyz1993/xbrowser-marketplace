@@ -19,13 +19,13 @@ mkdir my-plugin && cd my-plugin
 ### 2. Create `index.ts`
 
 ```typescript
-import { z } from 'zod';
+import { z } from 'zod'
 
 export default function (xcli: XCLIAPI): void {
   const site = xcli.createSite({
     name: 'my-plugin',
     url: 'https://example.com',
-  });
+  })
 
   site.command('hello', {
     description: 'Say hello',
@@ -35,7 +35,7 @@ export default function (xcli: XCLIAPI): void {
       ok: true as const,
       message: `Hello, ${params.name}!`,
     }),
-  });
+  })
 }
 ```
 
@@ -87,7 +87,7 @@ my-plugin/
 The entry file must export a default function:
 
 ```typescript
-import type { XCLIAPI } from '@dyyz1993/xbrowser';
+import type { XCLIAPI } from '@dyyz1993/xbrowser'
 
 export default function (xcli: XCLIAPI): void {
   // Register sites and commands here
@@ -98,19 +98,19 @@ export default function (xcli: XCLIAPI): void {
 
 The `xbrowser` field in package.json provides marketplace metadata:
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| name | string | yes | Display name |
-| slug | string | yes | URL-safe identifier (lowercase, hyphens) |
-| description | string | yes | One-line description |
-| version | string | no | Override package version |
-| author | string | no | Author name |
-| commands | string[] | no | List of command names |
-| tags | string[] | no | Searchable tags |
-| sites | string[] | no | Target website domains |
-| homepage | string | no | Plugin homepage URL |
-| license | string | no | Default: MIT |
-| screenshot | string | no | Screenshot URL |
+| Field       | Type     | Required | Description                              |
+| ----------- | -------- | -------- | ---------------------------------------- |
+| name        | string   | yes      | Display name                             |
+| slug        | string   | yes      | URL-safe identifier (lowercase, hyphens) |
+| description | string   | yes      | One-line description                     |
+| version     | string   | no       | Override package version                 |
+| author      | string   | no       | Author name                              |
+| commands    | string[] | no       | List of command names                    |
+| tags        | string[] | no       | Searchable tags                          |
+| sites       | string[] | no       | Target website domains                   |
+| homepage    | string   | no       | Plugin homepage URL                      |
+| license     | string   | no       | Default: MIT                             |
+| screenshot  | string   | no       | Screenshot URL                           |
 
 ## Command Definition
 
@@ -119,15 +119,15 @@ The `xbrowser` field in package.json provides marketplace metadata:
 ```typescript
 site.command('command-name', {
   description: 'What this command does',
-  scope: 'project',  // project | browser | page | element
+  scope: 'project', // project | browser | page | element
   parameters: z.object({
     url: z.string().url(),
     selector: z.string().optional(),
   }),
   handler: async (params, ctx) => {
-    return { ok: true as const, data: {} };
+    return { ok: true as const, data: {} }
   },
-});
+})
 ```
 
 ### Scope Levels
@@ -143,10 +143,10 @@ Always use discriminated union with `ok` field:
 
 ```typescript
 // Success
-return { ok: true as const, data: result };
+return { ok: true as const, data: result }
 
 // Failure
-return { ok: false as const, error: 'Something went wrong' };
+return { ok: false as const, error: 'Something went wrong' }
 ```
 
 Never throw errors in handlers. Use `ok: false` instead.
@@ -157,15 +157,15 @@ Inside page-scoped commands, access the browser page:
 
 ```typescript
 handler: async (params, ctx) => {
-  const page = ctx.page;
-  
-  await page.goto(params.url);
-  await page.waitForSelector(params.selector);
-  
-  const title = await page.title();
-  const content = await page.evaluate(() => document.body.innerText);
-  
-  return { ok: true as const, title, content };
+  const page = ctx.page
+
+  await page.goto(params.url)
+  await page.waitForSelector(params.selector)
+
+  const title = await page.title()
+  const content = await page.evaluate(() => document.body.innerText)
+
+  return { ok: true as const, title, content }
 }
 ```
 
@@ -188,13 +188,13 @@ parameters: z.object({
 ```typescript
 handler: async (params, ctx) => {
   try {
-    const result = await doSomething(ctx.page, params);
-    return { ok: true as const, data: result };
+    const result = await doSomething(ctx.page, params)
+    return { ok: true as const, data: result }
   } catch (e) {
-    return { 
-      ok: false as const, 
-      error: e instanceof Error ? e.message : 'Unknown error' 
-    };
+    return {
+      ok: false as const,
+      error: e instanceof Error ? e.message : 'Unknown error',
+    }
   }
 }
 ```
@@ -203,10 +203,10 @@ handler: async (params, ctx) => {
 
 ```typescript
 // Read state
-const state = await ctx.storage.get<PluginState>('my-key');
+const state = await ctx.storage.get<PluginState>('my-key')
 
 // Write state
-await ctx.storage.set('my-key', { lastRun: Date.now() });
+await ctx.storage.set('my-key', { lastRun: Date.now() })
 ```
 
 ### 4. Type Safety
@@ -252,6 +252,7 @@ xbrowser plugin publish --dry-run
 ```
 
 This validates:
+
 - `index.ts` exists and has default export
 - `package.json` has required fields
 - `xbrowser` metadata is complete
@@ -264,6 +265,7 @@ xbrowser plugin publish
 ```
 
 The CLI will:
+
 1. Read plugin files (excluding node_modules, .git, etc.)
 2. Validate metadata
 3. Package and upload to the marketplace
@@ -296,22 +298,22 @@ site.command('scrape', {
     fields: z.array(z.string()),
   }),
   handler: async (params, ctx) => {
-    const elements = await ctx.page.$$(params.selector);
-    const results = [];
-    
+    const elements = await ctx.page.$$(params.selector)
+    const results = []
+
     for (const el of elements) {
-      const item: Record<string, string> = {};
+      const item: Record<string, string> = {}
       for (const field of params.fields) {
-        item[field] = await el.$eval(`[data-${field}]`, (e: Element) => 
-          (e as HTMLElement).textContent?.trim() || ''
-        ).catch(() => '');
+        item[field] = await el
+          .$eval(`[data-${field}]`, (e: Element) => (e as HTMLElement).textContent?.trim() || '')
+          .catch(() => '')
       }
-      results.push(item);
+      results.push(item)
     }
-    
-    return { ok: true as const, data: results };
+
+    return { ok: true as const, data: results }
   },
-});
+})
 ```
 
 ### Form Filling Pattern
@@ -326,17 +328,17 @@ site.command('fill-form', {
   }),
   handler: async (params, ctx) => {
     for (const [selector, value] of Object.entries(params.fields)) {
-      await ctx.page.fill(selector, value);
+      await ctx.page.fill(selector, value)
     }
-    
+
     if (params.submit) {
-      await ctx.page.click('button[type="submit"]');
-      await ctx.page.waitForNavigation();
+      await ctx.page.click('button[type="submit"]')
+      await ctx.page.waitForNavigation()
     }
-    
-    return { ok: true as const };
+
+    return { ok: true as const }
   },
-});
+})
 ```
 
 ### Screenshot Pattern
@@ -352,15 +354,15 @@ site.command('screenshot-element', {
   handler: async (params, ctx) => {
     const buffer = await ctx.page.screenshot({
       fullPage: params.fullPage,
-    });
-    
-    return { 
-      ok: true as const, 
+    })
+
+    return {
+      ok: true as const,
       size: buffer.length,
       mimeType: 'image/png',
-    };
+    }
   },
-});
+})
 ```
 
 ## File Size Limits
@@ -371,11 +373,11 @@ site.command('screenshot-element', {
 
 ## Marketplace API Endpoints
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | /api/auth/register | Register developer account |
-| POST | /api/auth/login | Login and get API token |
-| GET | /api/auth/verify | Verify current token |
-| POST | /api/plugins/publish | Publish plugin (multipart) |
-| POST | /api/plugins/:slug/versions | Publish new version |
-| GET | /api/plugins/:slug/tarball | Get tarball download info |
+| Method | Endpoint                    | Description                |
+| ------ | --------------------------- | -------------------------- |
+| POST   | /api/auth/register          | Register developer account |
+| POST   | /api/auth/login             | Login and get API token    |
+| GET    | /api/auth/verify            | Verify current token       |
+| POST   | /api/plugins/publish        | Publish plugin (multipart) |
+| POST   | /api/plugins/:slug/versions | Publish new version        |
+| GET    | /api/plugins/:slug/tarball  | Get tarball download info  |

@@ -85,7 +85,10 @@ export const noTypeAssertionOnSharedTypes = {
         } else if (typeAnnotation.type === 'TSArrayType') {
           // 处理数组类型
           const elementType = typeAnnotation.elementType
-          if (elementType.type === 'TSTypeReference' && elementType.typeName.type === 'Identifier') {
+          if (
+            elementType.type === 'TSTypeReference' &&
+            elementType.typeName.type === 'Identifier'
+          ) {
             typeName = elementType.typeName.name
           }
         }

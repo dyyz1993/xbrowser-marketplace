@@ -13,12 +13,16 @@ export const ExpandedRow: React.FC<{ record: PluginItem }> = ({ record }) => (
     </Descriptions.Item>
     <Descriptions.Item label="Commands">
       {record.commands.map(c => (
-        <Tag key={c} color="blue">{c}</Tag>
+        <Tag key={c} color="blue">
+          {c}
+        </Tag>
       ))}
     </Descriptions.Item>
     <Descriptions.Item label="Site URLs" span={2}>
       {record.siteUrls.map(s => (
-        <Tag key={s} color="geekblue">{s}</Tag>
+        <Tag key={s} color="geekblue">
+          {s}
+        </Tag>
       ))}
     </Descriptions.Item>
     {record.readme && (

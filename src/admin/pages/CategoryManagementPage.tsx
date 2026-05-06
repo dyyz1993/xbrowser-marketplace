@@ -1,17 +1,7 @@
 import { useState } from 'react'
 import { pluginAdminApi } from '../services/plugin-admin-api'
 import { useCRUD } from '../hooks/useCRUD'
-import {
-  Table,
-  Button,
-  Space,
-  Modal,
-  Form,
-  Input,
-  InputNumber,
-  Popconfirm,
-  Tag,
-} from 'antd'
+import { Table, Button, Space, Modal, Form, Input, InputNumber, Popconfirm, Tag } from 'antd'
 import { Plus, Pencil, Trash2, RefreshCw } from 'lucide-react'
 
 interface CategoryItem {
@@ -58,7 +48,7 @@ export const CategoryManagementPage: React.FC = () => {
       }
       return []
     },
-    createFn: async (input) => {
+    createFn: async input => {
       const result = await pluginAdminApi.createCategory(input)
       if (!result.success) throw new Error('Create failed')
       return result.data as unknown as CategoryItem
@@ -68,7 +58,7 @@ export const CategoryManagementPage: React.FC = () => {
       if (!result.success) throw new Error('Update failed')
       return result.data as unknown as CategoryItem
     },
-    deleteFn: async (id) => {
+    deleteFn: async id => {
       const result = await pluginAdminApi.deleteCategory(id)
       if (!result.success) throw new Error('Delete failed')
     },
@@ -158,7 +148,9 @@ export const CategoryManagementPage: React.FC = () => {
           </Button>
           <Popconfirm
             title={`Delete "${record.name}"?`}
-            description={record.pluginCount > 0 ? `${record.pluginCount} plugins will be unlinked.` : ''}
+            description={
+              record.pluginCount > 0 ? `${record.pluginCount} plugins will be unlinked.` : ''
+            }
             onConfirm={() => handleDelete(record.id)}
           >
             <Button danger size="small" icon={<Trash2 className="w-3 h-3" />}>

@@ -26,7 +26,9 @@ describe('CLIPage', () => {
 
     it('should render page description', () => {
       render(<CLIPage />)
-      expect(screen.getByText(/Install the xbrowser CLI and start using plugins/)).toBeInTheDocument()
+      expect(
+        screen.getByText(/Install the xbrowser CLI and start using plugins/)
+      ).toBeInTheDocument()
     })
   })
 
@@ -90,9 +92,7 @@ describe('CLIPage', () => {
 
     it('should render AI agent prompt example', () => {
       render(<CLIPage />)
-      expect(
-        screen.getByText(/Create an xbrowser plugin for scraping/)
-      ).toBeInTheDocument()
+      expect(screen.getByText(/Create an xbrowser plugin for scraping/)).toBeInTheDocument()
     })
   })
 
@@ -108,9 +108,7 @@ describe('CLIPage', () => {
 
     it('should render workflow description', () => {
       render(<CLIPage />)
-      expect(
-        screen.getByText(/Create → Test locally → Login → Publish/)
-      ).toBeInTheDocument()
+      expect(screen.getByText(/Create → Test locally → Login → Publish/)).toBeInTheDocument()
     })
   })
 
@@ -135,9 +133,7 @@ describe('CLIPage', () => {
     it('should have copy buttons for code blocks', () => {
       render(<CLIPage />)
       const copyButtons = screen.getAllByRole('button')
-      const copyBtnCount = copyButtons.filter(
-        btn => btn.querySelector('svg.lucide-copy')
-      ).length
+      const copyBtnCount = copyButtons.filter(btn => btn.querySelector('svg.lucide-copy')).length
       expect(copyBtnCount).toBeGreaterThan(0)
     })
 

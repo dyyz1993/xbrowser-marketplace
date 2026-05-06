@@ -6,7 +6,7 @@ import type { RoleType } from '@shared/modules/role/schemas'
 export const getColumns = (
   onManagePermissions: (role: RoleType) => void,
   onEdit: (role: RoleType) => void,
-  onDelete: (id: string) => void,
+  onDelete: (id: string) => void
 ): ColumnsType<RoleType> => [
   {
     title: '角色代码',
@@ -50,11 +50,7 @@ export const getColumns = (
     render: (_: unknown, record: RoleType) => (
       <Space>
         {record.code !== 'super_admin' && (
-          <Button
-            type="link"
-            icon={<KeyOutlined />}
-            onClick={() => onManagePermissions(record)}
-          >
+          <Button type="link" icon={<KeyOutlined />} onClick={() => onManagePermissions(record)}>
             权限
           </Button>
         )}

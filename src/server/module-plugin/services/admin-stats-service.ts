@@ -1,5 +1,11 @@
 import { getDb } from '../../db'
-import { plugins, pluginCategories, pluginCategoryMappings, pluginReviews, developers } from '../../db/schema'
+import {
+  plugins,
+  pluginCategories,
+  pluginCategoryMappings,
+  pluginReviews,
+  developers,
+} from '../../db/schema'
 import { desc, sql } from 'drizzle-orm'
 import { toAdminPluginItem, type PluginRow } from './admin-plugin-helpers'
 
@@ -34,7 +40,10 @@ export async function getDashboardStats() {
       catPluginCounts.set(catName, (catPluginCounts.get(catName) ?? 0) + 1)
     }
   }
-  const pluginsByCategory = Array.from(catPluginCounts.entries()).map(([category, count]) => ({ category, count }))
+  const pluginsByCategory = Array.from(catPluginCounts.entries()).map(([category, count]) => ({
+    category,
+    count,
+  }))
 
   const allDevelopers = await db.select().from(developers)
   const roleCounts = new Map<string, number>()
@@ -68,7 +77,10 @@ export async function getDashboardStats() {
 export async function getPluginInventory() {
   const db = await getDb()
 
-  const allPlugins: PluginRow[] = await db.select().from(plugins).where(sql`${plugins.status} != 'removed'`)
+  const allPlugins: PluginRow[] = await db
+    .select()
+    .from(plugins)
+    .where(sql`${plugins.status} != 'removed'`)
 
   const allMappings = await db.select().from(pluginCategoryMappings)
   const allReviews = await db.select().from(pluginReviews)

@@ -90,9 +90,9 @@ describe('Export Routes', () => {
 
       if (tokenData.success) {
         const token = tokenData.data.token
-        const downloadRes = await client.api.admin.todos.export.download[':token'].$get(
-          { param: { token } }
-        )
+        const downloadRes = await client.api.admin.todos.export.download[':token'].$get({
+          param: { token },
+        })
 
         expect(downloadRes.status).toBe(200)
         const contentType = downloadRes.headers.get('Content-Type')
@@ -104,12 +104,12 @@ describe('Export Routes', () => {
 
     it('should return 403 for invalid token', async () => {
       const client = createTestClient()
-      const res = await client.api.admin.todos.export.download[':token'].$get(
-        { param: { token: 'invalid-token-12345' } }
-      )
+      const res = await client.api.admin.todos.export.download[':token'].$get({
+        param: { token: 'invalid-token-12345' },
+      })
 
       expect(res.status).toBe(403)
-      const data = await res.json() as Record<string, unknown>
+      const data = (await res.json()) as Record<string, unknown>
       expect(data.success).toBe(false)
       expect(data.error).toContain('Invalid or expired')
     })
@@ -124,14 +124,14 @@ describe('Export Routes', () => {
       if (tokenData.success) {
         const token = tokenData.data.token
 
-        const firstDownload = await client.api.admin.todos.export.download[':token'].$get(
-          { param: { token } }
-        )
+        const firstDownload = await client.api.admin.todos.export.download[':token'].$get({
+          param: { token },
+        })
         expect(firstDownload.status).toBe(200)
 
-        const secondDownload = await client.api.admin.todos.export.download[':token'].$get(
-          { param: { token } }
-        )
+        const secondDownload = await client.api.admin.todos.export.download[':token'].$get({
+          param: { token },
+        })
         expect(secondDownload.status).toBe(403)
       }
     })

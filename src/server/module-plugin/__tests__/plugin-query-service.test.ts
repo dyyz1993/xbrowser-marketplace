@@ -30,7 +30,13 @@ async function seedPlugin(overrides: Record<string, unknown> = {}) {
   })
   await client.execute({
     sql: `INSERT INTO plugin_versions (id, plugin_id, version, status, published_at) VALUES (?, ?, ?, ?, ?)`,
-    args: [`ver-${(overrides.id as string) ?? 'plugin-1'}`, (overrides.id as string) ?? 'plugin-1', '1.0.0', 'approved', now],
+    args: [
+      `ver-${(overrides.id as string) ?? 'plugin-1'}`,
+      (overrides.id as string) ?? 'plugin-1',
+      '1.0.0',
+      'approved',
+      now,
+    ],
   })
 }
 
@@ -138,14 +144,20 @@ describe('Plugin Query Service', () => {
 
     it('should filter by site', async () => {
       await seedPlugin()
-      const result = await pluginQueryService.searchPlugins({ query: 'Query', site: 'https://example.com' })
+      const result = await pluginQueryService.searchPlugins({
+        query: 'Query',
+        site: 'https://example.com',
+      })
       expect(result.items.length).toBeGreaterThanOrEqual(1)
     })
 
     it('should filter by category', async () => {
       await seedPlugin()
       await seedCategory()
-      const result = await pluginQueryService.searchPlugins({ query: 'Query', category: 'automation' })
+      const result = await pluginQueryService.searchPlugins({
+        query: 'Query',
+        category: 'automation',
+      })
       expect(result.items.length).toBeGreaterThanOrEqual(1)
     })
   })

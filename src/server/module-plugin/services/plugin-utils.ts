@@ -70,5 +70,8 @@ export function buildStatusCondition(status?: string): SQL {
 
 export function inList(columnExpr: unknown, ids: string[]): SQL {
   if (ids.length === 1 && ids[0]) return eq(columnExpr as never, ids[0])
-  return sql`${columnExpr} IN (${sql.join(ids.map(id => sql`${id}`), sql`, `)})`
+  return sql`${columnExpr} IN (${sql.join(
+    ids.map(id => sql`${id}`),
+    sql`, `
+  )})`
 }

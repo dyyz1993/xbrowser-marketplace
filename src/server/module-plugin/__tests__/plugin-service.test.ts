@@ -124,7 +124,10 @@ describe('Plugin Service', () => {
 
     it('should filter by site', async () => {
       await seedPlugin()
-      const result = await pluginService.searchPlugins({ query: 'Test', site: 'https://example.com' })
+      const result = await pluginService.searchPlugins({
+        query: 'Test',
+        site: 'https://example.com',
+      })
       expect(result.items.length).toBeGreaterThanOrEqual(1)
     })
   })

@@ -53,7 +53,9 @@ function checkRequiredTestFiles(
     return { missing, found }
   }
 
-  const testFiles = readdirSync(testsDir).filter(f => f.endsWith('.test.ts') || f.endsWith('.spec.ts'))
+  const testFiles = readdirSync(testsDir).filter(
+    f => f.endsWith('.test.ts') || f.endsWith('.spec.ts')
+  )
 
   for (const required of config.requiredTestFiles) {
     const hasMatch = testFiles.some(file => minimatch(file, required.pattern))

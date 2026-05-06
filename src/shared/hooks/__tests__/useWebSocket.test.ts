@@ -74,9 +74,9 @@ describe('useWebSocket', () => {
 
     const { result } = renderHook(() => useWebSocket(route))
 
-    await expect(
-      result.current.call('echo' as never, undefined as never)
-    ).rejects.toThrow('WebSocket not connected')
+    await expect(result.current.call('echo' as never, undefined as never)).rejects.toThrow(
+      'WebSocket not connected'
+    )
   })
 
   it('should call RPC method when connected', async () => {

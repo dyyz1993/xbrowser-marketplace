@@ -20,9 +20,7 @@ export const DetailModal: React.FC<{
         <Descriptions.Item label="Author">{plugin.authorName}</Descriptions.Item>
         <Descriptions.Item label="Version">{plugin.version}</Descriptions.Item>
         <Descriptions.Item label="Status">
-          <Tag color={statusColorMap[plugin.status]}>
-            {statusLabelMap[plugin.status]}
-          </Tag>
+          <Tag color={statusColorMap[plugin.status]}>{statusLabelMap[plugin.status]}</Tag>
         </Descriptions.Item>
         <Descriptions.Item label="Downloads">{plugin.downloadCount}</Descriptions.Item>
         <Descriptions.Item label="Description" span={2}>
@@ -35,7 +33,9 @@ export const DetailModal: React.FC<{
         </Descriptions.Item>
         <Descriptions.Item label="Commands" span={2}>
           {plugin.commands.map(c => (
-            <Tag key={c} color="blue">{c}</Tag>
+            <Tag key={c} color="blue">
+              {c}
+            </Tag>
           ))}
         </Descriptions.Item>
         {plugin.readme && (

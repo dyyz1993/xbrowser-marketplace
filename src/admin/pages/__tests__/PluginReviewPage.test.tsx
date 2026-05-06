@@ -250,7 +250,11 @@ describe('PluginReviewPage', () => {
       expect(screen.getByText('Test Plugin')).toBeInTheDocument()
     })
 
-    const eyeButtons = screen.getAllByRole('button').filter(btn => btn.querySelector('svg.lucide-eye') || btn.querySelector('[data-lucide="eye"]'))
+    const eyeButtons = screen
+      .getAllByRole('button')
+      .filter(
+        btn => btn.querySelector('svg.lucide-eye') || btn.querySelector('[data-lucide="eye"]')
+      )
     if (eyeButtons.length > 0) {
       await user.click(eyeButtons[0])
     }

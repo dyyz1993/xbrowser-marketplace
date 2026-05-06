@@ -13,7 +13,7 @@ function doFetch(path: string, init?: RequestInit) {
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
     'User-Agent': 'TestClient/1.0',
-    ...(init?.headers as Record<string, string> ?? {}),
+    ...((init?.headers as Record<string, string>) ?? {}),
   }
   const req = new Request(`http://localhost${path}`, { ...init, headers })
   return application.fetch(req)
@@ -135,7 +135,10 @@ describe('Plugin API', () => {
       await seedPlugin()
       const res = await doFetch('/api/plugins/test-plugin')
       expect(res.status).toBe(200)
-      const data = (await res.json()) as { success: boolean; data: { slug: string; name: string; description: string } }
+      const data = (await res.json()) as {
+        success: boolean
+        data: { slug: string; name: string; description: string }
+      }
       if (data.success) {
         expect(data.data.slug).toBe('test-plugin')
         expect(data.data.name).toBe('Test Plugin')
@@ -175,7 +178,10 @@ describe('Plugin API', () => {
         }),
       })
       expect(res.status).toBe(201)
-      const data = (await res.json()) as { success: boolean; data: { slug: string; status: string } }
+      const data = (await res.json()) as {
+        success: boolean
+        data: { slug: string; status: string }
+      }
       if (data.success) {
         expect(data.data.slug).toBe('new-plugin')
         expect(data.data.status).toBe('pending')

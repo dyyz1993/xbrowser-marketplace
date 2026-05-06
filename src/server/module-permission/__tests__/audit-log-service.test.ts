@@ -168,7 +168,16 @@ describe('Audit Log Service', () => {
       if (client && 'execute' in client) {
         await client.execute({
           sql: `INSERT INTO permission_audit_logs (id, user_id, action, resource_type, resource_id, ip_address, user_agent, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-          args: ['log-old', 'user-1', 'create', 'role', 'role-1', '127.0.0.1', 'test', Math.floor(oldTime / 1000)],
+          args: [
+            'log-old',
+            'user-1',
+            'create',
+            'role',
+            'role-1',
+            '127.0.0.1',
+            'test',
+            Math.floor(oldTime / 1000),
+          ],
         })
       }
       await service.create({

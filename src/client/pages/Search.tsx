@@ -15,7 +15,8 @@ export const SearchPage: React.FC = () => {
   const sort = searchParams.get('sort') ?? 'newest'
   const page = parseInt(searchParams.get('page') ?? '1', 10)
 
-  const { plugins, categories, loading, pagination, searchPlugins, fetchPlugins, fetchCategories } = usePluginStore()
+  const { plugins, categories, loading, pagination, searchPlugins, fetchPlugins, fetchCategories } =
+    usePluginStore()
 
   useEffect(() => {
     fetchCategories()
@@ -25,9 +26,18 @@ export const SearchPage: React.FC = () => {
     if (query) {
       searchPlugins({ q: query, category: category || undefined, page, limit: 20 })
     } else if (category) {
-      fetchPlugins({ category, sort: sort as 'newest' | 'popular' | 'most_downloaded' | 'name', page, limit: 20 })
+      fetchPlugins({
+        category,
+        sort: sort as 'newest' | 'popular' | 'most_downloaded' | 'name',
+        page,
+        limit: 20,
+      })
     } else {
-      fetchPlugins({ sort: sort as 'newest' | 'popular' | 'most_downloaded' | 'name', page, limit: 20 })
+      fetchPlugins({
+        sort: sort as 'newest' | 'popular' | 'most_downloaded' | 'name',
+        page,
+        limit: 20,
+      })
     }
   }, [query, category, sort, page, searchPlugins, fetchPlugins])
 
@@ -61,7 +71,10 @@ export const SearchPage: React.FC = () => {
             allowClear
             placeholder="All Categories"
             style={{ width: 180 }}
-            options={categories.map(c => ({ label: `${c.name} (${c.pluginCount})`, value: c.slug }))}
+            options={categories.map(c => ({
+              label: `${c.name} (${c.pluginCount})`,
+              value: c.slug,
+            }))}
           />
         </div>
         <Select

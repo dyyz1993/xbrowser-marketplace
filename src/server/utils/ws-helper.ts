@@ -1,7 +1,7 @@
-import { upgradeWebSocket } from 'hono/cloudflare-workers';
-import { isCloudflare } from './env';
+import { upgradeWebSocket } from 'hono/cloudflare-workers'
+import { isCloudflare } from './env'
 
-export { isCloudflare };
+export { isCloudflare }
 
 export function createCloudflareWSHandler(
   onMessage: (data: string, send: (msg: string) => void, close: () => void) => void,
@@ -10,21 +10,23 @@ export function createCloudflareWSHandler(
 ) {
   return upgradeWebSocket(() => ({
     onMessage(event: MessageEvent) {
-      const ws = event.target as WebSocket;
+      const ws = event.target as WebSocket
       onMessage(
         event.data as string,
-        (msg) => ws.send(msg),
+        msg => ws.send(msg),
         () => ws.close()
-      );
+      )
     },
     onClose() {
-      onClose?.();
+      onClose?.()
     },
     onOpen(_event: Event, ws: WebSocket) {
-      ws.send(JSON.stringify({
-        type: 'connected',
-        payload: { timestamp: Date.now() },
-      }));
+      ws.send(
+        JSON.stringify({
+          type: 'connected',
+          payload: { timestamp: Date.now() },
+        })
+      )
     },
-  }));
+  }))
 }

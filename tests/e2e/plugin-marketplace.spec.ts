@@ -7,7 +7,11 @@ function getBaseUrl(): string {
 test.describe('Plugin Marketplace', () => {
   async function seedPlugins(page: import('@playwright/test').Page) {
     const plugins = [
-      { name: 'Awesome Logger', category: 'developer-tools', description: 'A powerful logging plugin' },
+      {
+        name: 'Awesome Logger',
+        category: 'developer-tools',
+        description: 'A powerful logging plugin',
+      },
       { name: 'Theme Pack Pro', category: 'ui-themes', description: 'Beautiful theme collection' },
       { name: 'Data Sync', category: 'integration', description: 'Sync data across platforms' },
     ]

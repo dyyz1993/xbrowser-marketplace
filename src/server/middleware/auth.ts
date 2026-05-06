@@ -149,7 +149,9 @@ async function verifyAdminToken(token: string): Promise<AuthUser | null> {
     ['sign']
   )
   const sig = await crypto.subtle.sign('HMAC', key, encoder.encode(data))
-  const expectedHex = Array.from(new Uint8Array(sig)).map(b => b.toString(16).padStart(2, '0')).join('')
+  const expectedHex = Array.from(new Uint8Array(sig))
+    .map(b => b.toString(16).padStart(2, '0'))
+    .join('')
 
   if (hexSig !== expectedHex) return null
 
@@ -165,7 +167,12 @@ async function verifyAdminToken(token: string): Promise<AuthUser | null> {
   return {
     id: userId,
     username: userId === '1' ? 'superadmin' : userId === '2' ? 'customerservice' : 'user1',
-    email: userId === '1' ? 'superadmin@example.com' : userId === '2' ? 'cs@example.com' : 'user1@example.com',
+    email:
+      userId === '1'
+        ? 'superadmin@example.com'
+        : userId === '2'
+          ? 'cs@example.com'
+          : 'user1@example.com',
     role: mappedRole,
     permissions: getPermissionsByRole(mappedRole),
   }
@@ -202,7 +209,10 @@ export function authMiddleware(options: AuthMiddlewareOptions = {}): MiddlewareH
       throw AuthenticationError.tokenMissing()
     }
 
-    const user = verifyToken(token, secretKey) || await verifyAdminToken(token) || await verifyApiKey(token)
+    const user =
+      verifyToken(token, secretKey) ||
+      (await verifyAdminToken(token)) ||
+      (await verifyApiKey(token))
 
     if (!user) {
       log.warn({ path: c.req.path, method: c.req.method }, 'Invalid auth token')

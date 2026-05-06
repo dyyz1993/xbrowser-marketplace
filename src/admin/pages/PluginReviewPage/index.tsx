@@ -109,7 +109,7 @@ export const PluginReviewPage: React.FC = () => {
   const columns = getColumns(
     record => setDetailPlugin(record),
     handleApprove,
-    record => setRejectModal({ slug: record.slug, name: record.name }),
+    record => setRejectModal({ slug: record.slug, name: record.name })
   )
 
   return (

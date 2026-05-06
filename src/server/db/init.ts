@@ -1,5 +1,13 @@
 import { getDb } from './driver'
-import { permissions, roles, rolePermissions, plugins, pluginVersions, pluginCategories, pluginCategoryMappings } from './schema'
+import {
+  permissions,
+  roles,
+  rolePermissions,
+  plugins,
+  pluginVersions,
+  pluginCategories,
+  pluginCategoryMappings,
+} from './schema'
 import { logger } from '../utils/logger'
 import { seedCategories, seedPlugins } from './seeds/plugin-seed'
 
@@ -301,11 +309,11 @@ export async function seedPluginMarketplace() {
   const existingPlugins = await db.select().from(plugins)
   if (existingPlugins.length === 0) {
     log.info({}, 'Seeding plugins...')
-    await db.insert(plugins).values(seedPlugins.map((s) => s.plugin))
-    await db.insert(pluginVersions).values(seedPlugins.flatMap((s) => s.versions))
+    await db.insert(plugins).values(seedPlugins.map(s => s.plugin))
+    await db.insert(pluginVersions).values(seedPlugins.flatMap(s => s.versions))
     await db.insert(pluginCategoryMappings).values(
-      seedPlugins.flatMap((s) =>
-        s.categoryIds.map((categoryId) => ({
+      seedPlugins.flatMap(s =>
+        s.categoryIds.map(categoryId => ({
           pluginId: s.plugin.id,
           categoryId,
         }))

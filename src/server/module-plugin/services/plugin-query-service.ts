@@ -60,7 +60,12 @@ export async function listPlugins(options: {
         .where(eq(pluginCategoryMappings.categoryId, catRows[0].id))
 
       if (mappingRows.length > 0) {
-        conditions.push(inList(plugins.id, mappingRows.map(m => m.pluginId)))
+        conditions.push(
+          inList(
+            plugins.id,
+            mappingRows.map(m => m.pluginId)
+          )
+        )
       } else {
         return { items: [], total: 0 }
       }
@@ -142,7 +147,12 @@ export async function searchPlugins(options: {
         .where(eq(pluginCategoryMappings.categoryId, catRows[0].id))
 
       if (mappingRows.length > 0) {
-        conditions.push(inList(plugins.id, mappingRows.map(m => m.pluginId)))
+        conditions.push(
+          inList(
+            plugins.id,
+            mappingRows.map(m => m.pluginId)
+          )
+        )
       } else {
         return { items: [], total: 0 }
       }
@@ -152,7 +162,13 @@ export async function searchPlugins(options: {
   const whereClause = and(...conditions)
 
   const [rows, countRows] = await Promise.all([
-    db.select().from(plugins).where(whereClause).orderBy(desc(plugins.createdAt)).limit(limit).offset(offset),
+    db
+      .select()
+      .from(plugins)
+      .where(whereClause)
+      .orderBy(desc(plugins.createdAt))
+      .limit(limit)
+      .offset(offset),
     db.select().from(plugins).where(whereClause),
   ])
 
@@ -168,7 +184,11 @@ export async function searchPlugins(options: {
 export async function getPluginBySlug(slug: string): Promise<PluginDetail> {
   const db = await getDb()
 
-  const pluginRows: PluginRow[] = await db.select().from(plugins).where(eq(plugins.slug, slug)).limit(1)
+  const pluginRows: PluginRow[] = await db
+    .select()
+    .from(plugins)
+    .where(eq(plugins.slug, slug))
+    .limit(1)
 
   if (pluginRows.length === 0) {
     throw new NotFoundError('Plugin', slug)
@@ -228,7 +248,11 @@ export async function getPluginBySlug(slug: string): Promise<PluginDetail> {
 export async function getPluginVersions(slug: string) {
   const db = await getDb()
 
-  const pluginRows: PluginRow[] = await db.select().from(plugins).where(eq(plugins.slug, slug)).limit(1)
+  const pluginRows: PluginRow[] = await db
+    .select()
+    .from(plugins)
+    .where(eq(plugins.slug, slug))
+    .limit(1)
 
   if (pluginRows.length === 0) {
     throw new NotFoundError('Plugin', slug)
@@ -311,7 +335,13 @@ export async function getPluginsByCategory(
   const whereClause = and(inList(plugins.id, ids), eq(plugins.status, 'approved'))
 
   const [rows, countRows] = await Promise.all([
-    db.select().from(plugins).where(whereClause).orderBy(desc(plugins.downloadCount)).limit(limit).offset(offset),
+    db
+      .select()
+      .from(plugins)
+      .where(whereClause)
+      .orderBy(desc(plugins.downloadCount))
+      .limit(limit)
+      .offset(offset),
     db.select().from(plugins).where(whereClause),
   ])
 

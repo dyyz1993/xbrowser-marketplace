@@ -100,27 +100,27 @@ npm run format
 
 All API endpoints are under `/api/`.
 
-| Area | Method | Endpoint | Auth |
-|------|--------|----------|------|
-| Auth | POST | `/api/auth/register` | No |
-| Auth | POST | `/api/auth/login` | No |
-| Auth | GET | `/api/auth/verify` | Yes |
-| Plugins | GET | `/api/plugins` | No |
-| Plugins | GET | `/api/plugins/search` | No |
-| Plugins | GET | `/api/plugins/{slug}` | No |
-| Plugins | POST | `/api/plugins` | Yes |
-| Plugins | PUT | `/api/plugins/{slug}` | Yes |
-| Plugins | DELETE | `/api/plugins/{slug}` | Yes |
-| Plugins | POST | `/api/plugins/publish` | Yes |
-| Plugins | POST | `/api/plugins/{slug}/install` | No |
-| Plugins | POST | `/api/plugins/{slug}/reviews` | Yes |
-| Categories | GET | `/api/categories` | No |
-| Categories | GET | `/api/categories/{slug}/plugins` | No |
-| Stats | GET | `/api/stats` | No |
-| Admin | GET | `/api/admin/stats/dashboard` | Admin |
-| Admin | GET | `/api/admin/plugins/pending` | Admin |
-| Admin | PUT | `/api/admin/plugins/{slug}/approve` | Admin |
-| Admin | PUT | `/api/admin/plugins/{slug}/reject` | Admin |
+| Area       | Method | Endpoint                            | Auth  |
+| ---------- | ------ | ----------------------------------- | ----- |
+| Auth       | POST   | `/api/auth/register`                | No    |
+| Auth       | POST   | `/api/auth/login`                   | No    |
+| Auth       | GET    | `/api/auth/verify`                  | Yes   |
+| Plugins    | GET    | `/api/plugins`                      | No    |
+| Plugins    | GET    | `/api/plugins/search`               | No    |
+| Plugins    | GET    | `/api/plugins/{slug}`               | No    |
+| Plugins    | POST   | `/api/plugins`                      | Yes   |
+| Plugins    | PUT    | `/api/plugins/{slug}`               | Yes   |
+| Plugins    | DELETE | `/api/plugins/{slug}`               | Yes   |
+| Plugins    | POST   | `/api/plugins/publish`              | Yes   |
+| Plugins    | POST   | `/api/plugins/{slug}/install`       | No    |
+| Plugins    | POST   | `/api/plugins/{slug}/reviews`       | Yes   |
+| Categories | GET    | `/api/categories`                   | No    |
+| Categories | GET    | `/api/categories/{slug}/plugins`    | No    |
+| Stats      | GET    | `/api/stats`                        | No    |
+| Admin      | GET    | `/api/admin/stats/dashboard`        | Admin |
+| Admin      | GET    | `/api/admin/plugins/pending`        | Admin |
+| Admin      | PUT    | `/api/admin/plugins/{slug}/approve` | Admin |
+| Admin      | PUT    | `/api/admin/plugins/{slug}/reject`  | Admin |
 
 See [docs/api.md](docs/api.md) for complete API documentation.
 

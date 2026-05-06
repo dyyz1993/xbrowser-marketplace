@@ -6,8 +6,24 @@ import { RolesPage } from '../RolesPage'
 vi.mock('../../hooks/useRoles', () => ({
   useRoleStore: () => ({
     roles: [
-      { id: 'r1', code: 'admin', name: '管理员', label: '管理员', description: '', isSystem: true, isActive: true },
-      { id: 'r2', code: 'manager', name: '经理', label: '经理', description: '经理角色', isSystem: false, isActive: true },
+      {
+        id: 'r1',
+        code: 'admin',
+        name: '管理员',
+        label: '管理员',
+        description: '',
+        isSystem: true,
+        isActive: true,
+      },
+      {
+        id: 'r2',
+        code: 'manager',
+        name: '经理',
+        label: '经理',
+        description: '经理角色',
+        isSystem: false,
+        isActive: true,
+      },
     ],
     loading: false,
     fetchRoles: vi.fn(),
@@ -133,7 +149,9 @@ describe('RolesPage', () => {
     await user.click(screen.getByText('创建角色'))
 
     await waitFor(() => {
-      const modal = screen.getByText('创建角色', { selector: '.ant-modal-title' }).closest('.ant-modal')!
+      const modal = screen
+        .getByText('创建角色', { selector: '.ant-modal-title' })
+        .closest('.ant-modal')!
       expect(within(modal as HTMLElement).getByText('角色代码')).toBeInTheDocument()
       expect(within(modal as HTMLElement).getByText('角色名称')).toBeInTheDocument()
       expect(within(modal as HTMLElement).getByText('显示名称')).toBeInTheDocument()
@@ -152,7 +170,9 @@ describe('RolesPage', () => {
       expect(screen.getByText('创建角色', { selector: '.ant-modal-title' })).toBeInTheDocument()
     })
 
-    const modal = screen.getByText('创建角色', { selector: '.ant-modal-title' }).closest('.ant-modal')!
+    const modal = screen
+      .getByText('创建角色', { selector: '.ant-modal-title' })
+      .closest('.ant-modal')!
     expect(within(modal as HTMLElement).queryByText('状态')).not.toBeInTheDocument()
   })
 
@@ -167,7 +187,9 @@ describe('RolesPage', () => {
       expect(screen.getByText('创建角色', { selector: '.ant-modal-title' })).toBeInTheDocument()
     })
 
-    const modal = screen.getByText('创建角色', { selector: '.ant-modal-title' }).closest('.ant-modal')!
+    const modal = screen
+      .getByText('创建角色', { selector: '.ant-modal-title' })
+      .closest('.ant-modal')!
     const footer = modal.querySelector('.ant-modal-footer')
     if (footer) {
       const buttons = within(footer as HTMLElement).getAllByRole('button')
@@ -215,9 +237,12 @@ describe('RolesPage', () => {
     if (permButtons.length > 0) {
       await user.click(permButtons[0])
 
-      await waitFor(() => {
-        expect(screen.getByTestId('permission-tree')).toBeInTheDocument()
-      }, { timeout: 3000 })
+      await waitFor(
+        () => {
+          expect(screen.getByTestId('permission-tree')).toBeInTheDocument()
+        },
+        { timeout: 3000 }
+      )
     }
   })
 

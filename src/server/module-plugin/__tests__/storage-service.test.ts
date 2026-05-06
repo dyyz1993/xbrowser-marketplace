@@ -63,7 +63,12 @@ describe('Storage Service', () => {
 
     it('should upload plugin tarball via static method', async () => {
       const bucket = createMockBucket()
-      const result = await R2Storage.uploadPluginTarball(bucket, 'my-plugin', '1.0.0', Buffer.from('tar'))
+      const result = await R2Storage.uploadPluginTarball(
+        bucket,
+        'my-plugin',
+        '1.0.0',
+        Buffer.from('tar')
+      )
       expect(result).toBe('r2://plugins/my-plugin/1.0.0.tar.gz')
     })
 
@@ -75,7 +80,9 @@ describe('Storage Service', () => {
   describe('NpmMirrorStorage', () => {
     it('should throw on upload attempt', () => {
       const storage = new NpmMirrorStorage()
-      expect(() => storage.upload('key', Buffer.from('x'))).toThrow('does not support direct upload')
+      expect(() => storage.upload('key', Buffer.from('x'))).toThrow(
+        'does not support direct upload'
+      )
     })
 
     it('should throw on delete attempt', async () => {

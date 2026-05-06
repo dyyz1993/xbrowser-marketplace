@@ -29,8 +29,12 @@ export const CategoryGrid: React.FC<CategoryGridProps> = ({ categories }) => {
           to={`/search?category=${encodeURIComponent(cat.slug)}`}
           className="flex flex-col items-center gap-2 p-4 bg-white rounded-xl border border-gray-200 hover:border-blue-300 hover:shadow-sm transition-all text-center group"
         >
-          <span className="text-2xl">{iconMap[cat.slug] ?? <FolderOpen className="w-7 h-7 text-gray-400" />}</span>
-          <span className="text-sm font-medium text-gray-700 group-hover:text-blue-600">{cat.name}</span>
+          <span className="text-2xl">
+            {iconMap[cat.slug] ?? <FolderOpen className="w-7 h-7 text-gray-400" />}
+          </span>
+          <span className="text-sm font-medium text-gray-700 group-hover:text-blue-600">
+            {cat.name}
+          </span>
           <span className="text-xs text-gray-400">{cat.pluginCount} plugins</span>
         </Link>
       ))}

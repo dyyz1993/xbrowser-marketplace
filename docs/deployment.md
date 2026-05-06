@@ -114,12 +114,12 @@ The app runs at http://localhost:3010 with HMR.
 
 ## Environment Variables
 
-| Variable | Description | Required | Default |
-|----------|-------------|----------|---------|
-| `SQLITE_PATH` | Path to SQLite database file (local only) | Local dev | `:memory:` |
-| `AUTH_SECRET_KEY` | Secret key for JWT signing | Production | `dev-secret-key-change-in-production` |
-| `ENABLE_DEV_TOKENS` | Enable dev auth tokens (`admin-token`, etc.) | Never in prod | `false` |
-| `NODE_ENV` | Environment mode | Yes | `development` |
+| Variable            | Description                                  | Required      | Default                               |
+| ------------------- | -------------------------------------------- | ------------- | ------------------------------------- |
+| `SQLITE_PATH`       | Path to SQLite database file (local only)    | Local dev     | `:memory:`                            |
+| `AUTH_SECRET_KEY`   | Secret key for JWT signing                   | Production    | `dev-secret-key-change-in-production` |
+| `ENABLE_DEV_TOKENS` | Enable dev auth tokens (`admin-token`, etc.) | Never in prod | `false`                               |
+| `NODE_ENV`          | Environment mode                             | Yes           | `development`                         |
 
 ### Cloudflare Workers
 

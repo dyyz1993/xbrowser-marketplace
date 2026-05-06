@@ -49,7 +49,10 @@ describe('PermissionConfigEditor', () => {
     render(<PermissionConfigEditor {...defaultProps} />)
     const textarea = screen.getByPlaceholderText('["permission1", "permission2"]')
     expect(textarea).toBeInTheDocument()
-    expect(JSON.parse((textarea as HTMLTextAreaElement).value)).toEqual(['user:view', 'content:view'])
+    expect(JSON.parse((textarea as HTMLTextAreaElement).value)).toEqual([
+      'user:view',
+      'content:view',
+    ])
   })
 
   it('should render template tab', () => {

@@ -9,6 +9,7 @@ All endpoints are served under `/api`. The API uses JSON for request/response bo
 Register a new developer account.
 
 **Request:**
+
 ```json
 {
   "email": "dev@example.com",
@@ -18,6 +19,7 @@ Register a new developer account.
 ```
 
 **Response (201):**
+
 ```json
 {
   "success": true,
@@ -40,6 +42,7 @@ Register a new developer account.
 Authenticate and receive a token.
 
 **Request:**
+
 ```json
 {
   "email": "dev@example.com",
@@ -48,6 +51,7 @@ Authenticate and receive a token.
 ```
 
 **Response (200):**
+
 ```json
 {
   "success": true,
@@ -74,6 +78,7 @@ Verify the current token is valid.
 **Headers:** `Authorization: Bearer <token>`
 
 **Response (200):**
+
 ```json
 {
   "success": true,
@@ -99,17 +104,18 @@ List plugins with optional filtering and pagination.
 
 **Query Parameters:**
 
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `page` | string | `"1"` | Page number |
-| `limit` | string | `"20"` | Items per page (max 50) |
-| `status` | string | `"approved"` | Filter by status: `pending`, `approved`, `rejected`, `removed` |
-| `category` | string | - | Filter by category slug |
-| `tag` | string | - | Filter by tag name |
-| `sort` | string | `"newest"` | Sort: `newest`, `popular`, `most_downloaded`, `name` |
-| `featured` | string | - | Filter featured: `"true"` or `"false"` |
+| Parameter  | Type   | Default      | Description                                                    |
+| ---------- | ------ | ------------ | -------------------------------------------------------------- |
+| `page`     | string | `"1"`        | Page number                                                    |
+| `limit`    | string | `"20"`       | Items per page (max 50)                                        |
+| `status`   | string | `"approved"` | Filter by status: `pending`, `approved`, `rejected`, `removed` |
+| `category` | string | -            | Filter by category slug                                        |
+| `tag`      | string | -            | Filter by tag name                                             |
+| `sort`     | string | `"newest"`   | Sort: `newest`, `popular`, `most_downloaded`, `name`           |
+| `featured` | string | -            | Filter featured: `"true"` or `"false"`                         |
 
 **Response (200):**
+
 ```json
 {
   "success": true,
@@ -151,14 +157,14 @@ Full-text search across plugin names, descriptions, and tags.
 
 **Query Parameters:**
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `q` | string | Yes | Search query (min 1 char) |
-| `tag` | string | No | Additional tag filter |
-| `site` | string | No | Site URL filter |
-| `category` | string | No | Category slug filter |
-| `page` | string | No | Page number (default `"1"`) |
-| `limit` | string | No | Items per page (default `"20"`) |
+| Parameter  | Type   | Required | Description                     |
+| ---------- | ------ | -------- | ------------------------------- |
+| `q`        | string | Yes      | Search query (min 1 char)       |
+| `tag`      | string | No       | Additional tag filter           |
+| `site`     | string | No       | Site URL filter                 |
+| `category` | string | No       | Category slug filter            |
+| `page`     | string | No       | Page number (default `"1"`)     |
+| `limit`    | string | No       | Items per page (default `"20"`) |
 
 **Response (200):** Same shape as `GET /api/plugins`.
 
@@ -169,6 +175,7 @@ Full-text search across plugin names, descriptions, and tags.
 Get detailed plugin information by slug. Increments the view count.
 
 **Response (200):**
+
 ```json
 {
   "success": true,
@@ -197,9 +204,7 @@ Get detailed plugin information by slug. Increments the view count.
     "homepageUrl": "https://my-plugin.dev",
     "npmPackage": null,
     "license": "MIT",
-    "categories": [
-      { "id": "cat-uuid", "name": "Automation", "slug": "automation" }
-    ],
+    "categories": [{ "id": "cat-uuid", "name": "Automation", "slug": "automation" }],
     "versions": [
       {
         "id": "ver-uuid",
@@ -221,6 +226,7 @@ Get detailed plugin information by slug. Increments the view count.
 List all published versions of a plugin.
 
 **Response (200):**
+
 ```json
 {
   "success": true,
@@ -248,6 +254,7 @@ Create a new plugin (requires authentication). The plugin starts in `pending` st
 **Headers:** `Authorization: Bearer <token>`
 
 **Request:**
+
 ```json
 {
   "name": "My Plugin",
@@ -279,6 +286,7 @@ Update an existing plugin (author only).
 **Headers:** `Authorization: Bearer <token>`
 
 **Request:** All fields are optional (partial update):
+
 ```json
 {
   "name": "My Updated Plugin",
@@ -298,6 +306,7 @@ Soft-delete a plugin by setting status to `removed` (author only).
 **Headers:** `Authorization: Bearer <token>`
 
 **Response (200):**
+
 ```json
 {
   "success": true,
@@ -315,13 +324,14 @@ Publish a plugin via multipart form upload (requires authentication). Creates a 
 
 **Form Fields:**
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `metadata` | File (JSON) | Yes | Plugin metadata (see below) |
-| `files` | File(s) | No | Plugin source files |
-| `checksum` | string | No | SHA-256 checksum |
+| Field      | Type        | Required | Description                 |
+| ---------- | ----------- | -------- | --------------------------- |
+| `metadata` | File (JSON) | Yes      | Plugin metadata (see below) |
+| `files`    | File(s)     | No       | Plugin source files         |
+| `checksum` | string      | No       | SHA-256 checksum            |
 
 **Metadata JSON:**
+
 ```json
 {
   "name": "My Plugin",
@@ -350,6 +360,7 @@ Publish a new version of an existing plugin (author only).
 **Headers:** `Authorization: Bearer <token>`
 
 **Request:**
+
 ```json
 {
   "version": "1.1.0",
@@ -358,6 +369,7 @@ Publish a new version of an existing plugin (author only).
 ```
 
 **Response (201):**
+
 ```json
 {
   "success": true,
@@ -381,6 +393,7 @@ Publish a new version of an existing plugin (author only).
 Get download info for the latest version tarball.
 
 **Response (200):**
+
 ```json
 {
   "success": true,
@@ -395,6 +408,7 @@ Get download info for the latest version tarball.
 Track a plugin installation (increments download count).
 
 **Response (200):**
+
 ```json
 {
   "success": true,
@@ -411,6 +425,7 @@ Submit a review for a plugin (requires authentication).
 **Headers:** `Authorization: Bearer <token>`
 
 **Request:**
+
 ```json
 {
   "rating": 5,
@@ -420,6 +435,7 @@ Submit a review for a plugin (requires authentication).
 ```
 
 **Response (201):**
+
 ```json
 {
   "success": true,
@@ -444,12 +460,13 @@ List reviews for a plugin.
 
 **Query Parameters:**
 
-| Parameter | Type | Default |
-|-----------|------|---------|
-| `page` | string | `"1"` |
-| `limit` | string | `"20"` |
+| Parameter | Type   | Default |
+| --------- | ------ | ------- |
+| `page`    | string | `"1"`   |
+| `limit`   | string | `"20"`  |
 
 **Response (200):**
+
 ```json
 {
   "success": true,
@@ -469,6 +486,7 @@ List reviews for a plugin.
 List all plugin categories with plugin counts.
 
 **Response (200):**
+
 ```json
 {
   "success": true,
@@ -494,12 +512,13 @@ List approved plugins in a category.
 
 **Query Parameters:**
 
-| Parameter | Type | Default |
-|-----------|------|---------|
-| `page` | string | `"1"` |
-| `limit` | string | `"20"` |
+| Parameter | Type   | Default |
+| --------- | ------ | ------- |
+| `page`    | string | `"1"`   |
+| `limit`   | string | `"20"`  |
 
 **Response (200):**
+
 ```json
 {
   "success": true,
@@ -519,6 +538,7 @@ List approved plugins in a category.
 Marketplace-wide statistics.
 
 **Response (200):**
+
 ```json
 {
   "success": true,
@@ -552,11 +572,11 @@ List plugins pending review.
 
 **Query Parameters:**
 
-| Parameter | Type | Default |
-|-----------|------|---------|
-| `status` | string | - |
-| `page` | string | `"1"` |
-| `limit` | string | `"20"` |
+| Parameter | Type   | Default |
+| --------- | ------ | ------- |
+| `status`  | string | -       |
+| `page`    | string | `"1"`   |
+| `limit`   | string | `"20"`  |
 
 ---
 
@@ -566,12 +586,12 @@ List all plugins (all statuses) with optional search.
 
 **Query Parameters:**
 
-| Parameter | Type | Default |
-|-----------|------|---------|
-| `search` | string | - |
-| `status` | string | - |
-| `page` | string | `"1"` |
-| `limit` | string | `"20"` |
+| Parameter | Type   | Default |
+| --------- | ------ | ------- |
+| `search`  | string | -       |
+| `status`  | string | -       |
+| `page`    | string | `"1"`   |
+| `limit`   | string | `"20"`  |
 
 ---
 
@@ -588,6 +608,7 @@ Approve a pending plugin.
 Reject a pending plugin.
 
 **Request:**
+
 ```json
 {
   "reason": "Does not meet quality standards"
@@ -611,6 +632,7 @@ Toggle the featured status of a plugin.
 Remove a plugin from the marketplace (admin override).
 
 **Response (200):**
+
 ```json
 { "success": true, "data": { "id": "uuid" } }
 ```
@@ -622,6 +644,7 @@ Remove a plugin from the marketplace (admin override).
 Approve multiple plugins at once.
 
 **Request:**
+
 ```json
 {
   "slugs": ["plugin-a", "plugin-b", "plugin-c"]
@@ -629,6 +652,7 @@ Approve multiple plugins at once.
 ```
 
 **Response (200):**
+
 ```json
 { "success": true, "data": { "approved": 3 } }
 ```
@@ -640,6 +664,7 @@ Approve multiple plugins at once.
 Reject multiple plugins at once.
 
 **Request:**
+
 ```json
 {
   "slugs": ["plugin-x", "plugin-y"],
@@ -648,6 +673,7 @@ Reject multiple plugins at once.
 ```
 
 **Response (200):**
+
 ```json
 { "success": true, "data": { "rejected": 2 } }
 ```
@@ -663,6 +689,7 @@ List all categories (admin view).
 Create a new category.
 
 **Request:**
+
 ```json
 {
   "name": "New Category",
@@ -695,12 +722,12 @@ All errors follow a consistent format:
 }
 ```
 
-| Status | Meaning |
-|--------|---------|
-| 400 | Validation error (Zod schema mismatch) |
-| 401 | Missing or invalid authentication token |
-| 403 | Insufficient permissions (wrong role) |
-| 404 | Resource not found |
-| 409 | Conflict (duplicate slug, etc.) |
-| 429 | Rate limit exceeded |
-| 500 | Internal server error |
+| Status | Meaning                                 |
+| ------ | --------------------------------------- |
+| 400    | Validation error (Zod schema mismatch)  |
+| 401    | Missing or invalid authentication token |
+| 403    | Insufficient permissions (wrong role)   |
+| 404    | Resource not found                      |
+| 409    | Conflict (duplicate slug, etc.)         |
+| 429    | Rate limit exceeded                     |
+| 500    | Internal server error                   |

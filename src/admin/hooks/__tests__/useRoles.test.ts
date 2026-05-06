@@ -2,7 +2,14 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { useRoleStore } from '../useRoles'
 import type { RoleType } from '@shared/modules/role/schemas'
 
-const { mockRoles, mockRolesGet, mockRolesPost, mockRolesPut, mockRolesDelete, mockPermissionsPut } = vi.hoisted(() => {
+const {
+  mockRoles,
+  mockRolesGet,
+  mockRolesPost,
+  mockRolesPut,
+  mockRolesDelete,
+  mockPermissionsPut,
+} = vi.hoisted(() => {
   const roles: RoleType[] = [
     {
       id: 'role-1',
@@ -36,7 +43,14 @@ const { mockRoles, mockRolesGet, mockRolesPost, mockRolesPut, mockRolesDelete, m
   const del = vi.fn(async () => ({ json: async () => ({ success: true }) }))
   const permissionsPut = vi.fn(async () => ({ json: async () => ({ success: true }) }))
 
-  return { mockRoles: roles, mockRolesGet: get, mockRolesPost: post, mockRolesPut: put, mockRolesDelete: del, mockPermissionsPut: permissionsPut }
+  return {
+    mockRoles: roles,
+    mockRolesGet: get,
+    mockRolesPost: post,
+    mockRolesPut: put,
+    mockRolesDelete: del,
+    mockPermissionsPut: permissionsPut,
+  }
 })
 
 vi.mock('../../services/apiClient', () => ({

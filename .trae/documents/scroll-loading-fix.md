@@ -11,6 +11,7 @@ User reported: "hasMoreRounds is true but won't load more messages"
 **Location**: Line 264
 
 **Original Code**:
+
 ```typescript
 const limit = options.limit || 10
 const reversedRounds = rounds.reverse()
@@ -18,19 +19,21 @@ const limitedRounds = reversedRounds.slice(0, limit)
 const hasMore = rounds.length > limit
 ```
 
-**Problem**: 
+**Problem**:
+
 - The `hasMore` check uses `rounds.length` AFTER filtering by `before` parameter
 - When paginating with `before` timestamp, `filteredMessages` is already limited
 - So `rounds.length` (derived from filteredMessages) is always ≤ limit
 - This causes `hasMore` to always be `false` when it should be `true`
 
 **Fix**:
+
 ```typescript
 const limit = options.limit || 10
-const totalRounds = rounds.length  // Store total BEFORE limiting
+const totalRounds = rounds.length // Store total BEFORE limiting
 const reversedRounds = rounds.reverse()
 const limitedRounds = reversedRounds.slice(0, limit)
-const hasMore = totalRounds > limit  // Check against total
+const hasMore = totalRounds > limit // Check against total
 ```
 
 ### 2. Frontend Scroll Position Restoration Conflict (ChatArea.tsx)
@@ -38,11 +41,13 @@ const hasMore = totalRounds > limit  // Check against total
 **Location**: Lines 74-90
 
 **Problems**:
+
 1. Scroll position restoration doesn't reset refs after restoration, causing potential conflicts
 2. `scrollToBottom` effect runs on every rounds update, even during loading more
 3. This creates a race condition between scroll restoration and auto-scroll
 
 **Fix**:
+
 ```typescript
 // Reset refs after restoration to prevent multiple restorations
 useEffect(() => {
@@ -56,7 +61,7 @@ useEffect(() => {
   if (currentScrollHeight > prevScrollHeight && prevScrollHeight > 0) {
     const heightDiff = currentScrollHeight - prevScrollHeight
     container.scrollTop = prevScrollTop + heightDiff
-    
+
     // Reset refs to prevent multiple restorations
     prevScrollHeightRef.current = 0
     prevScrollTopRef.current = 0

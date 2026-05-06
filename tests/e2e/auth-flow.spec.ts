@@ -67,7 +67,9 @@ test.describe('Auth Flow', () => {
       await page.click('[data-testid="register-submit"]')
 
       await page.waitForSelector('[data-testid="form-error"]', { timeout: 10000 })
-      await expect(page.locator('[data-testid="form-error"]')).toContainText(/already.*exist|already.*registered/i)
+      await expect(page.locator('[data-testid="form-error"]')).toContainText(
+        /already.*exist|already.*registered/i
+      )
     })
 
     test('should show error for duplicate username', async ({ page }) => {
@@ -85,7 +87,9 @@ test.describe('Auth Flow', () => {
       await page.click('[data-testid="register-submit"]')
 
       await page.waitForSelector('[data-testid="form-error"]', { timeout: 10000 })
-      await expect(page.locator('[data-testid="form-error"]')).toContainText(/already.*taken|already.*exist/i)
+      await expect(page.locator('[data-testid="form-error"]')).toContainText(
+        /already.*taken|already.*exist/i
+      )
     })
 
     test('should show error for password mismatch', async ({ page }) => {
@@ -133,7 +137,9 @@ test.describe('Auth Flow', () => {
       await page.click('[data-testid="login-submit"]')
 
       await page.waitForSelector('[data-testid="form-error"]', { timeout: 10000 })
-      await expect(page.locator('[data-testid="form-error"]')).toContainText(/invalid|incorrect|wrong/i)
+      await expect(page.locator('[data-testid="form-error"]')).toContainText(
+        /invalid|incorrect|wrong/i
+      )
     })
 
     test('should show error for non-existent user', async ({ page }) => {
@@ -195,7 +201,9 @@ test.describe('Auth Flow', () => {
   })
 
   test.describe('Protected Routes', () => {
-    test('should redirect to login when accessing protected page without auth', async ({ page }) => {
+    test('should redirect to login when accessing protected page without auth', async ({
+      page,
+    }) => {
       await page.goto(`${getBaseUrl()}/dashboard`)
       await page.waitForURL('**/login', { timeout: 15000 })
       await expect(page).toHaveURL(/\/login/)

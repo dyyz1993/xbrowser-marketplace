@@ -98,7 +98,11 @@ test.describe('Admin Review', () => {
       await page.goto(`${getBaseUrl()}/admin/reviews`)
       await page.waitForSelector('[data-testid="review-list-container"]', { timeout: 15000 })
 
-      await page.locator('[data-testid="review-item"]').first().locator('[data-testid="approve-button"]').click()
+      await page
+        .locator('[data-testid="review-item"]')
+        .first()
+        .locator('[data-testid="approve-button"]')
+        .click()
 
       await page.waitForSelector('[data-testid="toast-success"]', { timeout: 10000 })
       await expect(page.locator('[data-testid="toast-success"]')).toBeVisible()
@@ -114,7 +118,11 @@ test.describe('Admin Review', () => {
       await page.goto(`${getBaseUrl()}/admin/reviews`)
       await page.waitForSelector('[data-testid="review-list-container"]', { timeout: 15000 })
 
-      await page.locator('[data-testid="review-item"]').first().locator('[data-testid="reject-button"]').click()
+      await page
+        .locator('[data-testid="review-item"]')
+        .first()
+        .locator('[data-testid="reject-button"]')
+        .click()
 
       await page.waitForSelector('[data-testid="reject-reason-dialog"]', { timeout: 10000 })
       await expect(page.locator('[data-testid="reject-reason-dialog"]')).toBeVisible()
@@ -134,8 +142,16 @@ test.describe('Admin Review', () => {
       await page.goto(`${getBaseUrl()}/admin/reviews`)
       await page.waitForSelector('[data-testid="review-list-container"]', { timeout: 15000 })
 
-      await page.locator('[data-testid="review-item"]').nth(0).locator('[data-testid="select-checkbox"]').check()
-      await page.locator('[data-testid="review-item"]').nth(1).locator('[data-testid="select-checkbox"]').check()
+      await page
+        .locator('[data-testid="review-item"]')
+        .nth(0)
+        .locator('[data-testid="select-checkbox"]')
+        .check()
+      await page
+        .locator('[data-testid="review-item"]')
+        .nth(1)
+        .locator('[data-testid="select-checkbox"]')
+        .check()
 
       await page.click('[data-testid="batch-approve-button"]')
 
@@ -149,13 +165,24 @@ test.describe('Admin Review', () => {
       await page.goto(`${getBaseUrl()}/admin/reviews`)
       await page.waitForSelector('[data-testid="review-list-container"]', { timeout: 15000 })
 
-      await page.locator('[data-testid="review-item"]').nth(0).locator('[data-testid="select-checkbox"]').check()
-      await page.locator('[data-testid="review-item"]').nth(1).locator('[data-testid="select-checkbox"]').check()
+      await page
+        .locator('[data-testid="review-item"]')
+        .nth(0)
+        .locator('[data-testid="select-checkbox"]')
+        .check()
+      await page
+        .locator('[data-testid="review-item"]')
+        .nth(1)
+        .locator('[data-testid="select-checkbox"]')
+        .check()
 
       await page.click('[data-testid="batch-reject-button"]')
 
       await page.waitForSelector('[data-testid="reject-reason-dialog"]', { timeout: 10000 })
-      await page.fill('[data-testid="reject-reason-input"]', 'Batch rejection - duplicate submissions')
+      await page.fill(
+        '[data-testid="reject-reason-input"]',
+        'Batch rejection - duplicate submissions'
+      )
       await page.click('[data-testid="confirm-reject-button"]')
 
       await page.waitForSelector('[data-testid="toast-success"]', { timeout: 10000 })
@@ -167,7 +194,12 @@ test.describe('Admin Review', () => {
   test.describe('Featured Toggle', () => {
     test('should toggle featured flag on a plugin', async ({ page }) => {
       await page.request.post(`${getBaseUrl()}/api/__test__/seed-plugin`, {
-        data: { name: 'Featured Candidate', status: 'approved', category: 'tools', featured: false },
+        data: {
+          name: 'Featured Candidate',
+          status: 'approved',
+          category: 'tools',
+          featured: false,
+        },
       })
 
       await page.goto(`${getBaseUrl()}/admin/plugins`)
@@ -189,7 +221,11 @@ test.describe('Admin Review', () => {
 
       const initialCount = await page.locator('[data-testid="review-item"]').count()
 
-      await page.locator('[data-testid="review-item"]').first().locator('[data-testid="delete-button"]').click()
+      await page
+        .locator('[data-testid="review-item"]')
+        .first()
+        .locator('[data-testid="delete-button"]')
+        .click()
 
       await page.waitForSelector('[data-testid="confirm-delete-dialog"]', { timeout: 10000 })
       await page.click('[data-testid="confirm-delete-button"]')

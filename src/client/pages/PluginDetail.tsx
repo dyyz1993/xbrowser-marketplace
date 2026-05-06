@@ -77,7 +77,10 @@ export const PluginDetailPage: React.FC = () => {
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
-      <Link to="/" className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-blue-600 mb-6">
+      <Link
+        to="/"
+        className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-blue-600 mb-6"
+      >
         <ArrowLeft className="w-4 h-4" /> Back to Marketplace
       </Link>
 
@@ -90,7 +93,9 @@ export const PluginDetailPage: React.FC = () => {
                 v{plugin.version}
               </span>
               {plugin.license && (
-                <span className="px-2 py-0.5 text-xs bg-gray-100 text-gray-600 rounded-full">{plugin.license}</span>
+                <span className="px-2 py-0.5 text-xs bg-gray-100 text-gray-600 rounded-full">
+                  {plugin.license}
+                </span>
               )}
             </div>
             <p className="text-sm text-gray-500 mb-4">
@@ -135,7 +140,10 @@ export const PluginDetailPage: React.FC = () => {
             </button>
             <div className="flex items-center gap-2 bg-gray-900 text-green-400 px-4 py-2.5 rounded-lg font-mono text-sm">
               <span className="flex-1 truncate text-xs">{installCmd}</span>
-              <button onClick={handleCopy} className="text-gray-400 hover:text-white transition-colors">
+              <button
+                onClick={handleCopy}
+                className="text-gray-400 hover:text-white transition-colors"
+              >
                 {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
               </button>
             </div>
@@ -170,7 +178,9 @@ export const PluginDetailPage: React.FC = () => {
           {plugin.readme && (
             <div className="bg-white rounded-xl border border-gray-200 p-6">
               <h2 className="text-lg font-semibold text-gray-900 mb-4">README</h2>
-              <div className="prose prose-sm max-w-none text-gray-700 whitespace-pre-wrap">{plugin.readme}</div>
+              <div className="prose prose-sm max-w-none text-gray-700 whitespace-pre-wrap">
+                {plugin.readme}
+              </div>
             </div>
           )}
 
@@ -179,7 +189,10 @@ export const PluginDetailPage: React.FC = () => {
               <h2 className="text-lg font-semibold text-gray-900 mb-4">Commands</h2>
               <div className="space-y-2">
                 {plugin.commands.map(cmd => (
-                  <div key={cmd} className="flex items-center gap-2 px-3 py-2 bg-gray-50 rounded-lg">
+                  <div
+                    key={cmd}
+                    className="flex items-center gap-2 px-3 py-2 bg-gray-50 rounded-lg"
+                  >
                     <Terminal className="w-4 h-4 text-gray-400" />
                     <code className="text-sm font-mono text-gray-700">{cmd}</code>
                   </div>

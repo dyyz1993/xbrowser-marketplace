@@ -19,7 +19,9 @@ async function createAdminToken(userId: string, role: string): Promise<string> {
     ['sign']
   )
   const sig = await crypto.subtle.sign('HMAC', key, encoder.encode(data))
-  const hex = Array.from(new Uint8Array(sig)).map(b => b.toString(16).padStart(2, '0')).join('')
+  const hex = Array.from(new Uint8Array(sig))
+    .map(b => b.toString(16).padStart(2, '0'))
+    .join('')
   return `adm.${userId}.${role}.${hex}`
 }
 import type {

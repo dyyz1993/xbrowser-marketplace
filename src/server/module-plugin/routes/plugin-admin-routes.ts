@@ -360,10 +360,13 @@ export const pluginAdminRoutes = new OpenAPIHono()
     const seedSlugs = ['baidu', 'douyin', 'github-seo', 'web-automation']
     const countResult = await adminService.resetSeedPluginCounts(seedSlugs)
     const reviewResult = await adminService.cleanupTestReviews()
-    return c.json(success({
-      countsReset: countResult,
-      reviewsCleaned: reviewResult,
-    }), 200)
+    return c.json(
+      success({
+        countsReset: countResult,
+        reviewsCleaned: reviewResult,
+      }),
+      200
+    )
   })
   .openapi(listDevelopersRoute, async c => {
     const devs = await adminService.listAllDevelopers()

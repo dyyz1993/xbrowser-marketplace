@@ -27,8 +27,12 @@ export const PluginCard = React.memo(function PluginCard({ plugin }: PluginCardP
     >
       <div className="flex items-start justify-between gap-3 mb-3">
         <div className="flex-1 min-w-0">
-          <h3 className="font-semibold text-gray-900 group-hover:text-blue-600 truncate">{plugin.name}</h3>
-          <p className="text-xs text-gray-400 mt-0.5">by {plugin.authorName} &middot; v{plugin.version}</p>
+          <h3 className="font-semibold text-gray-900 group-hover:text-blue-600 truncate">
+            {plugin.name}
+          </h3>
+          <p className="text-xs text-gray-400 mt-0.5">
+            by {plugin.authorName} &middot; v{plugin.version}
+          </p>
         </div>
         {plugin.screenshotUrl && (
           <img

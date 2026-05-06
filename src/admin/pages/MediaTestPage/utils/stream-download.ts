@@ -4,7 +4,7 @@ export const supportsFileSystemAccess = 'showSaveFilePicker' in window
 
 export async function readStreamToLines(
   reader: ReadableStreamDefaultReader<Uint8Array>,
-  onLine: (lineCount: number, line: string) => void,
+  onLine: (lineCount: number, line: string) => void
 ): Promise<void> {
   const decoder = new TextDecoder()
   let lineCount = 0
@@ -34,7 +34,7 @@ export async function readStreamToFileSystem(
   callbacks: {
     onLine: (line: string) => void
     onProgress: (progress: number) => void
-  },
+  }
 ): Promise<void> {
   const decoder = new TextDecoder()
   let lineCount = 0
@@ -64,7 +64,7 @@ export async function readStreamToBlob(
   callbacks: {
     onProgress: (progress: number) => void
     onSpeed: (speed: string) => void
-  },
+  }
 ): Promise<Blob> {
   const chunks: Uint8Array[] = []
   let receivedLength = 0

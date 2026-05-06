@@ -57,8 +57,8 @@ function appendToHistory(records: ChangeRecord[]): void {
   }
 
   const newRows = records
-    .filter((r) => r.reason)
-    .map((r) => {
+    .filter(r => r.reason)
+    .map(r => {
       const relativePath = r.file.replace(process.cwd() + '/', '')
       return `| ${timestamp} | ${relativePath} | ${r.oldBaseline} → ${r.newBaseline} | ${r.reason || '-'} | ${r.impact || '-'} | ${r.approvedBy || '-'} |`
     })
@@ -80,7 +80,7 @@ async function main() {
     allFiles.push(...files)
   }
 
-  const frameworkFiles = allFiles.filter((f) => isFrameworkFile(f))
+  const frameworkFiles = allFiles.filter(f => isFrameworkFile(f))
 
   if (frameworkFiles.length === 0) {
     console.log('⚠️  未找到框架文件')

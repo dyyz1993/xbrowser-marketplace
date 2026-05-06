@@ -20,11 +20,11 @@
 
 ### 1.1 角色定义
 
-| 角色 | 说明 | 核心诉求 |
-|------|------|----------|
-| **普通用户** | 使用插件进行浏览器自动化 | 发现好用的插件，快速安装，稳定运行 |
-| **插件开发者** | 开发并发布插件 | 便捷的开发流程，可靠的分发渠道 |
-| **市场管理员** | 管理市场质量 | 高效审核，安全可控，数据洞察 |
+| 角色           | 说明                     | 核心诉求                           |
+| -------------- | ------------------------ | ---------------------------------- |
+| **普通用户**   | 使用插件进行浏览器自动化 | 发现好用的插件，快速安装，稳定运行 |
+| **插件开发者** | 开发并发布插件           | 便捷的开发流程，可靠的分发渠道     |
+| **市场管理员** | 管理市场质量             | 高效审核，安全可控，数据洞察       |
 
 ### 1.2 普通用户旅程
 
@@ -157,15 +157,15 @@
 
 ### 2.1 当前实现状态
 
-| 功能 | 状态 | 实现位置 |
-|------|------|----------|
-| Web 注册 | ✅ 已实现 | `POST /api/auth/register` |
-| Web 登录 | ✅ 已实现 | `POST /api/auth/login` → 返回 API Key |
-| Token 验证 | ✅ 已实现 | `GET /api/auth/verify` (Bearer token) |
-| CLI register | ❌ 未实现 | 需新增 CLI 命令 |
-| CLI login | ❌ 未实现 | 需新增 CLI 命令 |
-| CLI whoami | ❌ 未实现 | 需新增 CLI 命令 |
-| Token 存储 | ❌ 未实现 | 需实现 `~/.xbrowser/auth.json` |
+| 功能         | 状态      | 实现位置                              |
+| ------------ | --------- | ------------------------------------- |
+| Web 注册     | ✅ 已实现 | `POST /api/auth/register`             |
+| Web 登录     | ✅ 已实现 | `POST /api/auth/login` → 返回 API Key |
+| Token 验证   | ✅ 已实现 | `GET /api/auth/verify` (Bearer token) |
+| CLI register | ❌ 未实现 | 需新增 CLI 命令                       |
+| CLI login    | ❌ 未实现 | 需新增 CLI 命令                       |
+| CLI whoami   | ❌ 未实现 | 需新增 CLI 命令                       |
+| Token 存储   | ❌ 未实现 | 需实现 `~/.xbrowser/auth.json`        |
 
 ### 2.2 方案评估：CLI 注册
 
@@ -258,15 +258,15 @@ $ xbrowser plugin logout
 
 #### 认证方式对比
 
-| 维度 | API Key (当前方案) | JWT |
-|------|-------------------|-----|
-| 实现复杂度 | 低 ✅ | 中（需要 refresh 机制） |
-| 无状态 | 否（需查库） | 是 |
-| 过期管理 | 无过期 ✅ 简单 | 需要刷新机制 |
-| 撤销 | 直接删除 key ✅ | 需要 blacklist |
-| 多设备 | 天然支持 | 需要管理 |
-| 安全性 | 依赖 HTTPS | 依赖 HTTPS + 密钥管理 |
-| 适合场景 | CLI/服务间 | 短期 Web session |
+| 维度       | API Key (当前方案) | JWT                     |
+| ---------- | ------------------ | ----------------------- |
+| 实现复杂度 | 低 ✅              | 中（需要 refresh 机制） |
+| 无状态     | 否（需查库）       | 是                      |
+| 过期管理   | 无过期 ✅ 简单     | 需要刷新机制            |
+| 撤销       | 直接删除 key ✅    | 需要 blacklist          |
+| 多设备     | 天然支持           | 需要管理                |
+| 安全性     | 依赖 HTTPS         | 依赖 HTTPS + 密钥管理   |
+| 适合场景   | CLI/服务间         | 短期 Web session        |
 
 **结论**: 当前 API Key 方案适合 CLI 场景，保持不变。Web 前端可考虑叠加 JWT 用于 session 管理。
 
@@ -283,6 +283,7 @@ $ xbrowser plugin logout
 ```
 
 **安全考虑**:
+
 - 文件权限: `0600` (仅当前用户可读写)
 - 不记录 email 和 password
 - `savedAt` 用于判断 token 是否需要刷新
@@ -336,14 +337,14 @@ xbr_<随机字符串>
 
 ### 3.1 当前实现状态
 
-| 步骤 | 状态 | 说明 |
-|------|------|------|
-| 接收 tarball | ✅ | `POST /api/plugins/publish` 接收 multipart files |
-| 解析 metadata | ✅ | 从 form-data 中解析 JSON metadata |
-| 写入 D1 元数据 | ✅ | plugins + pluginVersions 表 |
-| 文件持久化 | ❌ | files 被解析但未保存，`packageUrl` 是占位符 |
-| 文件下载 | ❌ | tarball 端点返回占位 URL |
-| CLI publish | ❌ | CLI 侧尚未实现 tarball 打包上传 |
+| 步骤           | 状态 | 说明                                             |
+| -------------- | ---- | ------------------------------------------------ |
+| 接收 tarball   | ✅   | `POST /api/plugins/publish` 接收 multipart files |
+| 解析 metadata  | ✅   | 从 form-data 中解析 JSON metadata                |
+| 写入 D1 元数据 | ✅   | plugins + pluginVersions 表                      |
+| 文件持久化     | ❌   | files 被解析但未保存，`packageUrl` 是占位符      |
+| 文件下载       | ❌   | tarball 端点返回占位 URL                         |
+| CLI publish    | ❌   | CLI 侧尚未实现 tarball 打包上传                  |
 
 ### 3.2 发布前准备
 
@@ -386,20 +387,20 @@ my-plugin/
 #### index.ts 入口规范
 
 ```typescript
-import type { XCLIAPI } from 'xbrowser';
+import type { XCLIAPI } from 'xbrowser'
 
 export default function (xcli: XCLIAPI): void {
   const site = xcli.createSite({
     name: 'baidu',
     url: 'https://www.baidu.com',
-  });
+  })
 
   site.command('search', {
     description: 'Search Baidu',
     handler: async (params, ctx) => {
-      return { data: [], tips: [] };
+      return { data: [], tips: [] }
     },
-  });
+  })
 }
 ```
 
@@ -583,17 +584,17 @@ xbrowser plugin publish --registry https://marketplace.xbrowser.dev
 
 ### 4.1 当前实现状态
 
-| 安装方式 | 状态 | 说明 |
-|---------|------|------|
-| Marketplace 搜索 | ✅ | `GET /api/plugins/search` 已实现 |
-| Marketplace 元数据 | ✅ | `GET /api/plugins/{slug}` 已实现 |
-| Marketplace 安装追踪 | ✅ | `POST /api/plugins/{slug}/install` 已实现 |
-| Marketplace 文件下载 | ❌ | tarball 端点返回占位 URL，无实际下载 |
-| npm 搜索 | ❌ | 需实现 npm registry API 调用 |
-| npm 安装 | ❌ | 需实现 npm pack/download |
-| Git 安装 | ❌ | 需实现 git clone |
-| 本地安装 | ❌ | 需实现目录复制 |
-| CLI install 命令 | ❌ | CLI 侧未实现 |
+| 安装方式             | 状态 | 说明                                      |
+| -------------------- | ---- | ----------------------------------------- |
+| Marketplace 搜索     | ✅   | `GET /api/plugins/search` 已实现          |
+| Marketplace 元数据   | ✅   | `GET /api/plugins/{slug}` 已实现          |
+| Marketplace 安装追踪 | ✅   | `POST /api/plugins/{slug}/install` 已实现 |
+| Marketplace 文件下载 | ❌   | tarball 端点返回占位 URL，无实际下载      |
+| npm 搜索             | ❌   | 需实现 npm registry API 调用              |
+| npm 安装             | ❌   | 需实现 npm pack/download                  |
+| Git 安装             | ❌   | 需实现 git clone                          |
+| 本地安装             | ❌   | 需实现目录复制                            |
+| CLI install 命令     | ❌   | CLI 侧未实现                              |
 
 ### 4.2 安装源优先级
 
@@ -884,13 +885,13 @@ files.checksum,     // ← 写入 DB
 
 ### 5.2 方案对比
 
-| 方案 | 优点 | 缺点 | 成本 | 复杂度 |
-|------|------|------|------|--------|
-| **Cloudflare R2** | 边缘存储，低延迟，S3 兼容，与 Workers 集成 | 需配置 bucket | 免费 10GB | 中 |
-| **npm registry** | 现成基础设施，版本管理，社区熟悉 | 需开发者同时发 npm | 免费 | 低 |
-| **GitHub Release** | 免费，版本管理好 | 依赖 GitHub，不支持非 GitHub 项目 | 免费 | 中 |
-| **D1 BLOB** | 与现有 D1 集成 | D1 不原生支持 BLOB，base64 存储效率低 | D1 存储 | 高 |
-| **本地磁盘** | 最简单 | 不适合 Cloudflare Workers 部署 | 免费 | 低 |
+| 方案               | 优点                                       | 缺点                                  | 成本      | 复杂度 |
+| ------------------ | ------------------------------------------ | ------------------------------------- | --------- | ------ |
+| **Cloudflare R2**  | 边缘存储，低延迟，S3 兼容，与 Workers 集成 | 需配置 bucket                         | 免费 10GB | 中     |
+| **npm registry**   | 现成基础设施，版本管理，社区熟悉           | 需开发者同时发 npm                    | 免费      | 低     |
+| **GitHub Release** | 免费，版本管理好                           | 依赖 GitHub，不支持非 GitHub 项目     | 免费      | 中     |
+| **D1 BLOB**        | 与现有 D1 集成                             | D1 不原生支持 BLOB，base64 存储效率低 | D1 存储   | 高     |
+| **本地磁盘**       | 最简单                                     | 不适合 Cloudflare Workers 部署        | 免费      | 低     |
 
 ### 5.3 推荐方案: 混合模式
 
@@ -958,16 +959,16 @@ export async function publishPlugin(
   files: PublishFiles,
   authorId: string,
   authorName: string,
-  bucket?: R2Bucket  // 新增: R2 bucket binding
+  bucket?: R2Bucket // 新增: R2 bucket binding
 ) {
   // ... 现有逻辑 ...
 
-  const r2Key = `plugins/${data.slug}/${data.version}/package.tar.gz`;
+  const r2Key = `plugins/${data.slug}/${data.version}/package.tar.gz`
 
   if (bucket && files.files.length > 0) {
     // 将文件打包上传到 R2
-    const tarball = createTarball(files.files);
-    await bucket.put(r2Key, tarball);
+    const tarball = createTarball(files.files)
+    await bucket.put(r2Key, tarball)
   }
 
   // packageUrl 改为实际 R2 URL
@@ -975,7 +976,7 @@ export async function publishPlugin(
     // ...
     packageUrl: bucket ? `r2://${r2Key}` : `npm://${data.npmPackage}`,
     // ...
-  });
+  })
 }
 ```
 
@@ -1016,11 +1017,11 @@ export async function publishPlugin(
 
 ### 5.5 存储成本估算
 
-| 场景 | 单个插件 | 1000 个插件 | R2 免费额度 |
-|------|---------|-------------|-------------|
-| 平均大小 | 50KB | 50MB | 10GB ✅ |
-| Class A 操作 (PUT) | 2 次 | 2000 次 | 1M/月 ✅ |
-| Class B 操作 (GET) | 10 次 | 10000 次 | 10M/月 ✅ |
+| 场景               | 单个插件 | 1000 个插件 | R2 免费额度 |
+| ------------------ | -------- | ----------- | ----------- |
+| 平均大小           | 50KB     | 50MB        | 10GB ✅     |
+| Class A 操作 (PUT) | 2 次     | 2000 次     | 1M/月 ✅    |
+| Class B 操作 (GET) | 10 次    | 10000 次    | 10M/月 ✅   |
 
 **结论**: R2 免费额度完全够用，初期无需担心成本。
 
@@ -1032,12 +1033,12 @@ export async function publishPlugin(
 
 #### API 能力
 
-| API | 端点 | 用途 | 实现状态 |
-|-----|------|------|---------|
-| 搜索 | `GET registry.npmjs.org/-/v1/search?text=` | 搜索 npm 上的 xbrowser 插件 | ❌ 需实现 |
-| 包信息 | `GET registry.npmjs.org/{package}` | 获取版本、tarball URL | ❌ 需实现 |
-| 下载 tarball | `GET {dist.tarball}` | 下载插件代码 | ❌ 需实现 |
-| 包版本列表 | `GET registry.npmjs.org/{package}/versions` | 版本选择 | ❌ 需实现 |
+| API          | 端点                                        | 用途                        | 实现状态  |
+| ------------ | ------------------------------------------- | --------------------------- | --------- |
+| 搜索         | `GET registry.npmjs.org/-/v1/search?text=`  | 搜索 npm 上的 xbrowser 插件 | ❌ 需实现 |
+| 包信息       | `GET registry.npmjs.org/{package}`          | 获取版本、tarball URL       | ❌ 需实现 |
+| 下载 tarball | `GET {dist.tarball}`                        | 下载插件代码                | ❌ 需实现 |
+| 包版本列表   | `GET registry.npmjs.org/{package}/versions` | 版本选择                    | ❌ 需实现 |
 
 #### 搜索策略
 
@@ -1068,38 +1069,38 @@ xbrowser plugin search "关键词"
 ```typescript
 // src/server/services/npm-registry-service.ts (新增)
 
-const NPM_REGISTRY = 'https://registry.npmjs.org';
+const NPM_REGISTRY = 'https://registry.npmjs.org'
 
 export async function searchNpmPlugins(query: string) {
-  const url = `${NPM_REGISTRY}/-/v1/search?text=${encodeURIComponent(query + ' xbrowser-plugin')}`;
-  const res = await fetch(url);
-  const data = await res.json();
+  const url = `${NPM_REGISTRY}/-/v1/search?text=${encodeURIComponent(query + ' xbrowser-plugin')}`
+  const res = await fetch(url)
+  const data = await res.json()
 
   return data.objects
     .filter((obj: any) => obj.package.keywords?.includes('xbrowser'))
-    .map(formatNpmResult);
+    .map(formatNpmResult)
 }
 
 export async function getNpmPackageInfo(packageName: string) {
-  const url = `${NPM_REGISTRY}/${encodeURIComponent(packageName)}`;
-  const res = await fetch(url);
-  return res.json();
+  const url = `${NPM_REGISTRY}/${encodeURIComponent(packageName)}`
+  const res = await fetch(url)
+  return res.json()
 }
 
 export async function getNpmTarballUrl(packageName: string, version: string) {
-  const info = await getNpmPackageInfo(packageName);
-  return info.versions[version]?.dist?.tarball;
+  const info = await getNpmPackageInfo(packageName)
+  return info.versions[version]?.dist?.tarball
 }
 ```
 
 ### 6.2 GitHub 集成
 
-| 能力 | API | 用途 | 优先级 |
-|------|-----|------|--------|
-| 仓库信息 | `api.github.com/repos/{owner}/{repo}` | 显示仓库元数据 | P1 |
-| README | `api.github.com/repos/{owner}/{repo}/readme` | 获取 README 内容 | P2 |
-| Releases | `api.github.com/repos/{owner}/{repo}/releases` | 版本管理 | P2 |
-| Stars/Forks | 仓库信息中包含 | 质量指标 | P2 |
+| 能力        | API                                            | 用途             | 优先级 |
+| ----------- | ---------------------------------------------- | ---------------- | ------ |
+| 仓库信息    | `api.github.com/repos/{owner}/{repo}`          | 显示仓库元数据   | P1     |
+| README      | `api.github.com/repos/{owner}/{repo}/readme`   | 获取 README 内容 | P2     |
+| Releases    | `api.github.com/repos/{owner}/{repo}/releases` | 版本管理         | P2     |
+| Stars/Forks | 仓库信息中包含                                 | 质量指标         | P2     |
 
 ### 6.3 AI Skill 集成
 
@@ -1622,90 +1623,90 @@ xbrowser CLI
 
 ### developers 表
 
-| 列 | 类型 | 说明 |
-|----|------|------|
-| id | text PK | UUID |
-| username | text UNIQUE | 用户名 |
-| email | text UNIQUE | 邮箱 |
-| passwordHash | text | bcrypt hash |
-| role | text | 'developer' / 'super_admin' |
-| apiKey | text UNIQUE | 认证 token |
-| createdAt | timestamp | 创建时间 |
-| updatedAt | timestamp | 更新时间 |
+| 列           | 类型        | 说明                        |
+| ------------ | ----------- | --------------------------- |
+| id           | text PK     | UUID                        |
+| username     | text UNIQUE | 用户名                      |
+| email        | text UNIQUE | 邮箱                        |
+| passwordHash | text        | bcrypt hash                 |
+| role         | text        | 'developer' / 'super_admin' |
+| apiKey       | text UNIQUE | 认证 token                  |
+| createdAt    | timestamp   | 创建时间                    |
+| updatedAt    | timestamp   | 更新时间                    |
 
 ### plugins 表
 
-| 列 | 类型 | 说明 |
-|----|------|------|
-| id | text PK | UUID |
-| name | text | 显示名 |
-| slug | text UNIQUE | URL 标识 |
-| description | text | 描述 |
-| readme | text | README 内容 |
-| authorId | text FK → developers.id | 作者 |
-| authorName | text | 作者名 |
-| repositoryUrl | text | 仓库地址 |
-| homepageUrl | text | 主页地址 |
-| npmPackage | text | npm 包名 |
-| license | text | 许可证 |
-| version | text | 当前版本 |
-| status | text | pending/approved/rejected/removed |
-| downloadCount | integer | 下载量 |
-| viewCount | integer | 浏览量 |
-| featured | boolean | 是否精选 |
-| screenshotUrl | text | 截图 URL |
-| siteUrls | text (JSON) | 支持站点列表 |
-| tags | text (JSON) | 标签列表 |
-| commands | text (JSON) | 命令列表 |
-| createdAt | timestamp | 创建时间 |
-| updatedAt | timestamp | 更新时间 |
+| 列            | 类型                    | 说明                              |
+| ------------- | ----------------------- | --------------------------------- |
+| id            | text PK                 | UUID                              |
+| name          | text                    | 显示名                            |
+| slug          | text UNIQUE             | URL 标识                          |
+| description   | text                    | 描述                              |
+| readme        | text                    | README 内容                       |
+| authorId      | text FK → developers.id | 作者                              |
+| authorName    | text                    | 作者名                            |
+| repositoryUrl | text                    | 仓库地址                          |
+| homepageUrl   | text                    | 主页地址                          |
+| npmPackage    | text                    | npm 包名                          |
+| license       | text                    | 许可证                            |
+| version       | text                    | 当前版本                          |
+| status        | text                    | pending/approved/rejected/removed |
+| downloadCount | integer                 | 下载量                            |
+| viewCount     | integer                 | 浏览量                            |
+| featured      | boolean                 | 是否精选                          |
+| screenshotUrl | text                    | 截图 URL                          |
+| siteUrls      | text (JSON)             | 支持站点列表                      |
+| tags          | text (JSON)             | 标签列表                          |
+| commands      | text (JSON)             | 命令列表                          |
+| createdAt     | timestamp               | 创建时间                          |
+| updatedAt     | timestamp               | 更新时间                          |
 
 ### plugin_versions 表
 
-| 列 | 类型 | 说明 |
-|----|------|------|
-| id | text PK | UUID |
-| pluginId | text FK → plugins.id | 所属插件 |
-| version | text | 版本号 |
-| changelog | text | 变更日志 |
-| packageUrl | text | 包下载地址 (当前为占位符) |
-| fileSize | integer | 文件大小 |
-| checksum | text | SHA-256 |
-| status | text | pending/approved/rejected/removed |
-| publishedAt | timestamp | 发布时间 |
+| 列          | 类型                 | 说明                              |
+| ----------- | -------------------- | --------------------------------- |
+| id          | text PK              | UUID                              |
+| pluginId    | text FK → plugins.id | 所属插件                          |
+| version     | text                 | 版本号                            |
+| changelog   | text                 | 变更日志                          |
+| packageUrl  | text                 | 包下载地址 (当前为占位符)         |
+| fileSize    | integer              | 文件大小                          |
+| checksum    | text                 | SHA-256                           |
+| status      | text                 | pending/approved/rejected/removed |
+| publishedAt | timestamp            | 发布时间                          |
 
 ### plugin_reviews 表
 
-| 列 | 类型 | 说明 |
-|----|------|------|
-| id | text PK | UUID |
-| pluginId | text FK → plugins.id | 所属插件 |
-| userId | text | 评论用户 |
-| userName | text | 用户名 |
-| rating | integer | 评分 (1-5) |
-| title | text | 评论标题 |
-| content | text | 评论内容 |
-| createdAt | timestamp | 创建时间 |
+| 列        | 类型                 | 说明       |
+| --------- | -------------------- | ---------- |
+| id        | text PK              | UUID       |
+| pluginId  | text FK → plugins.id | 所属插件   |
+| userId    | text                 | 评论用户   |
+| userName  | text                 | 用户名     |
+| rating    | integer              | 评分 (1-5) |
+| title     | text                 | 评论标题   |
+| content   | text                 | 评论内容   |
+| createdAt | timestamp            | 创建时间   |
 
 ### plugin_categories 表
 
-| 列 | 类型 | 说明 |
-|----|------|------|
-| id | text PK | UUID |
-| name | text UNIQUE | 分类名 |
-| slug | text UNIQUE | URL 标识 |
-| description | text | 描述 |
-| icon | text | 图标 |
-| sortOrder | integer | 排序权重 |
+| 列          | 类型        | 说明     |
+| ----------- | ----------- | -------- |
+| id          | text PK     | UUID     |
+| name        | text UNIQUE | 分类名   |
+| slug        | text UNIQUE | URL 标识 |
+| description | text        | 描述     |
+| icon        | text        | 图标     |
+| sortOrder   | integer     | 排序权重 |
 
 ### plugin_category_mappings 表
 
-| 列 | 类型 | 说明 |
-|----|------|------|
-| pluginId | text FK → plugins.id | 插件 ID |
+| 列         | 类型                           | 说明    |
+| ---------- | ------------------------------ | ------- |
+| pluginId   | text FK → plugins.id           | 插件 ID |
 | categoryId | text FK → plugin_categories.id | 分类 ID |
 
-*(pluginId + categoryId 联合唯一索引)*
+_(pluginId + categoryId 联合唯一索引)_
 
 ---
 
@@ -1713,52 +1714,52 @@ xbrowser CLI
 
 ### 认证
 
-| 方法 | 端点 | 认证 | 说明 | 状态 |
-|------|------|------|------|------|
-| POST | /api/auth/register | 无 | 注册开发者 | ✅ |
-| POST | /api/auth/login | 无 | 登录获取 token | ✅ |
-| GET | /api/auth/verify | Bearer | 验证 token | ✅ |
+| 方法 | 端点               | 认证   | 说明           | 状态 |
+| ---- | ------------------ | ------ | -------------- | ---- |
+| POST | /api/auth/register | 无     | 注册开发者     | ✅   |
+| POST | /api/auth/login    | 无     | 登录获取 token | ✅   |
+| GET  | /api/auth/verify   | Bearer | 验证 token     | ✅   |
 
 ### 插件 (公开)
 
-| 方法 | 端点 | 认证 | 说明 | 状态 |
-|------|------|------|------|------|
-| GET | /api/plugins | 无 | 插件列表 | ✅ |
-| GET | /api/plugins/search | 无 | 搜索插件 | ✅ |
-| GET | /api/plugins/{slug} | 无 | 插件详情 | ✅ |
-| GET | /api/plugins/{slug}/versions | 无 | 版本列表 | ✅ |
-| GET | /api/plugins/{slug}/tarball | 无 | 下载 tarball | ⚠️ 占位 |
-| POST | /api/plugins/{slug}/install | 无 | 追踪安装 | ✅ |
-| GET | /api/plugins/{slug}/reviews | 无 | 获取评价 | ✅ |
-| GET | /api/categories | 无 | 分类列表 | ✅ |
-| GET | /api/categories/{slug}/plugins | 无 | 分类下的插件 | ✅ |
-| GET | /api/stats | 无 | 市场统计 | ✅ |
+| 方法 | 端点                           | 认证 | 说明         | 状态    |
+| ---- | ------------------------------ | ---- | ------------ | ------- |
+| GET  | /api/plugins                   | 无   | 插件列表     | ✅      |
+| GET  | /api/plugins/search            | 无   | 搜索插件     | ✅      |
+| GET  | /api/plugins/{slug}            | 无   | 插件详情     | ✅      |
+| GET  | /api/plugins/{slug}/versions   | 无   | 版本列表     | ✅      |
+| GET  | /api/plugins/{slug}/tarball    | 无   | 下载 tarball | ⚠️ 占位 |
+| POST | /api/plugins/{slug}/install    | 无   | 追踪安装     | ✅      |
+| GET  | /api/plugins/{slug}/reviews    | 无   | 获取评价     | ✅      |
+| GET  | /api/categories                | 无   | 分类列表     | ✅      |
+| GET  | /api/categories/{slug}/plugins | 无   | 分类下的插件 | ✅      |
+| GET  | /api/stats                     | 无   | 市场统计     | ✅      |
 
 ### 插件 (需认证)
 
-| 方法 | 端点 | 认证 | 说明 | 状态 |
-|------|------|------|------|------|
-| POST | /api/plugins | Bearer | 创建插件 | ✅ |
-| PUT | /api/plugins/{slug} | Bearer | 更新插件 | ✅ |
-| DELETE | /api/plugins/{slug} | Bearer | 删除插件 | ✅ |
-| POST | /api/plugins/publish | Bearer | 发布 (tarball) | ⚠️ 文件未持久化 |
-| POST | /api/plugins/{slug}/versions | Bearer | 发布新版本 | ⚠️ 无文件上传 |
-| POST | /api/plugins/{slug}/reviews | Bearer | 提交评价 | ✅ |
+| 方法   | 端点                         | 认证   | 说明           | 状态            |
+| ------ | ---------------------------- | ------ | -------------- | --------------- |
+| POST   | /api/plugins                 | Bearer | 创建插件       | ✅              |
+| PUT    | /api/plugins/{slug}          | Bearer | 更新插件       | ✅              |
+| DELETE | /api/plugins/{slug}          | Bearer | 删除插件       | ✅              |
+| POST   | /api/plugins/publish         | Bearer | 发布 (tarball) | ⚠️ 文件未持久化 |
+| POST   | /api/plugins/{slug}/versions | Bearer | 发布新版本     | ⚠️ 无文件上传   |
+| POST   | /api/plugins/{slug}/reviews  | Bearer | 提交评价       | ✅              |
 
 ### 管理员
 
-| 方法 | 端点 | 认证 | 说明 | 状态 |
-|------|------|------|------|------|
-| GET | /api/admin/stats/dashboard | super_admin | 仪表盘 | ✅ |
-| GET | /api/admin/plugins/pending | super_admin | 待审核 | ✅ |
-| GET | /api/admin/plugins | super_admin | 所有插件 | ✅ |
-| PUT | /api/admin/plugins/{slug}/approve | super_admin | 批准 | ✅ |
-| PUT | /api/admin/plugins/{slug}/reject | super_admin | 拒绝 | ✅ |
-| PUT | /api/admin/plugins/{slug}/feature | super_admin | 精选 | ✅ |
-| DELETE | /api/admin/plugins/{slug} | super_admin | 下架 | ✅ |
-| POST | /api/admin/plugins/bulk-approve | super_admin | 批量批准 | ✅ |
-| POST | /api/admin/plugins/bulk-reject | super_admin | 批量拒绝 | ✅ |
-| GET | /api/admin/categories | super_admin | 分类列表 | ✅ |
-| POST | /api/admin/categories | super_admin | 创建分类 | ✅ |
-| PUT | /api/admin/categories/{id} | super_admin | 更新分类 | ✅ |
-| DELETE | /api/admin/categories/{id} | super_admin | 删除分类 | ✅ |
+| 方法   | 端点                              | 认证        | 说明     | 状态 |
+| ------ | --------------------------------- | ----------- | -------- | ---- |
+| GET    | /api/admin/stats/dashboard        | super_admin | 仪表盘   | ✅   |
+| GET    | /api/admin/plugins/pending        | super_admin | 待审核   | ✅   |
+| GET    | /api/admin/plugins                | super_admin | 所有插件 | ✅   |
+| PUT    | /api/admin/plugins/{slug}/approve | super_admin | 批准     | ✅   |
+| PUT    | /api/admin/plugins/{slug}/reject  | super_admin | 拒绝     | ✅   |
+| PUT    | /api/admin/plugins/{slug}/feature | super_admin | 精选     | ✅   |
+| DELETE | /api/admin/plugins/{slug}         | super_admin | 下架     | ✅   |
+| POST   | /api/admin/plugins/bulk-approve   | super_admin | 批量批准 | ✅   |
+| POST   | /api/admin/plugins/bulk-reject    | super_admin | 批量拒绝 | ✅   |
+| GET    | /api/admin/categories             | super_admin | 分类列表 | ✅   |
+| POST   | /api/admin/categories             | super_admin | 创建分类 | ✅   |
+| PUT    | /api/admin/categories/{id}        | super_admin | 更新分类 | ✅   |
+| DELETE | /api/admin/categories/{id}        | super_admin | 删除分类 | ✅   |

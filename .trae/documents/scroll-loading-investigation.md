@@ -37,7 +37,7 @@ const handleScroll = useCallback(() => {
 const handleLoadMore = useCallback(async () => {
   if (!hasMoreRounds || loadingMore) return
   setAutoScrollEnabled(false)
-  hasTriggeredLoadRef.current = true  // ⚠️ 标记已触发
+  hasTriggeredLoadRef.current = true // ⚠️ 标记已触发
   await loadMoreRounds()
 }, [hasMoreRounds, loadingMore, loadMoreRounds])
 ```
@@ -65,10 +65,12 @@ set(state => ({
 ### 问题 1：重置条件不合理
 
 **当前逻辑**：
+
 - 只有当 `scrollProgress > 0.5` 时才重置 `hasTriggeredLoadRef.current`
 - 但用户加载后可能还在浏览历史消息，不会滚动到 50% 以下
 
 **场景**：
+
 1. 用户滚动到顶部，触发加载（scrollProgress = 0.3）
 2. 加载完成，新消息添加到顶部
 3. 用户还在浏览，scrollProgress = 0.4（仍然 < 0.5）
@@ -85,6 +87,7 @@ const scrollProgress = scrollTop / (scrollHeight - clientHeight || 1)
 ### 问题 3：hasTriggeredLoadRef 的生命周期
 
 `hasTriggeredLoadRef` 是一个 ref，它的生命周期与组件相同，但在以下情况下不会重置：
+
 - 组件重新渲染
 - 数据更新
 - 加载完成
@@ -106,6 +109,7 @@ if (scrollProgress <= SCROLL_THRESHOLD && hasMoreRounds && !loadingMore && !hasT
 **核心问题**：`hasTriggeredLoadRef.current = true` 后，重置条件太严格，导致无法再次触发加载。
 
 **正确的逻辑应该是**：
+
 - 加载完成后，立即重置 `hasTriggeredLoadRef.current`
 - 或者在数据更新后重置
 - 或者每次滚动都检查是否需要加载，而不是依赖标记
@@ -124,16 +128,18 @@ const handleLoadMore = useCallback(async () => {
   setAutoScrollEnabled(false)
   hasTriggeredLoadRef.current = true
   await loadMoreRounds()
-  hasTriggeredLoadRef.current = false  // ✅ 立即重置
+  hasTriggeredLoadRef.current = false // ✅ 立即重置
 }, [hasMoreRounds, loadingMore, loadMoreRounds])
 ```
 
 **优点**：
+
 - ✅ 简单直接
 - ✅ 加载完成后可以立即再次触发
 - ✅ 不需要复杂的滚动条件
 
 **缺点**：
+
 - ⚠️ 如果加载很快，可能会连续触发多次
 - ⚠️ 需要依赖 `loadingMore` 状态防止重复
 
@@ -155,10 +161,12 @@ useEffect(() => {
 ```
 
 **优点**：
+
 - ✅ 数据更新后自动重置
 - ✅ 不依赖滚动位置
 
 **缺点**：
+
 - ⚠️ 需要额外的 ref 记录长度
 - ⚠️ 逻辑稍复杂
 
@@ -185,11 +193,13 @@ const handleScroll = useCallback(() => {
 ```
 
 **优点**：
+
 - ✅ 逻辑简单
 - ✅ 只依赖状态，不依赖 ref
 - ✅ `loadingMore` 会自动防止重复触发
 
 **缺点**：
+
 - ⚠️ 如果用户停留不动，可能会频繁触发
 - ⚠️ 需要防抖
 
@@ -214,10 +224,12 @@ const handleScroll = useCallback(() => {
 ```
 
 **优点**：
+
 - ✅ 防止频繁触发
 - ✅ 用户必须滚动一定距离才会再次触发
 
 **缺点**：
+
 - ⚠️ 逻辑复杂
 - ⚠️ 需要额外的 ref
 
@@ -228,6 +240,7 @@ const handleScroll = useCallback(() => {
 ### 🎯 推荐：方案 1 + 方案 3 结合
 
 **核心思路**：
+
 1. 移除 `hasTriggeredLoadRef`
 2. 完全依赖 `loadingMore` 状态
 3. 加载完成后，`loadingMore` 自动变为 `false`，允许再次触发
@@ -265,6 +278,7 @@ const handleScroll = useCallback(() => {
 ### 测试 1：连续滚动加载
 
 **步骤**：
+
 1. 初始加载 5 个轮次
 2. 向上滚动到顶部
 3. 触发加载，加载 5 个轮次
@@ -272,6 +286,7 @@ const handleScroll = useCallback(() => {
 5. 再次触发加载
 
 **预期**：
+
 - ✅ 每次滚动到顶部附近都会触发加载
 - ✅ 不会连续触发多次
 - ✅ 直到没有更多数据
@@ -279,21 +294,25 @@ const handleScroll = useCallback(() => {
 ### 测试 2：快速滚动
 
 **步骤**：
+
 1. 快速连续向上滚动
 2. 观察是否会触发多次加载
 
 **预期**：
+
 - ✅ 只会触发一次加载
 - ✅ 防抖生效
 
 ### 测试 3：加载完成后浏览
 
 **步骤**：
+
 1. 触发加载
 2. 加载完成后，在新加载的消息中浏览
 3. 继续向上滚动
 
 **预期**：
+
 - ✅ 可以再次触发加载
 - ✅ 不会卡在"只能加载一次"
 
@@ -335,7 +354,7 @@ const handleScroll = useCallback(() => {
 const lastLoadTimeRef = useRef(0)
 
 if (Date.now() - lastLoadTimeRef.current < 1000) {
-  return  // 1 秒内不重复加载
+  return // 1 秒内不重复加载
 }
 lastLoadTimeRef.current = Date.now()
 ```

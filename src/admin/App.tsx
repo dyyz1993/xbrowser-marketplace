@@ -15,8 +15,12 @@ import { SystemLogsPage } from './pages/SystemLogsPage'
 import { UsersPage } from './pages/UsersPage'
 import { ProtectedRoute, CaptchaModal } from './components'
 
-const MediaTestPage = React.lazy(() => import('./pages/MediaTestPage/index').then(m => ({ default: m.MediaTestPage })))
-const TestCaptchaPage = React.lazy(() => import('./pages/TestCaptchaPage').then(m => ({ default: m.TestCaptchaPage })))
+const MediaTestPage = React.lazy(() =>
+  import('./pages/MediaTestPage/index').then(m => ({ default: m.MediaTestPage }))
+)
+const TestCaptchaPage = React.lazy(() =>
+  import('./pages/TestCaptchaPage').then(m => ({ default: m.TestCaptchaPage }))
+)
 
 export const App: React.FC = () => {
   return (
@@ -49,8 +53,22 @@ export const App: React.FC = () => {
                     <Route path="/system/roles" element={<RolesPage />} />
                     {process.env.NODE_ENV !== 'production' && (
                       <>
-                        <Route path="/media-test" element={<Suspense fallback={null}><MediaTestPage /></Suspense>} />
-                        <Route path="/test-captcha" element={<Suspense fallback={null}><TestCaptchaPage /></Suspense>} />
+                        <Route
+                          path="/media-test"
+                          element={
+                            <Suspense fallback={null}>
+                              <MediaTestPage />
+                            </Suspense>
+                          }
+                        />
+                        <Route
+                          path="/test-captcha"
+                          element={
+                            <Suspense fallback={null}>
+                              <TestCaptchaPage />
+                            </Suspense>
+                          }
+                        />
                       </>
                     )}
                   </Routes>

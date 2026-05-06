@@ -1,6 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { usePluginStore } from '../plugin-store'
-import type { PluginListItem, PluginDetail, Category, MarketplaceStats } from '@shared/modules/plugins'
+import type {
+  PluginListItem,
+  PluginDetail,
+  Category,
+  MarketplaceStats,
+} from '@shared/modules/plugins'
 
 vi.mock('@client/services/plugin-api', () => ({
   pluginApi: {
@@ -77,9 +82,7 @@ describe('pluginStore', () => {
   })
 
   it('should handle fetch plugins error', async () => {
-    ;(pluginApi.list as ReturnType<typeof vi.fn>).mockRejectedValue(
-      new Error('Server error')
-    )
+    ;(pluginApi.list as ReturnType<typeof vi.fn>).mockRejectedValue(new Error('Server error'))
 
     await usePluginStore.getState().fetchPlugins()
 
@@ -98,9 +101,7 @@ describe('pluginStore', () => {
     await usePluginStore.getState().searchPlugins({ q: 'test' })
 
     expect(usePluginStore.getState().plugins).toHaveLength(1)
-    expect(pluginApi.search).toHaveBeenCalledWith(
-      expect.objectContaining({ q: 'test' })
-    )
+    expect(pluginApi.search).toHaveBeenCalledWith(expect.objectContaining({ q: 'test' }))
   })
 
   it('should fetch single plugin detail', async () => {
@@ -129,7 +130,15 @@ describe('pluginStore', () => {
 
   it('should fetch categories', async () => {
     const cats: Category[] = [
-      { id: 'c1', name: 'Dev Tools', slug: 'dev-tools', description: null, icon: null, sortOrder: null, pluginCount: 5 },
+      {
+        id: 'c1',
+        name: 'Dev Tools',
+        slug: 'dev-tools',
+        description: null,
+        icon: null,
+        sortOrder: null,
+        pluginCount: 5,
+      },
     ]
     ;(pluginApi.categories as ReturnType<typeof vi.fn>).mockResolvedValue({
       success: true,

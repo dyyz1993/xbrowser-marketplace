@@ -75,7 +75,7 @@ export const usePluginStore = create<PluginState>((set, get) => ({
     }
   },
 
-  searchPlugins: async (params) => {
+  searchPlugins: async params => {
     set({ loading: true, error: null })
     try {
       const { pagination } = get()

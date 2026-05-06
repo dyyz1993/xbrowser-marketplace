@@ -7,7 +7,7 @@ import { statusColorMap, statusLabelMap } from '../types'
 export const getColumns = (
   onView: (record: PluginItem) => void,
   onApprove: (slug: string) => void,
-  onReject: (record: PluginItem) => void,
+  onReject: (record: PluginItem) => void
 ): ColumnsType<PluginItem> => [
   {
     title: 'Plugin',
@@ -50,22 +50,14 @@ export const getColumns = (
     key: 'actions',
     render: (_: unknown, record: PluginItem) => (
       <Space>
-        <Button
-          size="small"
-          icon={<Eye className="w-3 h-3" />}
-          onClick={() => onView(record)}
-        />
+        <Button size="small" icon={<Eye className="w-3 h-3" />} onClick={() => onView(record)} />
         {record.status === 'pending' && (
           <>
             <Popconfirm
               title={`Approve "${record.name}"?`}
               onConfirm={() => onApprove(record.slug)}
             >
-              <Button
-                type="primary"
-                size="small"
-                icon={<CheckCircle className="w-3 h-3" />}
-              >
+              <Button type="primary" size="small" icon={<CheckCircle className="w-3 h-3" />}>
                 Approve
               </Button>
             </Popconfirm>

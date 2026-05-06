@@ -65,7 +65,10 @@ export function errorHandlerMiddleware(options: ErrorHandlerOptions = {}): Middl
           log.warn(fields, error.message)
         }
 
-        return c.json(createErrorResponse(error.statusCode, error.message, error.details), error.statusCode as import('hono/utils/http-status').ContentfulStatusCode)
+        return c.json(
+          createErrorResponse(error.statusCode, error.message, error.details),
+          error.statusCode as import('hono/utils/http-status').ContentfulStatusCode
+        )
       }
 
       if (error instanceof ZodError) {

@@ -71,7 +71,7 @@ async function resolvePackageUrl(
   if (files.files.length === 1) {
     tarballData = files.files[0].content
   } else {
-    tarballData = Buffer.concat(files.files.map((f) => Buffer.from(f.content)))
+    tarballData = Buffer.concat(files.files.map(f => Buffer.from(f.content)))
   }
 
   const packageUrl = await R2Storage.uploadPluginTarball(
@@ -122,10 +122,7 @@ export async function publishPlugin(
       updatedAt: new Date(),
     }
 
-    await db
-      .update(plugins)
-      .set(updateData)
-      .where(eq(plugins.id, existing[0].id))
+    await db.update(plugins).set(updateData).where(eq(plugins.id, existing[0].id))
 
     const versionId = generateUUID()
     const now = new Date()
@@ -141,11 +138,7 @@ export async function publishPlugin(
       publishedAt: now,
     })
 
-    const updated = await db
-      .select()
-      .from(plugins)
-      .where(eq(plugins.slug, data.slug))
-      .limit(1)
+    const updated = await db.select().from(plugins).where(eq(plugins.slug, data.slug)).limit(1)
 
     return {
       id: updated[0].id,

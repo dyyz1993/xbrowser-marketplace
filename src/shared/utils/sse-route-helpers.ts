@@ -25,9 +25,9 @@ import { createSSEClient } from '@shared/core/sse-client'
  * @param route - Hono route object (e.g., apiClient.api.notifications.stream)
  * @returns SSE client instance
  */
-export function createSSEClientFromRoute<P extends SSEProtocol = SSEProtocol>(
-  route: { $url: () => URL }
-): SSEClient<P> {
+export function createSSEClientFromRoute<P extends SSEProtocol = SSEProtocol>(route: {
+  $url: () => URL
+}): SSEClient<P> {
   const url = route.$url()
   return createSSEClient<P>(url, {})
 }

@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 
-vi.mock('zustand/middleware', async (importOriginal) => {
+vi.mock('zustand/middleware', async importOriginal => {
   const actual = await importOriginal<typeof import('zustand/middleware')>()
   return {
     ...actual,

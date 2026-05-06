@@ -11,7 +11,7 @@ function doFetch(path: string, init?: RequestInit) {
   const application = createApp()
   const headers: Record<string, string> = {
     'User-Agent': 'TestClient/1.0',
-    ...(init?.headers as Record<string, string> ?? {}),
+    ...((init?.headers as Record<string, string>) ?? {}),
   }
   if (init?.body && !(init.body instanceof FormData)) {
     headers['Content-Type'] = 'application/json'
@@ -44,7 +44,17 @@ async function seedOwnedPlugin() {
   })
   await client.execute({
     sql: `INSERT INTO plugin_versions (id, plugin_id, version, changelog, package_url, file_size, checksum, status, published_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    args: ['ver-owned-1', 'plugin-owned', '1.0.0', null, 'db://owned-plugin/1.0.0', null, null, 'approved', now],
+    args: [
+      'ver-owned-1',
+      'plugin-owned',
+      '1.0.0',
+      null,
+      'db://owned-plugin/1.0.0',
+      null,
+      null,
+      'approved',
+      now,
+    ],
   })
 }
 
@@ -96,7 +106,17 @@ async function seedNpmPlugin() {
   })
   await client.execute({
     sql: `INSERT INTO plugin_versions (id, plugin_id, version, changelog, package_url, file_size, checksum, status, published_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    args: ['ver-npm-1', 'plugin-npm', '1.0.0', null, 'npm://some-package@1.0.0', null, null, 'approved', now],
+    args: [
+      'ver-npm-1',
+      'plugin-npm',
+      '1.0.0',
+      null,
+      'npm://some-package@1.0.0',
+      null,
+      null,
+      'approved',
+      now,
+    ],
   })
 }
 
@@ -117,7 +137,14 @@ describe('Publish Routes', () => {
     it('should require authentication', async () => {
       const formData = new FormData()
       const metadata = new File(
-        [JSON.stringify({ name: 'Test', slug: 'test-pub', version: '1.0.0', description: 'A test plugin' })],
+        [
+          JSON.stringify({
+            name: 'Test',
+            slug: 'test-pub',
+            version: '1.0.0',
+            description: 'A test plugin',
+          }),
+        ],
         'metadata.json',
         { type: 'application/json' }
       )
@@ -158,7 +185,10 @@ describe('Publish Routes', () => {
         body: JSON.stringify({ version: '1.1.0', changelog: 'Bug fixes' }),
       })
       expect(res.status).toBe(201)
-      const data = (await res.json()) as { success: boolean; data: { version: string; changelog: string } }
+      const data = (await res.json()) as {
+        success: boolean
+        data: { version: string; changelog: string }
+      }
       if (data.success) {
         expect(data.data.version).toBe('1.1.0')
         expect(data.data.changelog).toBe('Bug fixes')
@@ -206,7 +236,21 @@ describe('Publish Routes', () => {
       const now = Date.now()
       await client.execute({
         sql: `INSERT INTO plugins (id, name, slug, description, author_id, author_name, version, status, tags, site_urls, commands, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        args: ['plugin-nover', 'No Version', 'no-version-plugin', 'No versions', 'super-admin-1', 'admin', '1.0.0', 'approved', '[]', '[]', '[]', now, now],
+        args: [
+          'plugin-nover',
+          'No Version',
+          'no-version-plugin',
+          'No versions',
+          'super-admin-1',
+          'admin',
+          '1.0.0',
+          'approved',
+          '[]',
+          '[]',
+          '[]',
+          now,
+          now,
+        ],
       })
       const res = await doFetch('/api/plugins/no-version-plugin/tarball')
       expect(res.status).toBe(404)

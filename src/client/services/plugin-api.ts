@@ -17,7 +17,16 @@ import type {
   SearchParams,
 } from '@shared/modules/plugins'
 
-export type { PluginListItem, PluginDetail, Category, Review, MarketplaceStats, PluginListResult, PluginListParams, SearchParams }
+export type {
+  PluginListItem,
+  PluginDetail,
+  Category,
+  Review,
+  MarketplaceStats,
+  PluginListResult,
+  PluginListParams,
+  SearchParams,
+}
 
 export const pluginApi = {
   list: async (params: PluginListParams = {}) => {

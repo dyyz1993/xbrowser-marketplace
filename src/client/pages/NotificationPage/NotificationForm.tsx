@@ -23,7 +23,10 @@ export const NotificationForm: React.FC<NotificationFormProps> = ({
   onTypeChange,
   onSubmit,
 }) => (
-  <form onSubmit={onSubmit} className="mb-8 p-6 bg-white rounded-xl shadow-sm border border-gray-200">
+  <form
+    onSubmit={onSubmit}
+    className="mb-8 p-6 bg-white rounded-xl shadow-sm border border-gray-200"
+  >
     <div className="flex gap-4 mb-4">
       <select
         value={type}

@@ -66,11 +66,7 @@ export async function registerDeveloper(data: {
 export async function loginDeveloper(data: { email: string; password: string }) {
   const db = await getDb()
 
-  const rows = await db
-    .select()
-    .from(developers)
-    .where(eq(developers.email, data.email))
-    .limit(1)
+  const rows = await db.select().from(developers).where(eq(developers.email, data.email)).limit(1)
 
   if (rows.length === 0) {
     throw new AuthenticationError('Invalid email or password')
@@ -91,11 +87,7 @@ export async function loginDeveloper(data: { email: string; password: string }) 
 export async function verifyApiKey(apiKey: string) {
   const db = await getDb()
 
-  const rows = await db
-    .select()
-    .from(developers)
-    .where(eq(developers.apiKey, apiKey))
-    .limit(1)
+  const rows = await db.select().from(developers).where(eq(developers.apiKey, apiKey)).limit(1)
 
   if (rows.length === 0) {
     throw new AuthenticationError('Invalid API key')
@@ -107,11 +99,7 @@ export async function verifyApiKey(apiKey: string) {
 export async function getDeveloperById(id: string) {
   const db = await getDb()
 
-  const rows = await db
-    .select()
-    .from(developers)
-    .where(eq(developers.id, id))
-    .limit(1)
+  const rows = await db.select().from(developers).where(eq(developers.id, id)).limit(1)
 
   if (rows.length === 0) {
     throw new NotFoundError('Developer', id)

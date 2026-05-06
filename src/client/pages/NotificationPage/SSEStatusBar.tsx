@@ -20,12 +20,18 @@ export const SSEStatusBar: React.FC<SSEStatusBarProps> = ({
       <div className="flex items-center gap-2">
         <span className="font-medium text-gray-700">SSE Status:</span>
         {sseConnected ? (
-          <span className="flex items-center gap-1 text-green-600" data-testid="sse-status-connected">
+          <span
+            className="flex items-center gap-1 text-green-600"
+            data-testid="sse-status-connected"
+          >
             <Wifi className="w-4 h-4" />
             Connected
           </span>
         ) : (
-          <span className="flex items-center gap-1 text-red-500" data-testid="sse-status-disconnected">
+          <span
+            className="flex items-center gap-1 text-red-500"
+            data-testid="sse-status-disconnected"
+          >
             <WifiOff className="w-4 h-4" />
             Disconnected
           </span>

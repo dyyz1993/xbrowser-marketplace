@@ -4,14 +4,16 @@ import { setupTestDatabase, cleanupTestDatabase } from '../../db/test-setup'
 import { getRawClient } from '../../db'
 import { hashSync } from 'bcryptjs'
 
-async function seedDeveloper(overrides: {
-  id?: string
-  username?: string
-  email?: string
-  password?: string
-  apiKey?: string
-  role?: string
-} = {}) {
+async function seedDeveloper(
+  overrides: {
+    id?: string
+    username?: string
+    email?: string
+    password?: string
+    apiKey?: string
+    role?: string
+  } = {}
+) {
   const client = await getRawClient()
   if (!client || !('execute' in client)) return null
 

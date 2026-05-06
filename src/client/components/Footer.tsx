@@ -4,9 +4,7 @@ export const Footer: React.FC = () => {
       <p className="flex items-center justify-center gap-2">
         <span className="font-medium text-gray-700">xbrowser marketplace</span>
       </p>
-      <p className="mt-1 text-xs text-gray-400">
-        Built with Hono + React + TypeScript
-      </p>
+      <p className="mt-1 text-xs text-gray-400">Built with Hono + React + TypeScript</p>
     </footer>
   )
 }

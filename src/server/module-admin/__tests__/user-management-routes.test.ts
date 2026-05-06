@@ -11,7 +11,7 @@ function doFetch(path: string, init?: RequestInit) {
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
     'User-Agent': 'TestClient/1.0',
-    ...(init?.headers as Record<string, string> ?? {}),
+    ...((init?.headers as Record<string, string>) ?? {}),
   }
   const req = new Request(`http://localhost${path}`, { ...init, headers })
   return application.fetch(req)
@@ -75,7 +75,10 @@ describe('User Management Routes', () => {
         }),
       })
       expect(res.status).toBe(200)
-      const data = (await res.json()) as { success: boolean; data: { username: string; role: string } }
+      const data = (await res.json()) as {
+        success: boolean
+        data: { username: string; role: string }
+      }
       if (data.success) {
         expect(data.data.username).toBe('newuser')
       }

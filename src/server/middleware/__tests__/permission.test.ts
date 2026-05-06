@@ -25,7 +25,10 @@ describe('Permission Middleware', () => {
     app = new Hono()
     app.onError((err, c) => {
       if (AppError.isAppError(err)) {
-        return c.json({ success: false, error: err.message }, err.statusCode as ContentfulStatusCode)
+        return c.json(
+          { success: false, error: err.message },
+          err.statusCode as ContentfulStatusCode
+        )
       }
       return c.json({ success: false, error: err.message }, 500)
     })
@@ -87,7 +90,9 @@ describe('Permission Middleware', () => {
   describe('protected routes with user', () => {
     it('should deny access when user lacks permission', async () => {
       permissionService.permissionService.hasPermission = vi.fn().mockResolvedValue(false)
-      roleService.roleService.getUserRoles = vi.fn().mockResolvedValue([{ code: 'user', name: 'User' }])
+      roleService.roleService.getUserRoles = vi
+        .fn()
+        .mockResolvedValue([{ code: 'user', name: 'User' }])
 
       app.use('*', async (c, next) => {
         c.set('authUser', { id: 'user-1', role: 'user', username: 'test' } as never)
@@ -105,7 +110,9 @@ describe('Permission Middleware', () => {
 
     it('should allow access when user has required permission', async () => {
       permissionService.permissionService.hasPermission = vi.fn().mockResolvedValue(true)
-      roleService.roleService.getUserRoles = vi.fn().mockResolvedValue([{ code: 'user', name: 'User' }])
+      roleService.roleService.getUserRoles = vi
+        .fn()
+        .mockResolvedValue([{ code: 'user', name: 'User' }])
 
       app.use('*', async (c, next) => {
         c.set('authUser', { id: 'user-1', role: 'user', username: 'test' } as never)
@@ -119,7 +126,9 @@ describe('Permission Middleware', () => {
     })
 
     it('should allow super admin access to any route', async () => {
-      roleService.roleService.getUserRoles = vi.fn().mockResolvedValue([{ code: 'super_admin', name: 'Super Admin' }])
+      roleService.roleService.getUserRoles = vi
+        .fn()
+        .mockResolvedValue([{ code: 'super_admin', name: 'Super Admin' }])
 
       app.use('*', async (c, next) => {
         c.set('authUser', { id: 'admin-1', role: 'super_admin', username: 'admin' } as never)
@@ -134,7 +143,9 @@ describe('Permission Middleware', () => {
 
     it('should handle content routes', async () => {
       permissionService.permissionService.hasPermission = vi.fn().mockResolvedValue(false)
-      roleService.roleService.getUserRoles = vi.fn().mockResolvedValue([{ code: 'user', name: 'User' }])
+      roleService.roleService.getUserRoles = vi
+        .fn()
+        .mockResolvedValue([{ code: 'user', name: 'User' }])
 
       app.use('*', async (c, next) => {
         c.set('authUser', { id: 'user-1', role: 'user', username: 'test' } as never)
@@ -149,7 +160,9 @@ describe('Permission Middleware', () => {
 
     it('should handle settings routes', async () => {
       permissionService.permissionService.hasPermission = vi.fn().mockResolvedValue(false)
-      roleService.roleService.getUserRoles = vi.fn().mockResolvedValue([{ code: 'user', name: 'User' }])
+      roleService.roleService.getUserRoles = vi
+        .fn()
+        .mockResolvedValue([{ code: 'user', name: 'User' }])
 
       app.use('*', async (c, next) => {
         c.set('authUser', { id: 'user-1', role: 'user', username: 'test' } as never)
