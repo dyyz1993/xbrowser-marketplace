@@ -95,11 +95,13 @@ export const SearchPage: React.FC = () => {
           <LoadingSpinner size="lg" />
         </div>
       ) : plugins.length === 0 ? (
-        <EmptyState
-          icon={Package}
-          title={query ? `No plugins found for "${query}"` : 'No plugins found'}
-          description="Try a different search term or browse categories"
-        />
+        <div data-testid="search-empty-state">
+          <EmptyState
+            icon={Package}
+            title={query ? `No plugins found for "${query}"` : 'No plugins found'}
+            description="Try a different search term or browse categories"
+          />
+        </div>
       ) : (
         <>
           <p className="text-sm text-gray-500 mb-4">
