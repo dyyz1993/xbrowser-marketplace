@@ -23,6 +23,7 @@ export const PluginCard = React.memo(function PluginCard({ plugin }: PluginCardP
   return (
     <Link
       to={`/plugin/${plugin.slug}`}
+      data-testid="plugin-card"
       className="block bg-white rounded-xl border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all p-5 group"
     >
       <div className="flex items-start justify-between gap-3 mb-3">

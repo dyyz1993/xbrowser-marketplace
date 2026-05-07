@@ -1,12 +1,12 @@
-import { Button, Space, Popconfirm, Tag } from 'antd'
+import { Button, Space, Tag } from 'antd'
 import { KeyOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
 import type { RoleType } from '@shared/modules/role/schemas'
 
 export const getColumns = (
-  onManagePermissions: (role: RoleType) => void,
+  onAssignRole: (role: RoleType) => void,
   onEdit: (role: RoleType) => void,
-  onDelete: (id: string) => void
+  onDeleteClick: (id: string) => void
 ): ColumnsType<RoleType> => [
   {
     title: '角色代码',
@@ -50,24 +50,33 @@ export const getColumns = (
     render: (_: unknown, record: RoleType) => (
       <Space>
         {record.code !== 'super_admin' && (
-          <Button type="link" icon={<KeyOutlined />} onClick={() => onManagePermissions(record)}>
+          <Button
+            type="link"
+            icon={<KeyOutlined />}
+            onClick={() => onAssignRole(record)}
+            data-testid="assign-role-button"
+          >
             权限
           </Button>
         )}
-        <Button type="link" icon={<EditOutlined />} onClick={() => onEdit(record)}>
+        <Button
+          type="link"
+          icon={<EditOutlined />}
+          onClick={() => onEdit(record)}
+          data-testid="edit-role-button"
+        >
           编辑
         </Button>
         {!record.isSystem && (
-          <Popconfirm
-            title="确定要删除这个角色吗？"
-            onConfirm={() => onDelete(record.id)}
-            okText="确定"
-            cancelText="取消"
+          <Button
+            type="link"
+            danger
+            icon={<DeleteOutlined />}
+            onClick={() => onDeleteClick(record.id)}
+            data-testid="delete-role-button"
           >
-            <Button type="link" danger icon={<DeleteOutlined />}>
-              删除
-            </Button>
-          </Popconfirm>
+            删除
+          </Button>
         )}
       </Space>
     ),

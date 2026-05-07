@@ -43,6 +43,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
           value={query}
           onChange={e => setQuery(e.target.value)}
           placeholder="Search plugins, tags, sites..."
+          data-testid="plugin-search-input"
           className={`w-full pl-10 pr-4 rounded-xl border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow ${
             isLarge ? 'py-3.5 text-lg' : 'py-2.5 text-sm'
           }`}

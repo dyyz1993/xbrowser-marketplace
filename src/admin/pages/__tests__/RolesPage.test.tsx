@@ -213,7 +213,7 @@ describe('RolesPage', () => {
     expect(editButtons.length).toBe(2)
   })
 
-  it('renders permission button that opens permission modal', async () => {
+  it('renders permission button that opens assign dialog', async () => {
     const user = userEvent.setup()
 
     render(<RolesPage />)
@@ -223,12 +223,12 @@ describe('RolesPage', () => {
       await user.click(permButtons[0])
 
       await waitFor(() => {
-        expect(screen.getByText(/管理角色权限/)).toBeInTheDocument()
+        expect(screen.getByText(/分配角色/)).toBeInTheDocument()
       })
     }
   })
 
-  it('renders PermissionTree in permission modal', async () => {
+  it('renders user search in assign dialog', async () => {
     const user = userEvent.setup()
 
     render(<RolesPage />)
@@ -239,7 +239,7 @@ describe('RolesPage', () => {
 
       await waitFor(
         () => {
-          expect(screen.getByTestId('permission-tree')).toBeInTheDocument()
+          expect(screen.getByTestId('assign-user-search')).toBeInTheDocument()
         },
         { timeout: 3000 }
       )

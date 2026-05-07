@@ -76,7 +76,7 @@ export const PluginDetailPage: React.FC = () => {
   const formatDate = (ts: number) => new Date(ts).toLocaleDateString()
 
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
+    <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8" data-testid="plugin-detail-container">
       <Link
         to="/"
         className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-blue-600 mb-6"
@@ -88,7 +88,12 @@ export const PluginDetailPage: React.FC = () => {
         <div className="flex flex-col sm:flex-row gap-6">
           <div className="flex-1">
             <div className="flex items-start gap-3 mb-2">
-              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">{plugin.name}</h1>
+              <h1
+                className="text-2xl sm:text-3xl font-bold text-gray-900"
+                data-testid="plugin-detail-name"
+              >
+                {plugin.name}
+              </h1>
               <span className="px-2 py-0.5 text-xs bg-blue-100 text-blue-700 rounded-full font-medium">
                 v{plugin.version}
               </span>
@@ -101,13 +106,15 @@ export const PluginDetailPage: React.FC = () => {
             <p className="text-sm text-gray-500 mb-4">
               by <span className="font-medium text-gray-700">{plugin.authorName}</span>
             </p>
-            <p className="text-gray-600 mb-4">{plugin.description}</p>
+            <p className="text-gray-600 mb-4" data-testid="plugin-detail-description">
+              {plugin.description}
+            </p>
 
             <div className="flex flex-wrap gap-4 text-sm text-gray-500 mb-4">
               <span className="flex items-center gap-1">
                 <Download className="w-4 h-4" /> {plugin.downloadCount} downloads
               </span>
-              <span className="flex items-center gap-1">
+              <span className="flex items-center gap-1" data-testid="plugin-rating">
                 <Star className="w-4 h-4 text-amber-400 fill-amber-400" />{' '}
                 {(plugin.avgRating ?? 0).toFixed(1)} ({plugin.reviewCount ?? 0} reviews)
               </span>
@@ -138,11 +145,15 @@ export const PluginDetailPage: React.FC = () => {
             >
               <Terminal className="w-4 h-4" /> Install
             </button>
-            <div className="flex items-center gap-2 bg-gray-900 text-green-400 px-4 py-2.5 rounded-lg font-mono text-sm">
+            <div
+              className="flex items-center gap-2 bg-gray-900 text-green-400 px-4 py-2.5 rounded-lg font-mono text-sm"
+              data-testid="install-command"
+            >
               <span className="flex-1 truncate text-xs">{installCmd}</span>
               <button
                 onClick={handleCopy}
                 className="text-gray-400 hover:text-white transition-colors"
+                data-testid="copy-install-command-button"
               >
                 {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
               </button>
@@ -202,7 +213,10 @@ export const PluginDetailPage: React.FC = () => {
           )}
 
           {reviews.length > 0 && (
-            <div className="bg-white rounded-xl border border-gray-200 p-6">
+            <div
+              className="bg-white rounded-xl border border-gray-200 p-6"
+              data-testid="plugin-reviews-section"
+            >
               <h2 className="text-lg font-semibold text-gray-900 mb-4">Reviews</h2>
               <div className="space-y-4">
                 {reviews.map(r => (

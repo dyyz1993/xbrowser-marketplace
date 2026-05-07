@@ -1,5 +1,5 @@
 import { Tag, Button, Space, Popconfirm } from 'antd'
-import { CheckCircle, XCircle, Eye } from 'lucide-react'
+import { CheckCircle, XCircle, Eye, Trash2 } from 'lucide-react'
 import type { ColumnsType } from 'antd/es/table'
 import type { PluginItem } from '../types'
 import { statusColorMap, statusLabelMap } from '../types'
@@ -7,7 +7,8 @@ import { statusColorMap, statusLabelMap } from '../types'
 export const getColumns = (
   onView: (record: PluginItem) => void,
   onApprove: (slug: string) => void,
-  onReject: (record: PluginItem) => void
+  onReject: (record: PluginItem) => void,
+  onDelete: (slug: string) => void
 ): ColumnsType<PluginItem> => [
   {
     title: 'Plugin',
@@ -57,7 +58,12 @@ export const getColumns = (
               title={`Approve "${record.name}"?`}
               onConfirm={() => onApprove(record.slug)}
             >
-              <Button type="primary" size="small" icon={<CheckCircle className="w-3 h-3" />}>
+              <Button
+                type="primary"
+                size="small"
+                icon={<CheckCircle className="w-3 h-3" />}
+                data-testid="approve-button"
+              >
                 Approve
               </Button>
             </Popconfirm>
@@ -66,11 +72,27 @@ export const getColumns = (
               size="small"
               icon={<XCircle className="w-3 h-3" />}
               onClick={() => onReject(record)}
+              data-testid="reject-button"
             >
               Reject
             </Button>
           </>
         )}
+        <Popconfirm
+          title={`Delete "${record.name}"?`}
+          description="This will permanently remove the plugin."
+          onConfirm={() => onDelete(record.slug)}
+          okButtonProps={{ 'data-testid': 'confirm-delete-button' }}
+        >
+          <Button
+            danger
+            size="small"
+            icon={<Trash2 className="w-3 h-3" />}
+            data-testid="delete-button"
+          >
+            Delete
+          </Button>
+        </Popconfirm>
       </Space>
     ),
   },

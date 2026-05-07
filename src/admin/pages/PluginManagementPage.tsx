@@ -133,6 +133,8 @@ export const PluginManagementPage: React.FC = () => {
               />
             }
             onClick={() => handleToggleFeatured(record.slug, featured)}
+            data-testid="featured-toggle"
+            data-active={featured ? 'true' : 'false'}
           />
         ) : (
           <span className="text-gray-300">—</span>
@@ -152,8 +154,14 @@ export const PluginManagementPage: React.FC = () => {
           title={`Remove "${record.name}"?`}
           description="This will mark the plugin as removed."
           onConfirm={() => handleRemove(record.slug)}
+          okButtonProps={{ 'data-testid': 'confirm-delete-button' }}
         >
-          <Button danger size="small" icon={<Trash2 className="w-3 h-3" />}>
+          <Button
+            danger
+            size="small"
+            icon={<Trash2 className="w-3 h-3" />}
+            data-testid="delete-button"
+          >
             Remove
           </Button>
         </Popconfirm>
@@ -162,7 +170,7 @@ export const PluginManagementPage: React.FC = () => {
   ]
 
   return (
-    <div>
+    <div data-testid="plugin-management-list">
       <h1 className="text-2xl font-bold text-gray-900 mb-6">Plugin Management</h1>
 
       <div className="flex items-center gap-3 mb-4">

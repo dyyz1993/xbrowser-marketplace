@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react'
 import { pluginAdminApi } from '../../services/plugin-admin-api'
-import { Table, Button, Space, Select, Popconfirm, message, Card } from 'antd'
+import { Table, Button, Space, Select, message, Card } from 'antd'
 import { RefreshCw } from 'lucide-react'
 import type { PluginItem } from './types'
 import { getColumns } from './components/Columns'
@@ -88,7 +88,28 @@ export const PluginReviewPage: React.FC = () => {
     }
   }
 
-  const handleBulkReject = async () => {
+  const handleDelete = async (slug: string) => {
+    try {
+      const result = await pluginAdminApi.remove(slug)
+      if (result.success) {
+        message.success(`Deleted: ${slug}`)
+        fetchPlugins()
+      }
+    } catch {
+      message.error('Failed to delete')
+    }
+  }
+
+  const handleBulkRejectClick = () => {
+    const first = plugins.find(p => p.id === selectedRowKeys[0])
+    if (first) {
+      setRejectModal({ slug: '__batch__', name: `${selectedRowKeys.length} plugins` })
+    }
+  }
+
+  const handleBulkRejectConfirm = async () => {
+    if (!rejectModal) return
+    setRejectLoading(true)
     try {
       const slugs = selectedRowKeys.map(key => {
         const plugin = plugins.find(p => p.id === key)
@@ -98,26 +119,32 @@ export const PluginReviewPage: React.FC = () => {
       if (result.success) {
         const data = result.data as { rejected: number }
         message.success(`Rejected ${data.rejected} plugins`)
+        setRejectModal(null)
+        setRejectReason('')
         setSelectedRowKeys([])
         fetchPlugins()
       }
     } catch {
       message.error('Bulk reject failed')
+    } finally {
+      setRejectLoading(false)
     }
   }
 
   const columns = getColumns(
     record => setDetailPlugin(record),
     handleApprove,
-    record => setRejectModal({ slug: record.slug, name: record.name })
+    record => setRejectModal({ slug: record.slug, name: record.name }),
+    handleDelete
   )
 
   return (
-    <div>
+    <div data-testid="review-list-container">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Plugin Review</h1>
         <Space>
           <Select
+            data-testid="status-filter-pending"
             value={statusFilter}
             onChange={val => {
               setStatusFilter(val)
@@ -141,17 +168,22 @@ export const PluginReviewPage: React.FC = () => {
         <Card size="small" className="mb-4">
           <Space>
             <span>{selectedRowKeys.length} selected</span>
-            <Button type="primary" size="small" onClick={handleBulkApprove}>
+            <Button
+              type="primary"
+              size="small"
+              onClick={handleBulkApprove}
+              data-testid="batch-approve-button"
+            >
               Bulk Approve
             </Button>
-            <Popconfirm
-              title={`Reject ${selectedRowKeys.length} plugins?`}
-              onConfirm={handleBulkReject}
+            <Button
+              danger
+              size="small"
+              onClick={handleBulkRejectClick}
+              data-testid="batch-reject-button"
             >
-              <Button danger size="small">
-                Bulk Reject
-              </Button>
-            </Popconfirm>
+              Bulk Reject
+            </Button>
             <Button size="small" onClick={() => setSelectedRowKeys([])}>
               Clear
             </Button>
@@ -159,29 +191,37 @@ export const PluginReviewPage: React.FC = () => {
         </Card>
       )}
 
-      <Table
-        dataSource={plugins}
-        columns={columns}
-        rowKey="id"
-        loading={loading}
-        rowSelection={{
-          selectedRowKeys,
-          onChange: keys => setSelectedRowKeys(keys as string[]),
-          getCheckboxProps: (record: PluginItem) => ({
-            disabled: record.status !== 'pending',
-          }),
-        }}
-        pagination={{
-          current: page,
-          total,
-          pageSize: 20,
-          onChange: p => setPage(p),
-          showTotal: t => `Total ${t}`,
-        }}
-        expandable={{
-          expandedRowRender: (record: PluginItem) => <ExpandedRow record={record} />,
-        }}
-      />
+      {!loading && plugins.length === 0 ? (
+        <div data-testid="review-empty-state" className="text-center py-12 text-gray-400">
+          No plugins pending review
+        </div>
+      ) : (
+        <Table
+          dataSource={plugins}
+          columns={columns}
+          rowKey="id"
+          loading={loading}
+          onRow={() => ({ 'data-testid': 'review-item' }) as Record<string, string>}
+          rowSelection={{
+            selectedRowKeys,
+            onChange: keys => setSelectedRowKeys(keys as string[]),
+            getCheckboxProps: (record: PluginItem) => ({
+              disabled: record.status !== 'pending',
+              'data-testid': 'select-checkbox',
+            }),
+          }}
+          pagination={{
+            current: page,
+            total,
+            pageSize: 20,
+            onChange: p => setPage(p),
+            showTotal: t => `Total ${t}`,
+          }}
+          expandable={{
+            expandedRowRender: (record: PluginItem) => <ExpandedRow record={record} />,
+          }}
+        />
+      )}
 
       <DetailModal plugin={detailPlugin} onClose={() => setDetailPlugin(null)} />
 
@@ -189,7 +229,7 @@ export const PluginReviewPage: React.FC = () => {
         target={rejectModal}
         reason={rejectReason}
         onReasonChange={setRejectReason}
-        onOk={handleReject}
+        onOk={rejectModal?.slug === '__batch__' ? handleBulkRejectConfirm : handleReject}
         onCancel={() => {
           setRejectModal(null)
           setRejectReason('')

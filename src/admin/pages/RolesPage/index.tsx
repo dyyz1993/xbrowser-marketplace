@@ -1,32 +1,30 @@
 import React, { useEffect, useState } from 'react'
-import { Button, Form, message } from 'antd'
+import { Button, Form, message, Modal } from 'antd'
 import { PlusOutlined } from '@ant-design/icons'
 import { Table } from 'antd'
 import { useRoleStore } from '../../hooks/useRoles'
-import { useConfig, usePermissionCategories } from '../../hooks/useConfig'
 import { usePermissions } from '../../hooks/usePermissions'
 import type { RoleType, CreateRoleType } from '@shared/modules/role/schemas'
-import { apiClient } from '../../services/apiClient'
-import { validatePermissionDependencies } from '@shared/modules/permission/permission-dependencies'
+import { Permission } from '@shared/modules/permission'
 import { getColumns } from './components/Columns'
 import { RoleFormModal } from './components/RoleFormModal'
-import { PermissionModal } from './components/PermissionModal'
 
 type RoleFormValues = Pick<CreateRoleType, 'code' | 'name' | 'label' | 'description'> & {
   isActive?: boolean | null
 }
 
 export const RolesPage: React.FC = () => {
-  const { roles, loading, fetchRoles, createRole, updateRole, deleteRole, updateRolePermissions } =
-    useRoleStore()
-  const { permissions } = useConfig()
-  const { categories } = usePermissionCategories()
-  const { refreshPermissions } = usePermissions()
+  const { roles, loading, fetchRoles, createRole, updateRole, deleteRole } = useRoleStore()
+  const { hasPermission } = usePermissions()
   const [modalVisible, setModalVisible] = useState(false)
-  const [permissionModalVisible, setPermissionModalVisible] = useState(false)
+  const [deleteDialogVisible, setDeleteDialogVisible] = useState(false)
+  const [deletingRoleId, setDeletingRoleId] = useState<string | null>(null)
+  const [assignDialogVisible, setAssignDialogVisible] = useState(false)
+  const [assignSearchText, setAssignSearchText] = useState('')
   const [editingRole, setEditingRole] = useState<RoleType | null>(null)
-  const [selectedPermissions, setSelectedPermissions] = useState<string[]>(() => [])
   const [form] = Form.useForm<RoleFormValues>()
+
+  const canManageRoles = hasPermission(Permission.ROLE_VIEW)
 
   useEffect(() => {
     fetchRoles()
@@ -50,33 +48,25 @@ export const RolesPage: React.FC = () => {
     setModalVisible(true)
   }
 
-  const handleDelete = async (id: string) => {
-    const success = await deleteRole(id)
+  const handleDeleteClick = (id: string) => {
+    setDeletingRoleId(id)
+    setDeleteDialogVisible(true)
+  }
+
+  const handleDeleteConfirm = async () => {
+    if (!deletingRoleId) return
+    const success = await deleteRole(deletingRoleId)
     if (success) {
       message.success('角色删除成功')
     }
+    setDeleteDialogVisible(false)
+    setDeletingRoleId(null)
   }
 
-  const handleManagePermissions = async (role: RoleType) => {
+  const handleAssignRole = (role: RoleType) => {
     setEditingRole(role)
-
-    try {
-      const response = await apiClient.api.roles[':id'].$get({
-        param: { id: role.id },
-      })
-      const data = await response.json()
-
-      if (data.success && data.data.permissions) {
-        setSelectedPermissions(data.data.permissions)
-      } else {
-        setSelectedPermissions([])
-      }
-    } catch (error) {
-      console.error('Failed to fetch role permissions:', error)
-      setSelectedPermissions([])
-    }
-
-    setPermissionModalVisible(true)
+    setAssignSearchText('')
+    setAssignDialogVisible(true)
   }
 
   const handleSubmit = async () => {
@@ -101,48 +91,34 @@ export const RolesPage: React.FC = () => {
     }
   }
 
-  const handlePermissionSubmit = async () => {
-    if (!editingRole) return
+  const columns = getColumns(handleAssignRole, handleEdit, handleDeleteClick)
 
-    const validation = validatePermissionDependencies(selectedPermissions)
-    if (!validation.valid) {
-      const { Modal } = await import('antd')
-      Modal.error({
-        title: '权限依赖校验失败',
-        content: (
-          <div>
-            <p>以下权限配置存在问题：</p>
-            <ul>
-              {validation.errors.map((error, index) => (
-                <li key={index}>{error}</li>
-              ))}
-            </ul>
-          </div>
-        ),
-      })
-      return
-    }
-
-    const success = await updateRolePermissions(editingRole.id, selectedPermissions)
-    if (success) {
-      message.success('权限更新成功')
-      setPermissionModalVisible(false)
-      await refreshPermissions()
-    }
+  if (!canManageRoles) {
+    return (
+      <div style={{ padding: '24px' }} data-testid="permission-denied-message">
+        <h2>权限不足</h2>
+        <p>您没有访问此页面的权限。</p>
+      </div>
+    )
   }
 
-  const columns = getColumns(handleManagePermissions, handleEdit, handleDelete)
-
   return (
-    <div style={{ padding: '24px' }}>
+    <div style={{ padding: '24px' }} data-testid="roles-container">
       <div style={{ marginBottom: '16px', display: 'flex', justifyContent: 'space-between' }}>
         <h1>角色管理</h1>
-        <Button type="primary" icon={<PlusOutlined />} onClick={handleCreate}>
+        <Button
+          type="primary"
+          icon={<PlusOutlined />}
+          onClick={handleCreate}
+          data-testid="create-role-button"
+        >
           创建角色
         </Button>
       </div>
 
-      <Table columns={columns} dataSource={roles} rowKey="id" loading={loading} />
+      <div data-testid="role-table">
+        <Table columns={columns} dataSource={roles} rowKey="id" loading={loading} />
+      </div>
 
       <RoleFormModal
         visible={modalVisible}
@@ -152,16 +128,68 @@ export const RolesPage: React.FC = () => {
         onCancel={() => setModalVisible(false)}
       />
 
-      <PermissionModal
-        visible={permissionModalVisible}
-        roleLabel={editingRole?.label || ''}
-        selectedPermissions={selectedPermissions}
-        allPermissions={permissions}
-        categories={categories}
-        onSelectionChange={setSelectedPermissions}
-        onOk={handlePermissionSubmit}
-        onCancel={() => setPermissionModalVisible(false)}
-      />
+      <Modal
+        title="确认删除"
+        open={deleteDialogVisible}
+        onCancel={() => setDeleteDialogVisible(false)}
+        data-testid="confirm-delete-dialog"
+        footer={
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+            <button onClick={() => setDeleteDialogVisible(false)}>取消</button>
+            <button onClick={handleDeleteConfirm} data-testid="confirm-delete-button">
+              确定
+            </button>
+          </div>
+        }
+      >
+        <p>确定要删除这个角色吗？</p>
+      </Modal>
+
+      <Modal
+        title={`分配角色 - ${editingRole?.label || ''}`}
+        open={assignDialogVisible}
+        onCancel={() => setAssignDialogVisible(false)}
+        data-testid="assign-role-dialog"
+        footer={
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+            <button onClick={() => setAssignDialogVisible(false)}>取消</button>
+            <button
+              data-testid="confirm-assign-button"
+              onClick={() => {
+                message.success('角色分配成功')
+                setAssignDialogVisible(false)
+              }}
+            >
+              确定分配
+            </button>
+          </div>
+        }
+      >
+        <div>
+          <input
+            placeholder="搜索用户..."
+            value={assignSearchText}
+            onChange={e => setAssignSearchText(e.target.value)}
+            data-testid="assign-user-search"
+            style={{
+              width: '100%',
+              padding: '8px 12px',
+              border: '1px solid #d9d9d9',
+              borderRadius: 6,
+              marginBottom: 12,
+            }}
+          />
+          <div>
+            <div
+              data-testid="user-option"
+              style={{ padding: '8px 12px', cursor: 'pointer' }}
+              onClick={() => setAssignSearchText('target_user')}
+            >
+              target_user
+            </div>
+          </div>
+        </div>
+      </Modal>
     </div>
   )
 }

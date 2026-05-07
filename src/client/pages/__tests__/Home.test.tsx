@@ -129,15 +129,19 @@ describe('HomePage', () => {
       render(<HomePage />)
       expect(mockStore.fetchStats).toHaveBeenCalledTimes(1)
       expect(mockStore.fetchCategories).toHaveBeenCalledTimes(1)
-      expect(mockStore.fetchPlugins).toHaveBeenCalledWith({ featured: true, limit: 6 })
+      expect(mockStore.fetchPlugins).toHaveBeenCalledWith({
+        category: undefined,
+        limit: 9,
+        page: 1,
+        sort: 'newest',
+      })
     })
   })
 
-  describe('Featured Plugins', () => {
-    it('should show featured plugins section when plugins exist', () => {
+  describe('Plugin List', () => {
+    it('should show plugins when they exist', () => {
       mockStore.plugins = [createMockPlugin({ name: 'Featured One' })]
       render(<HomePage />)
-      expect(screen.getByText('Featured Plugins')).toBeInTheDocument()
       expect(screen.getByText('Featured One')).toBeInTheDocument()
     })
 
@@ -145,21 +149,25 @@ describe('HomePage', () => {
       mockStore.loading = true
       mockStore.plugins = [createMockPlugin()]
       render(<HomePage />)
-      expect(screen.getByText('Featured Plugins')).toBeInTheDocument()
       const spinner = document.querySelector('.animate-spin')
       expect(spinner).toBeInTheDocument()
     })
 
-    it('should not show featured plugins section when plugins list is empty', () => {
+    it('should show empty state when no plugins', () => {
       render(<HomePage />)
-      expect(screen.queryByText('Featured Plugins')).not.toBeInTheDocument()
+      expect(screen.getByText('No plugins yet')).toBeInTheDocument()
     })
 
-    it('should render view all link to search page', () => {
-      mockStore.plugins = [createMockPlugin()]
+    it('should render category filter chips', () => {
+      mockStore.categories = [createMockCategory()]
       render(<HomePage />)
-      const link = screen.getByText('View all')
-      expect(link.closest('a')).toHaveAttribute('href', '/search?sort=popular')
+      expect(screen.getByText('All')).toBeInTheDocument()
+      expect(screen.getAllByText('E-Commerce').length).toBeGreaterThan(0)
+    })
+
+    it('should render sort select', () => {
+      render(<HomePage />)
+      expect(screen.getByTestId('sort-select')).toBeInTheDocument()
     })
   })
 
@@ -177,28 +185,10 @@ describe('HomePage', () => {
   })
 
   describe('Recently Added Section', () => {
-    it('should show recently added section when stats have recentPlugins', () => {
-      mockStore.stats = createMockStats({
-        recentPlugins: [createMockPlugin({ name: 'Recent Plugin' })],
-      })
-      render(<HomePage />)
-      expect(screen.getByText('Recently Added')).toBeInTheDocument()
-      expect(screen.getByText('Recent Plugin')).toBeInTheDocument()
-    })
-
     it('should not show recently added section when no recentPlugins', () => {
       mockStore.stats = createMockStats({ recentPlugins: [] })
       render(<HomePage />)
       expect(screen.queryByText('Recently Added')).not.toBeInTheDocument()
-    })
-
-    it('should render browse all link in recently added section', () => {
-      mockStore.stats = createMockStats({
-        recentPlugins: [createMockPlugin()],
-      })
-      render(<HomePage />)
-      const links = screen.getAllByText('Browse all')
-      expect(links.length).toBeGreaterThan(0)
     })
   })
 

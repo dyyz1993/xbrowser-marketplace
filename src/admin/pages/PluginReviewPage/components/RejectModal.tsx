@@ -15,13 +15,15 @@ export const RejectModal: React.FC<{
     onCancel={onCancel}
     confirmLoading={loading}
     okText="Reject"
-    okButtonProps={{ danger: true }}
+    okButtonProps={{ danger: true, 'data-testid': 'confirm-reject-button' }}
+    data-testid="reject-reason-dialog"
   >
     <Input.TextArea
       value={reason}
       onChange={e => onReasonChange(e.target.value)}
       placeholder="Rejection reason (optional)"
       rows={3}
+      data-testid="reject-reason-input"
     />
   </Modal>
 )

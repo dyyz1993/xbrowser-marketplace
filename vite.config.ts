@@ -15,6 +15,29 @@ export default defineConfig({
   },
   plugins: [
     tailwindcss(),
+    {
+      name: 'spa-fallback',
+      configureServer(server) {
+        server.middlewares.use((req, _res, next) => {
+          const accept = req.headers.accept || ''
+          const url = req.url?.split('?')[0] || '/'
+
+          const isHTMLRequest =
+            accept.includes('text/html') &&
+            !url.includes('.') &&
+            !url.startsWith('/@') &&
+            !url.startsWith('/node_modules') &&
+            !url.startsWith('/api') &&
+            !url.startsWith('/health')
+
+          if (isHTMLRequest) {
+            const target = url.startsWith('/admin') ? '/admin.html' : '/index.html'
+            req.url = target
+          }
+          next()
+        })
+      },
+    },
     devServer({
       entry: 'src/server/index.ts',
       exclude: [
