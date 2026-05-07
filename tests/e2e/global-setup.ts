@@ -23,19 +23,12 @@ async function waitForServer(port: number, timeout = 60000): Promise<void> {
 
   while (Date.now() - startTime < timeout) {
     try {
-      const http = await import('http')
-      await new Promise<void>(resolve => {
-        const req = http.request(`http://127.0.0.1:${port}`, { method: 'HEAD' }, res => {
-          if (res.statusCode && res.statusCode < 500) resolve()
-          else reject(new Error('Server not ready'))
-        })
-        req.on('error', reject)
-        req.end()
-      })
-      return
+      const response = await fetch(`http://127.0.0.1:${port}`, { method: 'HEAD' })
+      if (response.status < 500) return
     } catch {
-      await new Promise(resolve => setTimeout(resolve, 200))
+      // Server not ready yet
     }
+    await new Promise(resolve => setTimeout(resolve, 500))
   }
 
   throw new Error(`Server did not start within ${timeout}ms`)
