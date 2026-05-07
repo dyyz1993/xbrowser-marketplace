@@ -57,6 +57,7 @@ export const getColumns = (
             <Popconfirm
               title={`Approve "${record.name}"?`}
               onConfirm={() => onApprove(record.slug)}
+              okButtonProps={{ 'data-testid': 'confirm-approve-button' }}
             >
               <Button
                 type="primary"

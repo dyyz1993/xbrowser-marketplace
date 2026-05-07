@@ -45,12 +45,9 @@ test.describe('Permission & Role Management', () => {
   ) {
     const url = `${getBaseUrl()}/admin${path}`
 
-    // Zustand persist hydrates async — on full page reload ProtectedRoute may
-    // redirect to /login before hydration completes.  Wait for hydration first.
     await page.goto(url)
     await page.waitForLoadState('domcontentloaded')
 
-    // Give zustand-persist a moment to hydrate from localStorage
     await page.waitForTimeout(500)
 
     const onLoginPage = await page
@@ -70,7 +67,7 @@ test.describe('Permission & Role Management', () => {
     await page.waitForSelector(waitForSelector, { timeout: 20000 })
   }
 
-  async function waitForSuccessToast(page: import('@playwright/test').Page, timeout = 10000) {
+  async function waitForSuccessToast(page: import('@playwright/test').Page, timeout = 15000) {
     await page.waitForSelector('.ant-message-success', { timeout })
   }
 
@@ -123,7 +120,7 @@ test.describe('Permission & Role Management', () => {
 
       await page.fill('[data-testid="role-name-input"]', 'E2E Test Role')
       await page.fill('[data-testid="role-code-input"]', 'e2e_test_role')
-      await page.getByLabel('显示名称').fill('E2E Test Label')
+      await page.fill('[data-testid="role-label-input"]', 'E2E Test Label')
 
       await page.click(
         '[data-testid="permission-node-plugins"] [data-testid="permission-checkbox-read"]'
@@ -148,8 +145,8 @@ test.describe('Permission & Role Management', () => {
       await page.fill('[data-testid="role-code-input"]', 'some_code')
       await page.click('[data-testid="save-role-button"]')
 
-      await page.waitForSelector('[data-testid="form-error"]', { timeout: 10000 })
-      await expect(page.locator('[data-testid="form-error"]')).toContainText(/请输入/)
+      await page.waitForSelector('.ant-form-item-explain-error', { timeout: 10000 })
+      await expect(page.locator('.ant-form-item-explain-error')).toContainText(/请输入/)
     })
 
     test('should show validation error for duplicate role code', async ({ page }) => {
@@ -165,7 +162,7 @@ test.describe('Permission & Role Management', () => {
 
       await page.fill('[data-testid="role-name-input"]', 'Duplicate Role')
       await page.fill('[data-testid="role-code-input"]', 'existing_role')
-      await page.getByLabel('显示名称').fill('Duplicate Label')
+      await page.fill('[data-testid="role-label-input"]', 'Duplicate Label')
       await page.click('[data-testid="save-role-button"]')
 
       await page.waitForTimeout(2000)

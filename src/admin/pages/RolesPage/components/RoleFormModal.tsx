@@ -110,7 +110,7 @@ export const RoleFormModal: React.FC<{
           label="显示名称"
           rules={[{ required: true, message: '请输入显示名称' }]}
         >
-          <Input placeholder="请输入显示名称" />
+          <Input placeholder="请输入显示名称" data-testid="role-label-input" />
         </Form.Item>
 
         <Form.Item name="description" label="描述">

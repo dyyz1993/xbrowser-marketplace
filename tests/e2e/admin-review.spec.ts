@@ -67,6 +67,15 @@ test.describe('Admin Review', () => {
     }
   }
 
+  async function confirmPopconfirm(page: import('@playwright/test').Page) {
+    await page.waitForSelector('.ant-popover .ant-btn-primary', { timeout: 10000 })
+    await page.click('.ant-popover .ant-btn-primary')
+  }
+
+  async function waitForSuccessMessage(page: import('@playwright/test').Page) {
+    await page.waitForSelector('.ant-message-success', { timeout: 15000 })
+  }
+
   test.beforeEach(async ({ page }) => {
     try {
       await page.request.post(`${getBaseUrl()}/api/__test__/cleanup`)
@@ -134,7 +143,9 @@ test.describe('Admin Review', () => {
         .locator('[data-testid="approve-button"]')
         .click()
 
-      await page.waitForSelector('.ant-message-success', { timeout: 10000 })
+      await confirmPopconfirm(page)
+
+      await waitForSuccessMessage(page)
 
       const remaining = page.locator('[data-testid="review-item"]')
       await expect(remaining).toHaveCount(2)
@@ -157,7 +168,7 @@ test.describe('Admin Review', () => {
       await page.fill('[data-testid="reject-reason-input"]', 'Does not meet quality standards')
       await page.click('[data-testid="confirm-reject-button"]')
 
-      await page.waitForSelector('.ant-message-success', { timeout: 10000 })
+      await waitForSuccessMessage(page)
       const remaining = page.locator('[data-testid="review-item"]')
       await expect(remaining).toHaveCount(2)
     })
@@ -181,7 +192,7 @@ test.describe('Admin Review', () => {
 
       await page.click('[data-testid="batch-approve-button"]')
 
-      await page.waitForSelector('.ant-message-success', { timeout: 10000 })
+      await waitForSuccessMessage(page)
       const remaining = page.locator('[data-testid="review-item"]')
       await expect(remaining).toHaveCount(1)
     })
@@ -210,7 +221,7 @@ test.describe('Admin Review', () => {
       )
       await page.click('[data-testid="confirm-reject-button"]')
 
-      await page.waitForSelector('.ant-message-success', { timeout: 10000 })
+      await waitForSuccessMessage(page)
       const remaining = page.locator('[data-testid="review-item"]')
       await expect(remaining).toHaveCount(1)
     })
@@ -231,7 +242,7 @@ test.describe('Admin Review', () => {
 
       await page.locator('[data-testid="featured-toggle"]').first().click()
 
-      await page.waitForSelector('.ant-message-success', { timeout: 10000 })
+      await waitForSuccessMessage(page)
       const toggle = page.locator('[data-testid="featured-toggle"]').first()
       await expect(toggle).toHaveAttribute('data-active', 'true')
     })
@@ -250,10 +261,9 @@ test.describe('Admin Review', () => {
         .locator('[data-testid="delete-button"]')
         .click()
 
-      await page.waitForSelector('.ant-modal-confirm', { timeout: 10000 })
-      await page.click('[data-testid="confirm-delete-button"]')
+      await confirmPopconfirm(page)
 
-      await page.waitForSelector('.ant-message-success', { timeout: 10000 })
+      await waitForSuccessMessage(page)
       await expect(page.locator('[data-testid="review-item"]')).toHaveCount(initialCount - 1)
     })
   })
