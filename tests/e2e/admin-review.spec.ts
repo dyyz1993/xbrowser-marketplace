@@ -93,7 +93,7 @@ test.describe('Admin Review', () => {
     })
   })
 
-  test.describe.skip('Approve Plugin', () => {
+  test.describe('Approve Plugin', () => {
     // SKIP: Approve API integration not fully wired in E2E
     test('should approve a pending plugin', async ({ page }) => {
       await seedPendingPlugins(page)
@@ -113,7 +113,7 @@ test.describe('Admin Review', () => {
     })
   })
 
-  test.describe.skip('Reject Plugin', () => {
+  test.describe('Reject Plugin', () => {
     // SKIP: Reject modal + API integration not fully wired in E2E
     test('should reject a pending plugin with reason', async ({ page }) => {
       await seedPendingPlugins(page)
@@ -137,7 +137,7 @@ test.describe('Admin Review', () => {
     })
   })
 
-  test.describe.skip('Batch Operations', () => {
+  test.describe('Batch Operations', () => {
     // SKIP: Batch approve/reject API integration not fully wired in E2E
     test('should batch approve selected plugins', async ({ page }) => {
       await seedPendingPlugins(page)
@@ -193,7 +193,7 @@ test.describe('Admin Review', () => {
     })
   })
 
-  test.describe.skip('Featured Toggle', () => {
+  test.describe('Featured Toggle', () => {
     // SKIP: Featured toggle API integration not fully wired in E2E
     test('should toggle featured flag on a plugin', async ({ page }) => {
       await page.request.post(`${getBaseUrl()}/api/__test__/seed-plugin`, {
@@ -216,7 +216,7 @@ test.describe('Admin Review', () => {
     })
   })
 
-  test.describe.skip('Delete Plugin', () => {
+  test.describe('Delete Plugin', () => {
     // SKIP: Delete API integration not fully wired in E2E
     test('should delete a plugin with confirmation', async ({ page }) => {
       await seedPendingPlugins(page)

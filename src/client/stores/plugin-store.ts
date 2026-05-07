@@ -21,7 +21,9 @@ interface PluginState {
   pagination: { page: number; pageSize: number; total: number }
 
   fetchPlugins: (params?: PluginListParams) => Promise<void>
+  fetchPluginsAppend: (params?: PluginListParams) => Promise<void>
   searchPlugins: (params: SearchParams) => Promise<void>
+  searchPluginsAppend: (params: SearchParams) => Promise<void>
   fetchPlugin: (slug: string) => Promise<void>
   fetchCategories: () => Promise<void>
   fetchStats: () => Promise<void>
@@ -75,6 +77,39 @@ export const usePluginStore = create<PluginState>((set, get) => ({
     }
   },
 
+  fetchPluginsAppend: async (params = {}) => {
+    set({ loading: true, error: null })
+    try {
+      const { pagination, selectedCategory, plugins: existingPlugins } = get()
+      const result = await pluginApi.list({
+        page: params.page ?? pagination.page,
+        limit: params.limit ?? pagination.pageSize,
+        category: params.category ?? selectedCategory ?? undefined,
+        sort: params.sort,
+        featured: params.featured,
+      })
+      if (result.success) {
+        set({
+          plugins: [...existingPlugins, ...result.data.items],
+          pagination: {
+            page: result.data.page,
+            pageSize: result.data.limit,
+            total: result.data.total,
+          },
+          loading: false,
+        })
+      } else {
+        let errorText: string = 'Failed to fetch plugins'
+        if (!result.success && 'error' in result) {
+          errorText = result.error as string
+        }
+        set({ error: errorText, loading: false })
+      }
+    } catch (err) {
+      set({ error: err instanceof Error ? err.message : 'Unknown error', loading: false })
+    }
+  },
+
   searchPlugins: async params => {
     set({ loading: true, error: null })
     try {
@@ -87,6 +122,37 @@ export const usePluginStore = create<PluginState>((set, get) => ({
       if (result.success) {
         set({
           plugins: result.data.items,
+          pagination: {
+            page: result.data.page,
+            pageSize: result.data.limit,
+            total: result.data.total,
+          },
+          loading: false,
+        })
+      } else {
+        let errorText: string = 'Search failed'
+        if (!result.success && 'error' in result) {
+          errorText = result.error as string
+        }
+        set({ error: errorText, loading: false })
+      }
+    } catch (err) {
+      set({ error: err instanceof Error ? err.message : 'Unknown error', loading: false })
+    }
+  },
+
+  searchPluginsAppend: async params => {
+    set({ loading: true, error: null })
+    try {
+      const { pagination, plugins: existingPlugins } = get()
+      const result = await pluginApi.search({
+        ...params,
+        page: params.page ?? pagination.page,
+        limit: params.limit ?? pagination.pageSize,
+      })
+      if (result.success) {
+        set({
+          plugins: [...existingPlugins, ...result.data.items],
           pagination: {
             page: result.data.page,
             pageSize: result.data.limit,

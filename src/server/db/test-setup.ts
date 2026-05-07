@@ -194,6 +194,18 @@ export async function setupTestDatabase(): Promise<void> {
       created_at INTEGER NOT NULL DEFAULT (unixepoch() * 1000),
       updated_at INTEGER NOT NULL DEFAULT (unixepoch() * 1000)
     );
+
+    CREATE TABLE IF NOT EXISTS users (
+      id TEXT PRIMARY KEY NOT NULL,
+      username TEXT NOT NULL UNIQUE,
+      email TEXT NOT NULL UNIQUE,
+      password_hash TEXT NOT NULL,
+      role_code TEXT,
+      avatar TEXT,
+      is_active INTEGER DEFAULT true,
+      created_at INTEGER NOT NULL DEFAULT (unixepoch() * 1000),
+      updated_at INTEGER NOT NULL DEFAULT (unixepoch() * 1000)
+    );
   `
 
   const statements = migrationSQL.split(';').filter(s => s.trim())
@@ -421,6 +433,38 @@ async function seedTestData(client: any): Promise<void> {
     },
   ]
 
+  // role category (4 permissions)
+  const rolePermissions = [
+    {
+      id: 'perm_role_view',
+      code: 'role:view',
+      name: '查看角色',
+      label: '查看角色',
+      category: 'role',
+    },
+    {
+      id: 'perm_role_create',
+      code: 'role:create',
+      name: '创建角色',
+      label: '创建角色',
+      category: 'role',
+    },
+    {
+      id: 'perm_role_edit',
+      code: 'role:edit',
+      name: '编辑角色',
+      label: '编辑角色',
+      category: 'role',
+    },
+    {
+      id: 'perm_role_delete',
+      code: 'role:delete',
+      name: '删除角色',
+      label: '删除角色',
+      category: 'role',
+    },
+  ]
+
   // Combine all permissions
   const allPermissions = [
     ...userPermissions,
@@ -429,6 +473,7 @@ async function seedTestData(client: any): Promise<void> {
     ...orderPermissions,
     ...ticketPermissions,
     ...dataPermissions,
+    ...rolePermissions,
   ]
 
   for (const perm of allPermissions) {
@@ -507,6 +552,52 @@ async function seedTestData(client: any): Promise<void> {
       await client.execute({
         sql: `INSERT OR IGNORE INTO role_permissions (role_id, permission_id, created_at) VALUES (?, ?, ?)`,
         args: ['role_user', permId, Date.now()],
+      })
+    } catch {
+      // Ignore duplicate errors
+    }
+  }
+
+  // Insert test users
+  const bcrypt = await import('bcryptjs')
+  const users = [
+    {
+      id: 'user_super_admin',
+      username: 'superadmin',
+      email: 'superadmin@example.com',
+      role: 'super_admin',
+      passwordHash: bcrypt.hashSync('123456', 10),
+    },
+    {
+      id: 'user_customer_service',
+      username: 'customerservice',
+      email: 'cs@example.com',
+      role: 'customer_service',
+      passwordHash: bcrypt.hashSync('123456', 10),
+    },
+    {
+      id: 'user_regular',
+      username: 'user',
+      email: 'user@example.com',
+      role: 'user',
+      passwordHash: bcrypt.hashSync('123456', 10),
+    },
+  ]
+
+  for (const user of users) {
+    try {
+      await client.execute({
+        sql: `INSERT OR IGNORE INTO developers (id, username, email, password_hash, role, api_key, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        args: [
+          user.id,
+          user.username,
+          user.email,
+          user.passwordHash,
+          user.role,
+          `api_key_${user.id}`,
+          Date.now(),
+          Date.now(),
+        ],
       })
     } catch {
       // Ignore duplicate errors

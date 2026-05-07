@@ -18,8 +18,17 @@ const sortOptions = [
 ]
 
 export const HomePage: React.FC = () => {
-  const { stats, categories, loading, fetchStats, fetchCategories, fetchPlugins, searchPlugins } =
-    usePluginStore()
+  const {
+    stats,
+    categories,
+    loading,
+    fetchStats,
+    fetchCategories,
+    fetchPlugins,
+    fetchPluginsAppend,
+    searchPlugins,
+    searchPluginsAppend,
+  } = usePluginStore()
 
   const plugins = usePluginStore(s => s.plugins)
   const pagination = usePluginStore(s => s.pagination)
@@ -27,8 +36,6 @@ export const HomePage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
   const [sortBy, setSortBy] = useState<string>('newest')
-  const [currentPage, setCurrentPage] = useState(1)
-  const [displayCount, setDisplayCount] = useState(PAGE_SIZE)
   const [sortDropdownOpen, setSortDropdownOpen] = useState(false)
   const sortDropdownRef = useRef<HTMLDivElement>(null)
 
@@ -38,8 +45,6 @@ export const HomePage: React.FC = () => {
   }, [fetchStats, fetchCategories])
 
   const doFetch = useCallback(() => {
-    setDisplayCount(PAGE_SIZE)
-    setCurrentPage(1)
     if (searchQuery) {
       searchPlugins({
         q: searchQuery,
@@ -87,25 +92,20 @@ export const HomePage: React.FC = () => {
   }, [])
 
   const handleLoadMore = () => {
-    const nextPage = currentPage + 1
-    setCurrentPage(nextPage)
+    const nextPage = pagination.page + 1
     if (searchQuery) {
-      searchPlugins({
+      searchPluginsAppend({
         q: searchQuery,
         category: selectedCategory ?? undefined,
         page: nextPage,
         limit: PAGE_SIZE,
-      }).then(() => {
-        setDisplayCount(prev => prev + PAGE_SIZE)
       })
     } else {
-      fetchPlugins({
+      fetchPluginsAppend({
         category: selectedCategory ?? undefined,
         sort: sortBy as 'newest' | 'popular' | 'most_downloaded' | 'name',
         page: nextPage,
         limit: PAGE_SIZE,
-      }).then(() => {
-        setDisplayCount(prev => prev + PAGE_SIZE)
       })
     }
   }
@@ -115,7 +115,7 @@ export const HomePage: React.FC = () => {
     return [allChip, ...categories]
   }, [categories])
 
-  const hasMore = displayCount < pagination.total
+  const hasMore = plugins.length < pagination.total
 
   const filteredPlugins = useMemo(() => {
     if (searchQuery) {
@@ -197,7 +197,7 @@ export const HomePage: React.FC = () => {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 pb-10">
-        {loading ? (
+        {loading && plugins.length === 0 ? (
           <div className="flex justify-center py-12">
             <LoadingSpinner size="lg" />
           </div>
@@ -223,7 +223,7 @@ export const HomePage: React.FC = () => {
               className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
               data-testid="plugin-list"
             >
-              {filteredPlugins.slice(0, displayCount).map(p => (
+              {filteredPlugins.map(p => (
                 <PluginCard key={p.id} plugin={p} />
               ))}
             </div>
@@ -232,9 +232,10 @@ export const HomePage: React.FC = () => {
                 <button
                   data-testid="load-more-button"
                   onClick={handleLoadMore}
-                  className="px-6 py-2.5 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-600 hover:border-blue-300 hover:text-blue-600 transition-colors"
+                  className="px-6 py-2.5 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-600 hover:border-blue-300 hover:text-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={loading}
                 >
-                  Load More
+                  {loading ? 'Loading...' : 'Load More'}
                 </button>
               </div>
             )}

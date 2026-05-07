@@ -115,7 +115,7 @@ export const PluginReviewPage: React.FC = () => {
         const plugin = plugins.find(p => p.id === key)
         return plugin!.slug
       })
-      const result = await pluginAdminApi.bulkReject(slugs)
+      const result = await pluginAdminApi.bulkReject(slugs, rejectReason || 'Bulk rejection')
       if (result.success) {
         const data = result.data as { rejected: number }
         message.success(`Rejected ${data.rejected} plugins`)

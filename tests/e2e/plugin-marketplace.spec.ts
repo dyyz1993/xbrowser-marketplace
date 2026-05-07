@@ -69,15 +69,14 @@ test.describe('Plugin Marketplace', () => {
     })
   })
 
-  test.describe.skip('Search Plugins', () => {
-    // SKIP: Search feature not fully implemented
+  test.describe('Search Plugins', () => {
     test('should search plugins by keyword', async ({ page }) => {
       await seedPlugins(page)
       await page.goto(`${getBaseUrl()}/`)
       await page.waitForSelector('[data-testid="marketplace-container"]', { timeout: 25000 })
 
       await page.fill('[data-testid="plugin-search-input"]', 'Logger')
-      await page.waitForTimeout(500)
+      await page.waitForTimeout(1000)
 
       const results = page.locator('[data-testid="plugin-card"]')
       await expect(results).toHaveCount(1)
@@ -90,9 +89,10 @@ test.describe('Plugin Marketplace', () => {
       await page.waitForSelector('[data-testid="marketplace-container"]', { timeout: 25000 })
 
       await page.fill('[data-testid="plugin-search-input"]', 'NonExistentPlugin12345')
-      await page.waitForTimeout(500)
+      await page.waitForTimeout(1000)
 
-      await expect(page.locator('[data-testid="plugin-card"]')).toHaveCount(0)
+      const results = page.locator('[data-testid="plugin-card"]')
+      await expect(results).toHaveCount(0)
       await expect(page.locator('[data-testid="search-empty-state"]')).toBeVisible()
     })
   })
@@ -197,8 +197,7 @@ test.describe('Plugin Marketplace', () => {
     })
   })
 
-  test.describe.skip('Pagination', () => {
-    // SKIP: Pagination/load-more feature not fully implemented
+  test.describe('Pagination', () => {
     test('should load more plugins via pagination', async ({ page }) => {
       for (let i = 0; i < 12; i++) {
         await page.request.post(`${getBaseUrl()}/api/__test__/seed-plugin`, {
@@ -209,6 +208,7 @@ test.describe('Plugin Marketplace', () => {
       await page.waitForSelector('[data-testid="marketplace-container"]', { timeout: 25000 })
 
       const firstPageCount = await page.locator('[data-testid="plugin-card"]').count()
+      expect(firstPageCount).toBeGreaterThan(0)
 
       await page.click('[data-testid="load-more-button"]')
       await page.waitForTimeout(1000)

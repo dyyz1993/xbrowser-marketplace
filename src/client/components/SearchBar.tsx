@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Search } from 'lucide-react'
 
@@ -6,29 +6,65 @@ interface SearchBarProps {
   initialQuery?: string
   size?: 'default' | 'large'
   onSearch?: (query: string) => void
+  debounceMs?: number
 }
 
 export const SearchBar: React.FC<SearchBarProps> = ({
   initialQuery = '',
   size = 'default',
   onSearch,
+  debounceMs = 300,
 }) => {
   const [query, setQuery] = useState(initialQuery)
   const navigate = useNavigate()
+  const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const onSearchRef = useRef(onSearch)
+
+  useEffect(() => {
+    onSearchRef.current = onSearch
+  }, [onSearch])
 
   const handleSubmit = useCallback(
     (e: React.FormEvent) => {
       e.preventDefault()
       const trimmed = query.trim()
       if (!trimmed) return
-      if (onSearch) {
-        onSearch(trimmed)
+      const currentOnSearch = onSearchRef.current
+      if (currentOnSearch) {
+        currentOnSearch(trimmed)
       } else {
         navigate(`/search?q=${encodeURIComponent(trimmed)}`)
       }
     },
-    [query, navigate, onSearch]
+    [query, navigate]
   )
+
+  const triggerSearch = useCallback(() => {
+    const trimmed = query.trim()
+    if (!trimmed) return
+    const currentOnSearch = onSearchRef.current
+    if (currentOnSearch) {
+      currentOnSearch(trimmed)
+    } else {
+      navigate(`/search?q=${encodeURIComponent(trimmed)}`)
+    }
+  }, [query, navigate])
+
+  useEffect(() => {
+    if (debounceTimeoutRef.current) {
+      clearTimeout(debounceTimeoutRef.current)
+    }
+
+    debounceTimeoutRef.current = setTimeout(() => {
+      triggerSearch()
+    }, debounceMs)
+
+    return () => {
+      if (debounceTimeoutRef.current) {
+        clearTimeout(debounceTimeoutRef.current)
+      }
+    }
+  }, [query, triggerSearch, debounceMs])
 
   const isLarge = size === 'large'
 
