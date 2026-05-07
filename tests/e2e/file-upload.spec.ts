@@ -190,7 +190,7 @@ test.describe('Plugin Publish Flow', () => {
   })
 
   test('should display install command on plugin detail page', async ({ page }) => {
-    const seedResult = await seedApprovedPlugin({
+    await seedApprovedPlugin({
       name: 'Install Command Plugin',
       slug: 'install-command-plugin',
       description: 'Plugin for testing install command display on detail page',
