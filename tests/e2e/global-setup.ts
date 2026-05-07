@@ -24,7 +24,7 @@ async function waitForServer(port: number, timeout = 60000): Promise<void> {
   while (Date.now() - startTime < timeout) {
     try {
       const http = await import('http')
-      await new Promise<void>((resolve, reject) => {
+      await new Promise<void>(resolve => {
         const req = http.request(`http://localhost:${port}`, { method: 'HEAD' }, res => {
           if (res.statusCode && res.statusCode < 500) resolve()
           else reject(new Error('Server not ready'))
@@ -58,6 +58,7 @@ export default async function globalSetup(_config: FullConfig) {
       PORT: String(port),
       ENABLE_DEV_TOKENS: 'true',
       NODE_ENV: 'test',
+      MOCK_PASSWORD_HASH: '$2b$10$ZIPxd.Qk2NXhgi6l7rzx9OHOuvnqD4yzciVcXDCz2FSg6cTOmMol6',
     },
   })
 
@@ -69,5 +70,46 @@ export default async function globalSetup(_config: FullConfig) {
   })
 
   await waitForServer(port)
-  process.stdout.write(`✅ Dev server ready at ${baseUrl}\n\n`)
+  process.stdout.write(`✅ Dev server ready at ${baseUrl}\n`)
+
+  process.stdout.write(`📦 Seeding database...\n`)
+  try {
+    const http = await import('http')
+    await new Promise<void>(resolve => {
+      const postData = JSON.stringify({})
+      const req = http.request(
+        `${baseUrl}/api/__test__/seed`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Content-Length': Buffer.byteLength(postData),
+          },
+        },
+        res => {
+          let data = ''
+          res.on('data', chunk => {
+            data += chunk
+          })
+          res.on('end', () => {
+            if (res.statusCode && res.statusCode < 300) {
+              process.stdout.write(`✅ Database seeded\n\n`)
+              resolve()
+            } else {
+              process.stderr.write(`⚠️ Seed failed: ${data}\n\n`)
+              resolve()
+            }
+          })
+        }
+      )
+      req.on('error', err => {
+        process.stderr.write(`⚠️ Seed request failed: ${err}\n\n`)
+        resolve()
+      })
+      req.write(postData)
+      req.end()
+    })
+  } catch (error) {
+    process.stderr.write(`⚠️ Seed failed: ${error}\n\n`)
+  }
 }

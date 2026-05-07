@@ -5,6 +5,14 @@ function getBaseUrl(): string {
 }
 
 test.describe('Case O1 - Ops Admin Panel UI Acceptance', () => {
+  test.beforeEach(async ({ page }) => {
+    try {
+      await page.request.post(`${getBaseUrl()}/api/__test__/seed`)
+    } catch {
+      // Seed may already be done
+    }
+  })
+
   async function loginAs(page, username = 'superadmin', password = '123456') {
     await page.goto(`${getBaseUrl()}/admin/login`)
     await page.waitForSelector('[data-testid="admin-login-form"]', { timeout: 15000 })

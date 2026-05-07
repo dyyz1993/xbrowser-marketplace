@@ -18,6 +18,7 @@ test.describe('Permission & Role Management', () => {
   test.beforeEach(async ({ page }) => {
     try {
       await page.request.post(`${getBaseUrl()}/api/__test__/cleanup`)
+      await page.request.post(`${getBaseUrl()}/api/__test__/seed`)
     } catch (error) {
       console.warn('Error during database cleanup:', error)
     }
