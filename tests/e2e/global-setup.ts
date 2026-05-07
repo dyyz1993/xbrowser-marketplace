@@ -73,43 +73,27 @@ export default async function globalSetup(_config: FullConfig) {
   process.stdout.write(`✅ Dev server ready at ${baseUrl}\n`)
 
   process.stdout.write(`📦 Seeding database...\n`)
-  try {
-    const http = await import('http')
-    await new Promise<void>(resolve => {
-      const postData = JSON.stringify({})
-      const req = http.request(
-        `${baseUrl}/api/__test__/seed`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Content-Length': Buffer.byteLength(postData),
-          },
-        },
-        res => {
-          let data = ''
-          res.on('data', chunk => {
-            data += chunk
-          })
-          res.on('end', () => {
-            if (res.statusCode && res.statusCode < 300) {
-              process.stdout.write(`✅ Database seeded\n\n`)
-              resolve()
-            } else {
-              process.stderr.write(`⚠️ Seed failed: ${data}\n\n`)
-              resolve()
-            }
-          })
-        }
+  const maxSeedRetries = 10
+  let seedSuccess = false
+  for (let attempt = 0; attempt < maxSeedRetries; attempt++) {
+    try {
+      const seedResponse = await fetch(`${baseUrl}/api/__test__/seed`, { method: 'POST' })
+      if (seedResponse.ok) {
+        process.stdout.write(`✅ Database seeded\n\n`)
+        seedSuccess = true
+        break
+      }
+      process.stderr.write(
+        `⚠️ Seed attempt ${attempt + 1} failed with status ${seedResponse.status}\n`
       )
-      req.on('error', err => {
-        process.stderr.write(`⚠️ Seed request failed: ${err}\n\n`)
-        resolve()
-      })
-      req.write(postData)
-      req.end()
-    })
-  } catch (error) {
-    process.stderr.write(`⚠️ Seed failed: ${error}\n\n`)
+    } catch {
+      process.stderr.write(`⚠️ Seed attempt ${attempt + 1} failed (server not ready)\n`)
+    }
+    await new Promise(resolve => setTimeout(resolve, 2000))
+  }
+  if (!seedSuccess) {
+    process.stderr.write(
+      `⚠️ Warning: Failed to seed test data after ${maxSeedRetries} attempts\n\n`
+    )
   }
 }
