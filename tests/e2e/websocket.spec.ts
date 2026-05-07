@@ -99,6 +99,12 @@ test.describe('Admin Plugin Review Flow', () => {
     const approveBtn = page.locator('[data-testid="approve-button"]').first()
     if (await approveBtn.isVisible({ timeout: 5000 }).catch(() => false)) {
       await approveBtn.click()
+
+      const popconfirmOk = page.locator('.ant-popconfirm .ant-btn-primary').first()
+      if (await popconfirmOk.isVisible({ timeout: 5000 }).catch(() => false)) {
+        await popconfirmOk.click()
+      }
+
       await page.waitForTimeout(2000)
 
       const items = page.locator('[data-testid="review-item"]')
@@ -115,8 +121,13 @@ test.describe('Admin Plugin Review Flow', () => {
       const dialog = page.locator('[data-testid="reject-reason-dialog"]')
       await expect(dialog).toBeVisible({ timeout: 10000 })
 
-      await page.fill('[data-testid="reject-reason-input"]', 'Does not meet quality standards')
-      await page.click('[data-testid="confirm-reject-button"]')
+      const reasonInput = page.locator('[data-testid="reject-reason-input"]')
+      await expect(reasonInput).toBeVisible({ timeout: 5000 })
+      await reasonInput.fill('Does not meet quality standards')
+
+      const confirmBtn = page.locator('[data-testid="confirm-reject-button"]')
+      await expect(confirmBtn).toBeVisible({ timeout: 5000 })
+      await confirmBtn.click()
       await page.waitForTimeout(2000)
 
       const items = page.locator('[data-testid="review-item"]')
