@@ -25,7 +25,7 @@ async function waitForServer(port: number, timeout = 60000): Promise<void> {
     try {
       const http = await import('http')
       await new Promise<void>(resolve => {
-        const req = http.request(`http://localhost:${port}`, { method: 'HEAD' }, res => {
+        const req = http.request(`http://127.0.0.1:${port}`, { method: 'HEAD' }, res => {
           if (res.statusCode && res.statusCode < 500) resolve()
           else reject(new Error('Server not ready'))
         })
@@ -43,14 +43,14 @@ async function waitForServer(port: number, timeout = 60000): Promise<void> {
 
 export default async function globalSetup(_config: FullConfig) {
   const port = await getAvailablePort()
-  const baseUrl = `http://localhost:${port}`
+  const baseUrl = `http://127.0.0.1:${port}`
 
   process.env.PLAYWRIGHT_TEST_BASE_URL = baseUrl
   process.env.TEST_PORT = String(port)
 
   process.stdout.write(`\n🚀 Starting dev server on port ${port}...\n`)
 
-  const devServer = spawn('npx', ['vite', '--port', String(port)], {
+  const devServer = spawn('npx', ['vite', '--port', String(port), '--host', '127.0.0.1'], {
     stdio: 'inherit',
     shell: true,
     env: {
