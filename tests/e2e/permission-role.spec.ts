@@ -4,16 +4,38 @@ function getBaseUrl(): string {
   return process.env.PLAYWRIGHT_TEST_BASE_URL || 'http://localhost:3010'
 }
 
+const ADMIN_CREDENTIALS = {
+  username: 'superadmin',
+  password: '123456',
+}
+
+async function clearStorageSafely(page: import('@playwright/test').Page) {
+  try {
+    await page.goto(`${getBaseUrl()}/admin/login`)
+    await page.waitForLoadState('domcontentloaded')
+    await page.evaluate(() => {
+      localStorage.clear()
+      sessionStorage.clear()
+    })
+  } catch {
+    // Storage may not be accessible on certain pages (e.g. about:blank)
+  }
+}
+
+async function loginAs(page: import('@playwright/test').Page, username: string, password: string) {
+  await page.goto(`${getBaseUrl()}/admin/login`)
+  await page.waitForLoadState('load')
+  await page.waitForSelector('[data-testid="admin-login-form"]', { timeout: 25000 })
+  await page.getByTestId('admin-login-username').fill(username)
+  await page.getByTestId('admin-login-password').fill(password)
+  await page.getByTestId('admin-login-submit').click()
+  await page.waitForURL('**/admin/dashboard', { timeout: 25000 })
+  await page.waitForLoadState('networkidle')
+}
+
 test.describe('Permission & Role Management', () => {
   async function loginAsAdmin(page: import('@playwright/test').Page) {
-    await page.goto(`${getBaseUrl()}/admin/login`)
-    await page.waitForLoadState('load')
-    await page.waitForSelector('[data-testid="admin-login-form"]', { timeout: 25000 })
-    await page.getByTestId('admin-login-username').fill('superadmin')
-    await page.getByTestId('admin-login-password').fill('123456')
-    await page.getByTestId('admin-login-submit').click()
-    await page.waitForURL('**/admin/dashboard', { timeout: 25000 })
-    await page.waitForLoadState('networkidle')
+    await loginAs(page, ADMIN_CREDENTIALS.username, ADMIN_CREDENTIALS.password)
   }
 
   async function navigateToAdminPage(
@@ -22,15 +44,14 @@ test.describe('Permission & Role Management', () => {
     waitForSelector: string
   ) {
     const url = `${getBaseUrl()}/admin${path}`
-    await page.goto(url)
 
-    try {
-      await page.waitForSelector(waitForSelector, { timeout: 15000 })
-      return
-    } catch {
-      // Zustand persist hydrates async — ProtectedRoute may redirect to login
-      // before hydration completes on full page reload
-    }
+    // Zustand persist hydrates async — on full page reload ProtectedRoute may
+    // redirect to /login before hydration completes.  Wait for hydration first.
+    await page.goto(url)
+    await page.waitForLoadState('domcontentloaded')
+
+    // Give zustand-persist a moment to hydrate from localStorage
+    await page.waitForTimeout(500)
 
     const onLoginPage = await page
       .locator('[data-testid="admin-login-form"]')
@@ -38,8 +59,8 @@ test.describe('Permission & Role Management', () => {
       .catch(() => false)
 
     if (onLoginPage) {
-      await page.getByTestId('admin-login-username').fill('superadmin')
-      await page.getByTestId('admin-login-password').fill('123456')
+      await page.getByTestId('admin-login-username').fill(ADMIN_CREDENTIALS.username)
+      await page.getByTestId('admin-login-password').fill(ADMIN_CREDENTIALS.password)
       await page.getByTestId('admin-login-submit').click()
       await page.waitForURL('**/admin/dashboard', { timeout: 20000 })
       await page.waitForLoadState('networkidle')
@@ -61,15 +82,7 @@ test.describe('Permission & Role Management', () => {
       console.warn('Error during database cleanup:', error)
     }
 
-    try {
-      await page.evaluate(() => {
-        localStorage.clear()
-        sessionStorage.clear()
-      })
-    } catch (error) {
-      console.warn('Error clearing storage:', error)
-    }
-
+    await clearStorageSafely(page)
     await loginAsAdmin(page)
   })
 
@@ -316,23 +329,8 @@ test.describe('Permission & Role Management', () => {
         },
       })
 
-      await page.evaluate(() => {
-        localStorage.clear()
-        sessionStorage.clear()
-      })
-
-      await page.goto(`${getBaseUrl()}/admin/login`)
-      await page.waitForLoadState('load')
-      await page.waitForSelector('[data-testid="admin-login-form"]', { timeout: 15000 })
-      await page.fill('[data-testid="admin-login-username"]', 'restricted_user')
-      await page.fill('[data-testid="admin-login-password"]', 'TestPass123!')
-      await page.getByTestId('admin-login-submit').click()
-
-      try {
-        await page.waitForURL('**/admin/dashboard', { timeout: 15000 })
-      } catch {
-        await page.goto(`${getBaseUrl()}/admin/dashboard`)
-      }
+      await clearStorageSafely(page)
+      await loginAs(page, 'restricted_user', 'TestPass123!')
 
       await navigateToAdminPage(page, '/system/roles', '[data-testid="permission-denied-message"]')
       await expect(page.locator('[data-testid="permission-denied-message"]')).toBeVisible()

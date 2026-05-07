@@ -4,6 +4,47 @@ function getBaseUrl(): string {
   return process.env.PLAYWRIGHT_TEST_BASE_URL || 'http://localhost:3010'
 }
 
+async function clearStorageSafely(page: import('@playwright/test').Page) {
+  try {
+    await page.goto(`${getBaseUrl()}/admin/login`)
+    await page.waitForLoadState('domcontentloaded')
+    await page.evaluate(() => {
+      localStorage.clear()
+      sessionStorage.clear()
+    })
+  } catch {
+    // Storage may not be accessible on certain pages (e.g. about:blank)
+  }
+}
+
+async function navigateToAdminPage(
+  page: import('@playwright/test').Page,
+  path: string,
+  waitForSelector: string
+) {
+  const url = `${getBaseUrl()}/admin${path}`
+
+  await page.goto(url)
+  await page.waitForLoadState('domcontentloaded')
+  await page.waitForTimeout(500)
+
+  const onLoginPage = await page
+    .locator('[data-testid="admin-login-form"]')
+    .isVisible()
+    .catch(() => false)
+
+  if (onLoginPage) {
+    await page.getByTestId('admin-login-username').fill('superadmin')
+    await page.getByTestId('admin-login-password').fill('123456')
+    await page.getByTestId('admin-login-submit').click()
+    await page.waitForURL('**/admin/dashboard', { timeout: 20000 })
+    await page.waitForLoadState('networkidle')
+    await page.goto(url)
+  }
+
+  await page.waitForSelector(waitForSelector, { timeout: 20000 })
+}
+
 test.describe('Admin Review', () => {
   async function loginAsAdmin(page: import('@playwright/test').Page) {
     await page.goto(`${getBaseUrl()}/admin/login`)
@@ -12,7 +53,7 @@ test.describe('Admin Review', () => {
     await page.getByTestId('admin-login-password').fill('123456')
     await page.getByTestId('admin-login-submit').click()
     await page.waitForURL('**/admin/dashboard', { timeout: 15000 })
-    await page.waitForTimeout(2000)
+    await page.waitForLoadState('networkidle')
   }
 
   async function seedPendingPlugins(page: import('@playwright/test').Page) {
@@ -34,15 +75,7 @@ test.describe('Admin Review', () => {
       console.warn('Error during database cleanup:', error)
     }
 
-    try {
-      await page.evaluate(() => {
-        localStorage.clear()
-        sessionStorage.clear()
-      })
-    } catch (error) {
-      console.warn('Error clearing storage:', error)
-    }
-
+    await clearStorageSafely(page)
     await loginAsAdmin(page)
   })
 
@@ -58,8 +91,7 @@ test.describe('Admin Review', () => {
   test.describe('Pending List', () => {
     test('should display pending plugins in review list', async ({ page }) => {
       await seedPendingPlugins(page)
-      await page.goto(`${getBaseUrl()}/admin/plugins/review`)
-      await page.waitForSelector('[data-testid="review-list-container"]', { timeout: 15000 })
+      await navigateToAdminPage(page, '/plugins/review', '[data-testid="review-list-container"]')
 
       await expect(page.locator('[data-testid="review-list-container"]')).toBeVisible()
       const rows = page.locator('[data-testid="review-item"]')
@@ -67,8 +99,7 @@ test.describe('Admin Review', () => {
     })
 
     test('should show empty state when no pending plugins', async ({ page }) => {
-      await page.goto(`${getBaseUrl()}/admin/plugins/review`)
-      await page.waitForSelector('[data-testid="review-list-container"]', { timeout: 15000 })
+      await navigateToAdminPage(page, '/plugins/review', '[data-testid="review-list-container"]')
 
       await expect(page.locator('[data-testid="review-empty-state"]')).toBeVisible()
     })
@@ -79,8 +110,7 @@ test.describe('Admin Review', () => {
         data: { name: 'Approved Plugin', status: 'approved', category: 'tools' },
       })
 
-      await page.goto(`${getBaseUrl()}/admin/plugins/review`)
-      await page.waitForSelector('[data-testid="review-list-container"]', { timeout: 15000 })
+      await navigateToAdminPage(page, '/plugins/review', '[data-testid="review-list-container"]')
 
       await page.click('[data-testid="status-filter-pending"]')
       await page.waitForTimeout(500)
@@ -94,11 +124,9 @@ test.describe('Admin Review', () => {
   })
 
   test.describe('Approve Plugin', () => {
-    // SKIP: Approve API integration not fully wired in E2E
     test('should approve a pending plugin', async ({ page }) => {
       await seedPendingPlugins(page)
-      await page.goto(`${getBaseUrl()}/admin/plugins/review`)
-      await page.waitForSelector('[data-testid="review-list-container"]', { timeout: 15000 })
+      await navigateToAdminPage(page, '/plugins/review', '[data-testid="review-list-container"]')
 
       await page
         .locator('[data-testid="review-item"]')
@@ -114,11 +142,9 @@ test.describe('Admin Review', () => {
   })
 
   test.describe('Reject Plugin', () => {
-    // SKIP: Reject modal + API integration not fully wired in E2E
     test('should reject a pending plugin with reason', async ({ page }) => {
       await seedPendingPlugins(page)
-      await page.goto(`${getBaseUrl()}/admin/plugins/review`)
-      await page.waitForSelector('[data-testid="review-list-container"]', { timeout: 15000 })
+      await navigateToAdminPage(page, '/plugins/review', '[data-testid="review-list-container"]')
 
       await page
         .locator('[data-testid="review-item"]')
@@ -138,11 +164,9 @@ test.describe('Admin Review', () => {
   })
 
   test.describe('Batch Operations', () => {
-    // SKIP: Batch approve/reject API integration not fully wired in E2E
     test('should batch approve selected plugins', async ({ page }) => {
       await seedPendingPlugins(page)
-      await page.goto(`${getBaseUrl()}/admin/plugins/review`)
-      await page.waitForSelector('[data-testid="review-list-container"]', { timeout: 15000 })
+      await navigateToAdminPage(page, '/plugins/review', '[data-testid="review-list-container"]')
 
       await page
         .locator('[data-testid="review-item"]')
@@ -164,8 +188,7 @@ test.describe('Admin Review', () => {
 
     test('should batch reject selected plugins', async ({ page }) => {
       await seedPendingPlugins(page)
-      await page.goto(`${getBaseUrl()}/admin/plugins/review`)
-      await page.waitForSelector('[data-testid="review-list-container"]', { timeout: 15000 })
+      await navigateToAdminPage(page, '/plugins/review', '[data-testid="review-list-container"]')
 
       await page
         .locator('[data-testid="review-item"]')
@@ -194,7 +217,6 @@ test.describe('Admin Review', () => {
   })
 
   test.describe('Featured Toggle', () => {
-    // SKIP: Featured toggle API integration not fully wired in E2E
     test('should toggle featured flag on a plugin', async ({ page }) => {
       await page.request.post(`${getBaseUrl()}/api/__test__/seed-plugin`, {
         data: {
@@ -205,8 +227,7 @@ test.describe('Admin Review', () => {
         },
       })
 
-      await page.goto(`${getBaseUrl()}/admin/plugins/manage`)
-      await page.waitForSelector('[data-testid="plugin-management-list"]', { timeout: 15000 })
+      await navigateToAdminPage(page, '/plugins/manage', '[data-testid="plugin-management-list"]')
 
       await page.locator('[data-testid="featured-toggle"]').first().click()
 
@@ -217,11 +238,9 @@ test.describe('Admin Review', () => {
   })
 
   test.describe('Delete Plugin', () => {
-    // SKIP: Delete API integration not fully wired in E2E
     test('should delete a plugin with confirmation', async ({ page }) => {
       await seedPendingPlugins(page)
-      await page.goto(`${getBaseUrl()}/admin/plugins/review`)
-      await page.waitForSelector('[data-testid="review-list-container"]', { timeout: 15000 })
+      await navigateToAdminPage(page, '/plugins/review', '[data-testid="review-list-container"]')
 
       const initialCount = await page.locator('[data-testid="review-item"]').count()
 

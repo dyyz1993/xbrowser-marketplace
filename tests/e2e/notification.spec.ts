@@ -21,7 +21,6 @@ function getBaseUrl(): string {
 const persistenceTestInProgress = false
 
 test.beforeEach(async ({ page }) => {
-  // Only cleanup database if we're not in a persistence test
   if (!persistenceTestInProgress) {
     try {
       const response = await page.request.post(`${getBaseUrl()}/api/__test__/cleanup`)
@@ -33,19 +32,16 @@ test.beforeEach(async ({ page }) => {
     }
   }
 
-  // Clear storage safely
+  await page.goto(`${getBaseUrl()}/notifications`)
+  await page.waitForLoadState('load')
+
   try {
     await page.evaluate(() => {
-      try {
-        localStorage.clear()
-        sessionStorage.clear()
-      } catch (e) {
-        // Ignore security errors for localStorage access
-        console.warn('Could not clear storage:', e)
-      }
+      localStorage.clear()
+      sessionStorage.clear()
     })
-  } catch (error) {
-    console.warn('Error clearing storage:', error)
+  } catch {
+    // Storage may not be accessible on certain pages
   }
 
   await page.goto(`${getBaseUrl()}/notifications`)

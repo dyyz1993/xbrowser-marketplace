@@ -26,15 +26,6 @@ test.describe('Plugin Marketplace', () => {
     } catch (error) {
       console.warn('Error during database cleanup:', error)
     }
-
-    try {
-      await page.evaluate(() => {
-        localStorage.clear()
-        sessionStorage.clear()
-      })
-    } catch (error) {
-      console.warn('Error clearing storage:', error)
-    }
   })
 
   test.afterEach(async ({ page, context }) => {
