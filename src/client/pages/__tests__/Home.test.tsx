@@ -147,7 +147,7 @@ describe('HomePage', () => {
 
     it('should show loading spinner when loading', () => {
       mockStore.loading = true
-      mockStore.plugins = [createMockPlugin()]
+      mockStore.plugins = []  // Spinner only shows when plugins.length === 0
       render(<HomePage />)
       const spinner = document.querySelector('.animate-spin')
       expect(spinner).toBeInTheDocument()
