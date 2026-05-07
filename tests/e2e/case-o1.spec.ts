@@ -53,8 +53,7 @@ test.describe('Case O1 - Ops Admin Panel UI Acceptance', () => {
     await expect(page.getByText('Recent Submissions')).toBeVisible()
   })
 
-  // SKIP: /admin/system/monitor page does not exist yet
-  test.skip('Step 3 - Navigate to Monitor', async ({ page }) => {
+  test('Step 3 - Navigate to Monitor', async ({ page }) => {
     await loginAs(page)
     await page.goto(`${getBaseUrl()}/admin/system/monitor`)
     await page.waitForTimeout(2000)
@@ -92,8 +91,7 @@ test.describe('Case O1 - Ops Admin Panel UI Acceptance', () => {
     await expect(page.getByText('权限矩阵')).toBeVisible()
   })
 
-  // SKIP: Roles page feature not fully implemented
-  test.skip('Step 6 - Navigate to Roles', async ({ page }) => {
+  test('Step 6 - Navigate to Roles', async ({ page }) => {
     await loginAs(page)
     await page.goto(`${getBaseUrl()}/admin/system/roles`)
     await page.waitForTimeout(2000)

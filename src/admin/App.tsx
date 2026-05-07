@@ -12,6 +12,7 @@ import { SettingsPage } from './pages/SettingsPage'
 import { PermissionsPage } from './pages/PermissionsPage'
 import { RolesPage } from './pages/RolesPage/index'
 import { SystemLogsPage } from './pages/SystemLogsPage'
+import { MonitorPage } from './pages/MonitorPage'
 import { UsersPage } from './pages/UsersPage'
 import { ProtectedRoute, CaptchaModal } from './components'
 
@@ -51,6 +52,7 @@ export const App: React.FC = () => {
                     <Route path="/system/logs" element={<SystemLogsPage />} />
                     <Route path="/system/permissions" element={<PermissionsPage />} />
                     <Route path="/system/roles" element={<RolesPage />} />
+                    <Route path="/system/monitor" element={<MonitorPage />} />
                     {process.env.NODE_ENV !== 'production' && (
                       <>
                         <Route

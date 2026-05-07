@@ -219,6 +219,53 @@ export function createApp<T extends AppBindings = AppBindings>(_options: CreateA
         return c.json({ success: false as const, message: String(error) }, 500)
       }
     })
+    .post('/api/__test__/seed-review', async c => {
+      try {
+        const { getDb } = await import('./db')
+        const { plugins, pluginReviews } = await import('./db/schema')
+        const { generateUUID } = await import('./utils/uuid')
+        const db = await getDb()
+        const body = await c.req.json<{
+          pluginSlug?: string
+          rating?: number
+          title?: string
+          content?: string
+          userName?: string
+        }>()
+        const pluginSlug = body.pluginSlug
+        if (!pluginSlug) {
+          return c.json({ success: false as const, message: 'pluginSlug is required' }, 400)
+        }
+        const { eq } = await import('drizzle-orm')
+        const pluginRows = await db
+          .select()
+          .from(plugins)
+          .where(eq(plugins.slug, pluginSlug))
+          .limit(1)
+        if (pluginRows.length === 0) {
+          return c.json({ success: false as const, message: 'Plugin not found' }, 404)
+        }
+        const id = generateUUID()
+        const now = new Date()
+        await db.insert(pluginReviews).values({
+          id,
+          pluginId: pluginRows[0].id,
+          userId: 'test-reviewer',
+          userName: body.userName || 'Test Reviewer',
+          rating: body.rating ?? 5,
+          title: body.title ?? null,
+          content: body.content ?? 'Great plugin!',
+          createdAt: now,
+        })
+        return c.json({
+          success: true as const,
+          data: { id, pluginId: pluginRows[0].id, rating: body.rating ?? 5 },
+        })
+      } catch (error) {
+        console.error('Error seeding review:', error)
+        return c.json({ success: false as const, message: String(error) }, 500)
+      }
+    })
     .post('/api/__test__/seed-file', async c => {
       try {
         const { generateUUID } = await import('./utils/uuid')

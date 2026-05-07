@@ -144,14 +144,25 @@ test.describe('Plugin Marketplace', () => {
       await expect(page.locator('[data-testid="copy-install-command-button"]')).toBeVisible()
     })
 
-    test.skip('should display ratings and reviews on detail page', async ({ page }) => {
-      // SKIP: Ratings/reviews feature not fully implemented
+    test('should display ratings and reviews on detail page', async ({ page }) => {
       await seedPlugins(page)
-      await page.goto(`${getBaseUrl()}/`)
-      await page.waitForSelector('[data-testid="marketplace-container"]', { timeout: 25000 })
 
-      await page.locator('[data-testid="plugin-card"]').first().click()
-      await page.waitForURL('**/plugin/**', { timeout: 10000 })
+      const response = await page.request.post(`${getBaseUrl()}/api/__test__/seed-plugin`, {
+        data: { name: 'Reviewed Plugin' },
+      })
+      const { data: seeded } = await response.json()
+
+      await page.request.post(`${getBaseUrl()}/api/__test__/seed-review`, {
+        data: {
+          pluginSlug: seeded.slug,
+          rating: 5,
+          title: 'Excellent plugin',
+          content: 'Works perfectly!',
+          userName: 'Test Reviewer',
+        },
+      })
+
+      await page.goto(`${getBaseUrl()}/plugin/${seeded.slug}`)
 
       await expect(page.locator('[data-testid="plugin-rating"]')).toBeVisible()
       await expect(page.locator('[data-testid="plugin-reviews-section"]')).toBeVisible()
