@@ -228,8 +228,6 @@ test.describe('Permission & Role Management', () => {
       await navigateToAdminPage(page, '/system/roles', '[data-testid="roles-container"]')
       await page.waitForLoadState('networkidle')
 
-      const initialCount = await page.locator('[data-testid="role-table"] tbody tr').count()
-
       await page
         .locator('[data-testid="role-table"] tbody tr')
         .filter({ hasText: 'Deletable Role' })
