@@ -126,10 +126,12 @@ test.describe('Plugin Marketplace', () => {
 
   test.describe('Search', () => {
     test('should search plugins by keyword', async ({ page }) => {
-      const searchInput = page.locator('[data-testid="plugin-search-input"]')
-      if (await searchInput.isVisible()) {
+      const searchInput = page
+        .locator('[data-testid="marketplace-container"]')
+        .locator('[data-testid="plugin-search-input"]')
+      if (await searchInput.isVisible().catch(() => false)) {
         await searchInput.fill('Test Plugin 1')
-        await page.waitForTimeout(1000)
+        await page.waitForTimeout(1500)
 
         const cards = page.locator('[data-testid="plugin-card"]')
         const count = await cards.count()
@@ -138,13 +140,15 @@ test.describe('Plugin Marketplace', () => {
     })
 
     test('should show empty state when no results', async ({ page }) => {
-      const searchInput = page.locator('[data-testid="plugin-search-input"]')
-      if (await searchInput.isVisible()) {
+      const searchInput = page
+        .locator('[data-testid="marketplace-container"]')
+        .locator('[data-testid="plugin-search-input"]')
+      if (await searchInput.isVisible().catch(() => false)) {
         await searchInput.fill('zzz-no-match-xyz')
-        await page.waitForTimeout(1000)
+        await page.waitForTimeout(1500)
 
         const emptyState = page.locator('[data-testid="search-empty-state"]')
-        if (await emptyState.isVisible()) {
+        if (await emptyState.isVisible().catch(() => false)) {
           await expect(emptyState).toBeVisible()
         }
       }

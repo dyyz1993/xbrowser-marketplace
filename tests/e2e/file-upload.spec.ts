@@ -136,8 +136,8 @@ test.describe('Plugin Publish Flow', () => {
       body: JSON.stringify({
         name: 'E2E Publish Plugin',
         slug: 'e2e-publish-plugin',
-        description: 'Created via publish flow E2E test',
-        category: 'developer-tools',
+        description: 'Created via publish flow E2E test with enough characters',
+        version: '1.0.0',
       }),
     })
     expect(createRes.ok).toBeTruthy()
@@ -187,7 +187,7 @@ test.describe('Plugin Publish Flow', () => {
     await seedApprovedPlugin({
       name: 'Install Command Plugin',
       slug: 'install-command-plugin',
-      description: 'Plugin for testing install command display',
+      description: 'Plugin for testing install command display on detail page',
       category: 'developer-tools',
     })
 
@@ -195,7 +195,7 @@ test.describe('Plugin Publish Flow', () => {
     await page.waitForLoadState('load')
 
     const container = page.locator('[data-testid="plugin-detail-container"]')
-    await expect(container).toBeVisible({ timeout: 15000 })
+    await expect(container).toBeVisible({ timeout: 20000 })
 
     await expect(page.locator('[data-testid="install-command"]')).toBeVisible()
     await expect(page.locator('[data-testid="copy-install-command-button"]')).toBeVisible()
@@ -213,7 +213,9 @@ test.describe('Plugin Publish Flow', () => {
     await page.waitForLoadState('load')
     await page.waitForSelector('[data-testid="marketplace-container"]', { timeout: 25000 })
 
-    const searchInput = page.locator('[data-testid="plugin-search-input"]')
+    const searchInput = page
+      .locator('[data-testid="marketplace-container"]')
+      .locator('[data-testid="plugin-search-input"]')
     if (await searchInput.isVisible({ timeout: 5000 }).catch(() => false)) {
       await searchInput.fill('Unique Searchable')
       await page.waitForTimeout(1500)

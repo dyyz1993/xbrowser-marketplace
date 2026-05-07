@@ -116,13 +116,14 @@ test.describe('Plugin Marketplace', () => {
       await page.goto(`${getBaseUrl()}/`)
       await page.waitForSelector('[data-testid="marketplace-container"]', { timeout: 25000 })
 
+      await page.waitForSelector('[data-testid="category-filter-developer-tools"]', {
+        timeout: 10000,
+      })
       await page.click('[data-testid="category-filter-developer-tools"]')
-      await page.waitForTimeout(500)
-      await expect(page.locator('[data-testid="plugin-card"]')).toHaveCount(1)
+      await expect(page.locator('[data-testid="plugin-card"]')).toHaveCount(1, { timeout: 10000 })
 
       await page.click('[data-testid="category-filter-all"]')
-      await page.waitForTimeout(500)
-      await expect(page.locator('[data-testid="plugin-card"]')).toHaveCount(3)
+      await expect(page.locator('[data-testid="plugin-card"]')).toHaveCount(3, { timeout: 10000 })
     })
   })
 
