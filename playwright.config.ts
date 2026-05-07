@@ -13,12 +13,7 @@ const browserExecutablePath = process.env.PLAYWRIGHT_TEST_BROWSER_EXECUTABLE_PAT
 export default defineConfig({
   testDir: './tests/e2e',
   testMatch: '**/*.spec.ts',
-  testIgnore: [
-    '**/todo.spec.ts',
-    '**/websocket.spec.ts',
-    '**/auth-flow.spec.ts',
-    '**/file-upload.spec.ts',
-  ],
+
   timeout: 30 * 1000,
   expect: { timeout: 5 * 1000 },
   forbidOnly: !!process.env.CI,
