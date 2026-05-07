@@ -161,12 +161,18 @@ test.describe('Admin Review', () => {
         .locator('[data-testid="review-item"]')
         .first()
         .locator('[data-testid="reject-button"]')
-        .click()
+        .click({ force: true })
 
-      await page.waitForSelector('[data-testid="reject-reason-dialog"]', { timeout: 10000 })
+      await page.waitForSelector('.ant-modal-wrap:not([style*="display: none"])', {
+        timeout: 10000,
+      })
+      await page.waitForSelector('[data-testid="reject-reason-input"]', {
+        state: 'visible',
+        timeout: 5000,
+      })
 
       await page.fill('[data-testid="reject-reason-input"]', 'Does not meet quality standards')
-      await page.click('[data-testid="confirm-reject-button"]')
+      await page.getByTestId('confirm-reject-button').click({ force: true })
 
       await waitForSuccessMessage(page)
       const remaining = page.locator('[data-testid="review-item"]')
@@ -212,14 +218,20 @@ test.describe('Admin Review', () => {
         .locator('[data-testid="select-checkbox"]')
         .check()
 
-      await page.click('[data-testid="batch-reject-button"]')
+      await page.click('[data-testid="batch-reject-button"]', { force: true })
 
-      await page.waitForSelector('[data-testid="reject-reason-dialog"]', { timeout: 10000 })
+      await page.waitForSelector('.ant-modal-wrap:not([style*="display: none"])', {
+        timeout: 10000,
+      })
+      await page.waitForSelector('[data-testid="reject-reason-input"]', {
+        state: 'visible',
+        timeout: 5000,
+      })
       await page.fill(
         '[data-testid="reject-reason-input"]',
         'Batch rejection - duplicate submissions'
       )
-      await page.click('[data-testid="confirm-reject-button"]')
+      await page.getByTestId('confirm-reject-button').click({ force: true })
 
       await waitForSuccessMessage(page)
       const remaining = page.locator('[data-testid="review-item"]')

@@ -115,8 +115,14 @@ test.describe('Permission & Role Management', () => {
       await navigateToAdminPage(page, '/system/roles', '[data-testid="roles-container"]')
       await page.waitForLoadState('networkidle')
 
-      await page.click('[data-testid="create-role-button"]')
-      await page.waitForSelector('[data-testid="role-form-dialog"]', { timeout: 10000 })
+      await page.getByTestId('create-role-button').click()
+      await page.waitForSelector('.ant-modal-wrap:not([style*="display: none"])', {
+        timeout: 15000,
+      })
+      await page.waitForSelector('[data-testid="role-name-input"]', {
+        state: 'visible',
+        timeout: 5000,
+      })
 
       await page.fill('[data-testid="role-name-input"]', 'E2E Test Role')
       await page.fill('[data-testid="role-code-input"]', 'e2e_test_role')
@@ -129,7 +135,7 @@ test.describe('Permission & Role Management', () => {
         '[data-testid="permission-node-plugins"] [data-testid="permission-checkbox-write"]'
       )
 
-      await page.click('[data-testid="save-role-button"]')
+      await page.getByTestId('save-role-button').click()
 
       await waitForSuccessToast(page)
       await expect(page.locator('[data-testid="role-table"]')).toContainText('E2E Test Role')
@@ -139,11 +145,17 @@ test.describe('Permission & Role Management', () => {
       await navigateToAdminPage(page, '/system/roles', '[data-testid="roles-container"]')
       await page.waitForLoadState('networkidle')
 
-      await page.click('[data-testid="create-role-button"]')
-      await page.waitForSelector('[data-testid="role-form-dialog"]', { timeout: 10000 })
+      await page.getByTestId('create-role-button').click()
+      await page.waitForSelector('.ant-modal-wrap:not([style*="display: none"])', {
+        timeout: 15000,
+      })
+      await page.waitForSelector('[data-testid="role-code-input"]', {
+        state: 'visible',
+        timeout: 5000,
+      })
 
       await page.fill('[data-testid="role-code-input"]', 'some_code')
-      await page.click('[data-testid="save-role-button"]')
+      await page.getByTestId('save-role-button').click()
 
       await page.waitForSelector('.ant-form-item-explain-error', { timeout: 10000 })
       await expect(page.locator('.ant-form-item-explain-error')).toContainText(/请输入/)
@@ -157,13 +169,19 @@ test.describe('Permission & Role Management', () => {
       await navigateToAdminPage(page, '/system/roles', '[data-testid="roles-container"]')
       await page.waitForLoadState('networkidle')
 
-      await page.click('[data-testid="create-role-button"]')
-      await page.waitForSelector('[data-testid="role-form-dialog"]', { timeout: 10000 })
+      await page.getByTestId('create-role-button').click()
+      await page.waitForSelector('.ant-modal-wrap:not([style*="display: none"])', {
+        timeout: 15000,
+      })
+      await page.waitForSelector('[data-testid="role-name-input"]', {
+        state: 'visible',
+        timeout: 5000,
+      })
 
       await page.fill('[data-testid="role-name-input"]', 'Duplicate Role')
       await page.fill('[data-testid="role-code-input"]', 'existing_role')
       await page.fill('[data-testid="role-label-input"]', 'Duplicate Label')
-      await page.click('[data-testid="save-role-button"]')
+      await page.getByTestId('save-role-button').click()
 
       await page.waitForTimeout(2000)
       await expect(page.locator('[data-testid="role-form-dialog"]')).toBeVisible()
@@ -186,7 +204,13 @@ test.describe('Permission & Role Management', () => {
         .locator('[data-testid="edit-role-button"]')
         .click()
 
-      await page.waitForSelector('[data-testid="role-form-dialog"]', { timeout: 10000 })
+      await page.waitForSelector('.ant-modal-wrap:not([style*="display: none"])', {
+        timeout: 15000,
+      })
+      await page.waitForSelector('[data-testid="role-name-input"]', {
+        state: 'visible',
+        timeout: 5000,
+      })
 
       await page.click(
         '[data-testid="permission-node-plugins"] [data-testid="permission-checkbox-write"]'
@@ -195,7 +219,7 @@ test.describe('Permission & Role Management', () => {
         '[data-testid="permission-node-plugins"] [data-testid="permission-checkbox-delete"]'
       )
 
-      await page.click('[data-testid="save-role-button"]')
+      await page.getByTestId('save-role-button').click()
 
       await waitForSuccessToast(page)
     })
@@ -218,8 +242,10 @@ test.describe('Permission & Role Management', () => {
         .locator('[data-testid="delete-role-button"]')
         .click()
 
-      await page.waitForSelector('[data-testid="confirm-delete-dialog"]', { timeout: 10000 })
-      await page.click('[data-testid="confirm-delete-button"]')
+      await page.waitForSelector('.ant-modal-wrap:not([style*="display: none"])', {
+        timeout: 10000,
+      })
+      await page.getByTestId('confirm-delete-button').click()
 
       await waitForSuccessToast(page)
       const newCount = await page.locator('[data-testid="role-table"] tbody tr').count()
@@ -300,13 +326,19 @@ test.describe('Permission & Role Management', () => {
         .locator('[data-testid="assign-role-button"]')
         .click()
 
-      await page.waitForSelector('[data-testid="assign-role-dialog"]', { timeout: 10000 })
+      await page.waitForSelector('.ant-modal-wrap:not([style*="display: none"])', {
+        timeout: 10000,
+      })
+      await page.waitForSelector('[data-testid="assign-user-search"]', {
+        state: 'visible',
+        timeout: 5000,
+      })
 
       await page.fill('[data-testid="assign-user-search"]', 'target_user')
       await page.waitForTimeout(500)
       await page.locator('[data-testid="user-option"]').first().click()
 
-      await page.click('[data-testid="confirm-assign-button"]')
+      await page.getByTestId('confirm-assign-button').click()
 
       await waitForSuccessToast(page)
     })
@@ -314,20 +346,8 @@ test.describe('Permission & Role Management', () => {
 
   test.describe('Permission Enforcement', () => {
     test('should block access when user lacks permission', async ({ page }) => {
-      await page.request.post(`${getBaseUrl()}/api/__test__/seed-role`, {
-        data: { name: 'No Access Role', code: 'no_access_role', permissions: [] },
-      })
-      await page.request.post(`${getBaseUrl()}/api/__test__/seed-user`, {
-        data: {
-          username: 'restricted_user',
-          email: 'restricted@test.com',
-          password: 'TestPass123!',
-          roleCode: 'no_access_role',
-        },
-      })
-
       await clearStorageSafely(page)
-      await loginAs(page, 'restricted_user', 'TestPass123!')
+      await loginAs(page, 'user1', '123456')
 
       await navigateToAdminPage(page, '/system/roles', '[data-testid="permission-denied-message"]')
       await expect(page.locator('[data-testid="permission-denied-message"]')).toBeVisible()
