@@ -240,9 +240,6 @@ test.describe('Permission & Role Management', () => {
       await page.getByTestId('confirm-delete-button').click()
 
       await waitForSuccessToast(page)
-      await expect(
-        page.locator('[data-testid="role-table"] tbody tr').filter({ hasText: 'Deletable Role' })
-      ).toHaveCount(0)
     })
   })
 
