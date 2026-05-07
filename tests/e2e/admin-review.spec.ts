@@ -105,8 +105,7 @@ test.describe('Admin Review', () => {
         .locator('[data-testid="approve-button"]')
         .click()
 
-      await page.waitForSelector('[data-testid="toast-success"]', { timeout: 10000 })
-      await expect(page.locator('[data-testid="toast-success"]')).toBeVisible()
+      await page.waitForSelector('.ant-message-success', { timeout: 10000 })
 
       const remaining = page.locator('[data-testid="review-item"]')
       await expect(remaining).toHaveCount(2)
@@ -126,12 +125,11 @@ test.describe('Admin Review', () => {
         .click()
 
       await page.waitForSelector('[data-testid="reject-reason-dialog"]', { timeout: 10000 })
-      await expect(page.locator('[data-testid="reject-reason-dialog"]')).toBeVisible()
 
       await page.fill('[data-testid="reject-reason-input"]', 'Does not meet quality standards')
       await page.click('[data-testid="confirm-reject-button"]')
 
-      await page.waitForSelector('[data-testid="toast-success"]', { timeout: 10000 })
+      await page.waitForSelector('.ant-message-success', { timeout: 10000 })
       const remaining = page.locator('[data-testid="review-item"]')
       await expect(remaining).toHaveCount(2)
     })
@@ -156,7 +154,7 @@ test.describe('Admin Review', () => {
 
       await page.click('[data-testid="batch-approve-button"]')
 
-      await page.waitForSelector('[data-testid="toast-success"]', { timeout: 10000 })
+      await page.waitForSelector('.ant-message-success', { timeout: 10000 })
       const remaining = page.locator('[data-testid="review-item"]')
       await expect(remaining).toHaveCount(1)
     })
@@ -186,7 +184,7 @@ test.describe('Admin Review', () => {
       )
       await page.click('[data-testid="confirm-reject-button"]')
 
-      await page.waitForSelector('[data-testid="toast-success"]', { timeout: 10000 })
+      await page.waitForSelector('.ant-message-success', { timeout: 10000 })
       const remaining = page.locator('[data-testid="review-item"]')
       await expect(remaining).toHaveCount(1)
     })
@@ -208,7 +206,7 @@ test.describe('Admin Review', () => {
 
       await page.locator('[data-testid="featured-toggle"]').first().click()
 
-      await page.waitForSelector('[data-testid="toast-success"]', { timeout: 10000 })
+      await page.waitForSelector('.ant-message-success', { timeout: 10000 })
       const toggle = page.locator('[data-testid="featured-toggle"]').first()
       await expect(toggle).toHaveAttribute('data-active', 'true')
     })
@@ -228,10 +226,10 @@ test.describe('Admin Review', () => {
         .locator('[data-testid="delete-button"]')
         .click()
 
-      await page.waitForSelector('[data-testid="confirm-delete-dialog"]', { timeout: 10000 })
+      await page.waitForSelector('.ant-modal-confirm', { timeout: 10000 })
       await page.click('[data-testid="confirm-delete-button"]')
 
-      await page.waitForSelector('[data-testid="toast-success"]', { timeout: 10000 })
+      await page.waitForSelector('.ant-message-success', { timeout: 10000 })
       await expect(page.locator('[data-testid="review-item"]')).toHaveCount(initialCount - 1)
     })
   })
