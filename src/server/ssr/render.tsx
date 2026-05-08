@@ -82,6 +82,9 @@ function buildFromTemplate(
     `<meta name="description" content="${escapeHtml(description)}" />`
   )
 
+  // Remove existing og/twitter meta to avoid duplicates
+  html = html.replace(/<meta\s+(?:property|name)=["'](?:og:|twitter:)[^"']*["'][^>]*\/?>/g, '')
+
   const seoMeta = `<meta property="og:title" content="${escapeHtml(title)}" />
     <meta property="og:description" content="${escapeHtml(description)}" />
     <meta property="og:type" content="website" />

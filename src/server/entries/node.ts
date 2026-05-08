@@ -106,7 +106,6 @@ app.get('/admin/*', c => {
 
 // 其他非 API 路由返回 index.html
 app.get('*', c => {
-  // 如果路径以 /api/ 或 /files/ 开头，让 Hono 继续处理（可能会返回 404）
   if (c.req.path.startsWith('/api/') || c.req.path.startsWith('/files/')) {
     return c.notFound()
   }

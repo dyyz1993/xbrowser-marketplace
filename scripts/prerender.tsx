@@ -14,12 +14,6 @@ const DIST = join(process.cwd(), 'dist', 'client')
 
 const PAGES = [
   {
-    url: '/',
-    title: 'XBrowser Marketplace - Browser Extensions & Plugins',
-    desc: 'Discover and install browser extensions and plugins.',
-    file: 'index.html',
-  },
-  {
     url: '/categories',
     title: 'Categories - XBrowser Marketplace',
     desc: 'Browse browser extensions by category.',
@@ -75,6 +69,9 @@ function buildHTMLFromTemplate(
     /<meta\s+name="description"[^>]*>/,
     `<meta name="description" content="${escapeAttr(desc)}" />`
   )
+
+  // Remove existing og/twitter meta to avoid duplicates
+  html = html.replace(/<meta\s+(?:property|name)=["'](?:og:|twitter:)[^"']*["'][^>]*\/?>/g, '')
 
   const ogMeta = `<meta property="og:title" content="${escapeAttr(title)}" />
     <meta property="og:description" content="${escapeAttr(desc)}" />

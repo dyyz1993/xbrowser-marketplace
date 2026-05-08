@@ -40,13 +40,6 @@ const wrappedApp = app
     }
     await next()
   })
-  .get('/', c =>
-    c.json({
-      name: 'Biomimic Todo App',
-      version: '0.1.0',
-      environment: 'cloudflare-workers',
-    })
-  )
   .onError((err, c) => {
     console.error('Server error:', err)
     c.res.headers.set('Content-Type', 'application/json')
@@ -80,6 +73,7 @@ export default {
     }
 
     const isSeoPath =
+      url.pathname === '/' ||
       url.pathname === '/robots.txt' ||
       url.pathname === '/sitemap.xml' ||
       /^\/plugins\/[^/]+$/.test(url.pathname)

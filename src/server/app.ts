@@ -14,7 +14,7 @@ import { auditLogMiddleware } from './middleware/audit-log'
 import { createModuleLoggerSync } from './utils/logger'
 import { adminApiRoutes, clientApiRoutes } from './route-registry'
 import { fileRoutes } from './module-file/routes/file-routes'
-import { renderToHTML, buildDocument, PluginDetailSSR, type PluginSSRData } from './ssr'
+import { renderToHTML, buildDocument, PluginDetailSSR, HomeSSR, type PluginSSRData } from './ssr'
 
 export { type AppBindings, type CreateAppOptions } from './types/bindings'
 
@@ -479,6 +479,108 @@ ${urls
       const response = await assets.fetch(new Request(new URL('/admin.html', c.req.url)))
       if (response.ok) return response
       return c.notFound()
+    })
+    .get('/', async c => {
+      try {
+        const { getDb } = await import('./db')
+        const { plugins, pluginCategories, pluginCategoryMappings } = await import('./db/schema')
+        const { eq, desc, inArray } = await import('drizzle-orm')
+        const db = await getDb()
+
+        const approvedPlugins = await db
+          .select()
+          .from(plugins)
+          .where(eq(plugins.status, 'approved'))
+          .orderBy(desc(plugins.createdAt))
+          .limit(12)
+
+        const allApproved = await db
+          .select()
+          .from(plugins)
+          .where(eq(plugins.status, 'approved'))
+        const totalPlugins = allApproved.length
+
+        const catRows = await db.select().from(pluginCategories)
+
+        const pluginIds = approvedPlugins.map(p => p.id)
+        let ratingMap = new Map<string, { avgRating: number; reviewCount: number }>()
+        if (pluginIds.length > 0) {
+          try {
+            const { getReviewStatsBatch } =
+              await import('./module-plugin/services/plugin-review-service')
+            ratingMap = await getReviewStatsBatch(pluginIds)
+          } catch {
+            // Reviews are optional
+          }
+        }
+
+        const mappings =
+          pluginIds.length > 0
+            ? await db
+                .select()
+                .from(pluginCategoryMappings)
+                .where(inArray(pluginCategoryMappings.pluginId, pluginIds))
+            : []
+        const pluginCatMap = new Map<string, string>()
+        for (const m of mappings) {
+          if (!pluginCatMap.has(m.pluginId)) {
+            const cat = catRows.find(c => c.id === m.categoryId)
+            if (cat) pluginCatMap.set(m.pluginId, cat.slug)
+          }
+        }
+
+        const pluginItems = approvedPlugins.map(p => {
+          const stats = ratingMap.get(p.id)
+          return {
+            name: p.name,
+            description: p.description,
+            slug: p.slug,
+            downloads: p.downloadCount ?? 0,
+            avgRating: stats?.avgRating ?? 0,
+            category: pluginCatMap.get(p.id) ?? 'other',
+          }
+        })
+
+        const categories = catRows.map(cat => ({
+          name: cat.name,
+          slug: cat.slug,
+          count: 0,
+        }))
+
+        const content = renderToHTML(
+          React.createElement(HomeSSR, {
+            plugins: pluginItems,
+            categories,
+            totalPlugins,
+          })
+        )
+
+        let spaTemplate: string | undefined
+        const assets = (c.env as AppBindings).ASSETS
+        if (assets) {
+          try {
+            const spaResponse = await assets.fetch(new Request(new URL('/index.html', c.req.url)))
+            if (spaResponse.ok) {
+              spaTemplate = await spaResponse.text()
+            }
+          } catch {
+            // Template fetch failed
+          }
+        }
+
+        const html = buildDocument({
+          title: `XBrowser Marketplace - Browser Extensions & Plugins`,
+          description: 'Discover and install browser extensions and plugins.',
+          content,
+          spaTemplate,
+        })
+
+        return c.html(html)
+      } catch {
+        const assets = (c.env as AppBindings).ASSETS
+        if (!assets) return c.notFound()
+        return assets.fetch(new Request(new URL('/index.html', c.req.url)))
+      }
     })
     .get('*', async c => {
       const assets = (c.env as AppBindings).ASSETS
