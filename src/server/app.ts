@@ -312,7 +312,170 @@ export function createApp<T extends AppBindings = AppBindings>(_options: CreateA
 
   autoRegisterRealtime(openapiApp)
 
+  autoRegisterRealtime(openapiApp)
+
+  const SEO_BASE_URL = 'https://xbrowser-marketplace.dyyz1993.workers.dev'
+  const SEO_SITE_NAME = 'xbrowser Plugin Marketplace'
+
+  function escapeHtml(str: string): string {
+    return str
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;')
+  }
+
+  function truncate(str: string, maxLen: number): string {
+    if (str.length <= maxLen) return str
+    return str.slice(0, maxLen - 3) + '...'
+  }
+
   app
+    .get('/robots.txt', c => {
+      const body = `User-agent: *
+Allow: /
+Allow: /plugins/
+Disallow: /api/
+Disallow: /admin/
+
+Sitemap: ${SEO_BASE_URL}/sitemap.xml
+`
+      return c.text(body, 200, { 'Content-Type': 'text/plain; charset=utf-8' })
+    })
+    .get('/sitemap.xml', async c => {
+      try {
+        const { getDb } = await import('./db')
+        const { plugins } = await import('./db/schema')
+        const { eq } = await import('drizzle-orm')
+        const db = await getDb()
+        const approved = await db.select().from(plugins).where(eq(plugins.status, 'approved'))
+        const now = new Date().toISOString().split('T')[0]
+        const urls = [
+          { loc: SEO_BASE_URL, lastmod: now, changefreq: 'daily', priority: '1.0' },
+          { loc: `${SEO_BASE_URL}/plugins`, lastmod: now, changefreq: 'daily', priority: '0.9' },
+          ...approved.map(p => ({
+            loc: `${SEO_BASE_URL}/plugins/${p.slug}`,
+            lastmod: p.updatedAt.toISOString().split('T')[0],
+            changefreq: 'weekly',
+            priority: '0.8',
+          })),
+        ]
+        const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${urls
+  .map(
+    u => `  <url>
+    <loc>${u.loc}</loc>
+    <lastmod>${u.lastmod}</lastmod>
+    <changefreq>${u.changefreq}</changefreq>
+    <priority>${u.priority}</priority>
+  </url>`
+  )
+  .join('\n')}
+</urlset>`
+        return c.text(xml, 200, { 'Content-Type': 'application/xml; charset=utf-8' })
+      } catch {
+        const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>${SEO_BASE_URL}</loc>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+</urlset>`
+        return c.text(xml, 200, { 'Content-Type': 'application/xml; charset=utf-8' })
+      }
+    })
+    .get('/plugins/:slug', async c => {
+      const slug = c.req.param('slug')
+      const ua = c.req.header('user-agent') || ''
+      const accept = c.req.header('accept') || ''
+      const isBot =
+        accept.includes('text/html') ||
+        /bot|crawler|spider|facebookexternalhit|twitterbot|linkedinbot|slackbot|discordbot|preview/i.test(
+          ua
+        )
+
+      if (!isBot) {
+        const assets = (c.env as AppBindings).ASSETS
+        if (!assets) return c.notFound()
+        return assets.fetch(new Request(new URL('/index.html', c.req.url)))
+      }
+
+      try {
+        const { getDb } = await import('./db')
+        const { plugins } = await import('./db/schema')
+        const { eq } = await import('drizzle-orm')
+        const db = await getDb()
+        const rows = await db.select().from(plugins).where(eq(plugins.slug, slug)).limit(1)
+        if (rows.length === 0) return c.notFound()
+
+        const p = rows[0]
+        const title = `${p.name} - ${SEO_SITE_NAME}`
+        const desc = truncate(p.description, 160)
+        const pageUrl = `${SEO_BASE_URL}/plugins/${p.slug}`
+        const jsonLd = JSON.stringify({
+          '@context': 'https://schema.org',
+          '@type': 'SoftwareApplication',
+          name: p.name,
+          description: p.description,
+          applicationCategory: 'BrowserExtension',
+          operatingSystem: 'Any',
+          version: p.version,
+          author: { '@type': 'Person', name: p.authorName },
+          url: pageUrl,
+          offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+        })
+
+        const metaTags = [
+          `<title>${escapeHtml(title)}</title>`,
+          `<meta name="description" content="${escapeHtml(desc)}" />`,
+          `<meta property="og:title" content="${escapeHtml(title)}" />`,
+          `<meta property="og:description" content="${escapeHtml(desc)}" />`,
+          `<meta property="og:url" content="${escapeHtml(pageUrl)}" />`,
+          `<meta property="og:type" content="article" />`,
+          `<meta property="og:site_name" content="${escapeHtml(SEO_SITE_NAME)}" />`,
+          `<link rel="canonical" href="${escapeHtml(pageUrl)}" />`,
+          `<meta name="twitter:card" content="summary" />`,
+          `<meta name="twitter:title" content="${escapeHtml(title)}" />`,
+          `<meta name="twitter:description" content="${escapeHtml(desc)}" />`,
+        ]
+        if (p.screenshotUrl) {
+          metaTags.push(`<meta property="og:image" content="${escapeHtml(p.screenshotUrl)}" />`)
+          metaTags.push(`<meta name="twitter:image" content="${escapeHtml(p.screenshotUrl)}" />`)
+          metaTags.push(`<meta name="twitter:card" content="summary_large_image" />`)
+        }
+        metaTags.push(`<script type="application/ld+json">${jsonLd}</script>`)
+
+        const assets = (c.env as AppBindings).ASSETS
+        if (!assets) return c.notFound()
+        const htmlResp = await assets.fetch(new Request(new URL('/index.html', c.req.url)))
+        if (!htmlResp.ok) return c.notFound()
+        let html = await htmlResp.text()
+
+        const headClose = html.indexOf('</head>')
+        if (headClose !== -1) {
+          const titleMatch = html.indexOf('<title')
+          let insertPoint = headClose
+          if (titleMatch !== -1 && titleMatch < headClose) {
+            const titleEnd = html.indexOf('</title>', titleMatch)
+            if (titleEnd !== -1) {
+              const afterTitle = titleEnd + '</title>'.length
+              const nlIdx = html.indexOf('\n', afterTitle)
+              insertPoint = nlIdx !== -1 && nlIdx <= headClose ? nlIdx + 1 : headClose
+            }
+          }
+          html = html.slice(0, insertPoint) + metaTags.join('\n') + '\n' + html.slice(insertPoint)
+        }
+
+        return c.html(html)
+      } catch {
+        const assets = (c.env as AppBindings).ASSETS
+        if (!assets) return c.notFound()
+        return assets.fetch(new Request(new URL('/index.html', c.req.url)))
+      }
+    })
     .get('/admin/*', async c => {
       const assets = (c.env as AppBindings).ASSETS
       if (!assets) return c.notFound()

@@ -79,6 +79,15 @@ export default {
       return wrappedApp.fetch(request, env, ctx)
     }
 
+    const isSeoPath =
+      url.pathname === '/robots.txt' ||
+      url.pathname === '/sitemap.xml' ||
+      /^\/plugins\/[^/]+$/.test(url.pathname)
+
+    if (isSeoPath) {
+      return wrappedApp.fetch(request, env, ctx)
+    }
+
     if (env.ASSETS) {
       const assetResponse = await env.ASSETS.fetch(request)
       if (assetResponse.status !== 404) {
