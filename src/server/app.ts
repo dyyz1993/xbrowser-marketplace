@@ -14,7 +14,7 @@ import { auditLogMiddleware } from './middleware/audit-log'
 import { createModuleLoggerSync } from './utils/logger'
 import { adminApiRoutes, clientApiRoutes } from './route-registry'
 import { fileRoutes } from './module-file/routes/file-routes'
-import { renderToHTML, buildDocument, PluginDetailSSR, HomeSSR, type PluginSSRData } from './ssr'
+import { renderToHTML, buildDocument, PluginDetailSSR, HomeSSR, CategoriesSSR, CliSSR, type PluginSSRData } from './ssr'
 
 export { type AppBindings, type CreateAppOptions } from './types/bindings'
 
@@ -334,6 +334,9 @@ Sitemap: ${SEO_BASE_URL}/sitemap.xml
 `
       return c.text(body, 200, { 'Content-Type': 'text/plain; charset=utf-8' })
     })
+    .get('/plugins', async c => {
+      return c.redirect('/', 301)
+    })
     .get('/sitemap.xml', async c => {
       try {
         const { getDb } = await import('./db')
@@ -344,13 +347,25 @@ Sitemap: ${SEO_BASE_URL}/sitemap.xml
         const now = new Date().toISOString().split('T')[0]
         const urls = [
           { loc: SEO_BASE_URL, lastmod: now, changefreq: 'daily', priority: '1.0' },
-          { loc: `${SEO_BASE_URL}/plugins`, lastmod: now, changefreq: 'daily', priority: '0.9' },
-          ...approved.map(p => ({
-            loc: `${SEO_BASE_URL}/plugin/${p.slug}`,
-            lastmod: p.updatedAt.toISOString().split('T')[0],
-            changefreq: 'weekly',
-            priority: '0.8',
-          })),
+          { loc: `${SEO_BASE_URL}/categories`, lastmod: now, changefreq: 'weekly', priority: '0.9' },
+          { loc: `${SEO_BASE_URL}/cli`, lastmod: now, changefreq: 'monthly', priority: '0.7' },
+          ...approved.map(p => {
+            let date: Date
+            if (p.updatedAt instanceof Date) {
+              date = p.updatedAt.getTime() < 1e12
+                ? new Date(p.updatedAt.getTime() * 1000)
+                : p.updatedAt
+            } else {
+              const raw = Number(p.updatedAt)
+              date = new Date(raw > 1e12 ? raw : raw * 1000)
+            }
+            return {
+              loc: `${SEO_BASE_URL}/plugin/${p.slug}`,
+              lastmod: date.toISOString().split('T')[0],
+              changefreq: 'weekly',
+              priority: '0.8',
+            }
+          }),
         ]
         const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
@@ -459,11 +474,12 @@ ${urls
           description: truncate(p.description, 160),
           content,
           spaTemplate,
+          canonicalPath: `/plugin/${p.slug}`,
           extraHead: `<script type="application/ld+json">${JSON.stringify(jsonLd)}</script>${
             p.screenshotUrl
               ? `<meta property="og:image" content="${p.screenshotUrl}" /><meta name="twitter:image" content="${p.screenshotUrl}" />`
               : ''
-          }<meta property="og:url" content="${SEO_BASE_URL}/plugin/${p.slug}" />`,
+          }`,
         })
 
         return c.html(html)
@@ -573,11 +589,113 @@ ${urls
           description: 'Discover and install browser extensions and plugins.',
           content,
           spaTemplate,
+          canonicalPath: '/',
         })
 
         return c.html(html)
       } catch (err) {
         console.error('[SSR /] Error rendering homepage:', err)
+        const assets = (c.env as AppBindings).ASSETS
+        if (!assets) return c.notFound()
+        return assets.fetch(new Request(new URL('/index.html', c.req.url)))
+      }
+    })
+    .get('/categories', async c => {
+      try {
+        const { getDb } = await import('./db')
+        const { plugins, pluginCategories, pluginCategoryMappings } = await import('./db/schema')
+        const { eq } = await import('drizzle-orm')
+        const db = await getDb()
+
+        const catRows = await db.select().from(pluginCategories)
+
+        const allApproved = await db
+          .select()
+          .from(plugins)
+          .where(eq(plugins.status, 'approved'))
+        const totalPlugins = allApproved.length
+
+        const approvedIds = allApproved.map(p => p.id)
+        const categoryCounts = new Map<string, number>()
+        if (approvedIds.length > 0) {
+          const { inArray } = await import('drizzle-orm')
+          const mappings = await db
+            .select()
+            .from(pluginCategoryMappings)
+            .where(inArray(pluginCategoryMappings.pluginId, approvedIds))
+          for (const m of mappings) {
+            categoryCounts.set(m.categoryId, (categoryCounts.get(m.categoryId) ?? 0) + 1)
+          }
+        }
+
+        const categories = catRows.map(cat => ({
+          name: cat.name,
+          slug: cat.slug,
+          description: cat.description ?? undefined,
+          pluginCount: categoryCounts.get(cat.id) ?? 0,
+        }))
+
+        const content = renderToHTML(
+          React.createElement(CategoriesSSR, { categories, totalPlugins })
+        )
+
+        let spaTemplate: string | undefined
+        const assets = (c.env as AppBindings).ASSETS
+        if (assets) {
+          try {
+            const spaResponse = await assets.fetch(new Request(new URL('/index.html', c.req.url)))
+            if (spaResponse.ok) {
+              spaTemplate = await spaResponse.text()
+            }
+          } catch {
+            // Template fetch failed
+          }
+        }
+
+        const html = buildDocument({
+          title: `Browse Categories - ${SEO_SITE_NAME}`,
+          description: 'Browse browser extension plugins by category.',
+          content,
+          spaTemplate,
+          canonicalPath: '/categories',
+        })
+
+        return c.html(html)
+      } catch (err) {
+        console.error('[SSR /categories] Error:', err)
+        const assets = (c.env as AppBindings).ASSETS
+        if (!assets) return c.notFound()
+        return assets.fetch(new Request(new URL('/index.html', c.req.url)))
+      }
+    })
+    .get('/cli', async c => {
+      try {
+        const content = renderToHTML(React.createElement(CliSSR))
+
+        let spaTemplate: string | undefined
+        const assets = (c.env as AppBindings).ASSETS
+        if (assets) {
+          try {
+            const spaResponse = await assets.fetch(new Request(new URL('/index.html', c.req.url)))
+            if (spaResponse.ok) {
+              spaTemplate = await spaResponse.text()
+            }
+          } catch {
+            // Template fetch failed
+          }
+        }
+
+        const html = buildDocument({
+          title: `CLI Documentation - ${SEO_SITE_NAME}`,
+          description: 'Install and use xbrowser CLI to browse, install, and publish browser automation plugins.',
+          content,
+          spaTemplate,
+          canonicalPath: '/cli',
+        })
+
+        return c.html(html)
+      } catch (err) {
+        console.error('[SSR /cli] Error:', err)
         const assets = (c.env as AppBindings).ASSETS
         if (!assets) return c.notFound()
         return assets.fetch(new Request(new URL('/index.html', c.req.url)))

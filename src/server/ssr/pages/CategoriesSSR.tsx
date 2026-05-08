@@ -1,8 +1,30 @@
 import React from 'react'
 
-export const SSRLayout: React.FC<{ children: React.ReactNode; title?: string }> = ({
-  children,
-}) => {
+const iconMap: Record<string, string> = {
+  ecommerce: '\uD83D\uDED2',
+  social: '\uD83D\uDCAC',
+  search: '\uD83D\uDD0D',
+  scraping: '\uD83D\uDD77\uFE0F',
+  automation: '\uD83E\uDD16',
+  productivity: '\u26A1',
+  testing: '\uD83E\uDDEA',
+  monitoring: '\uD83D\uDCCA',
+  devtools: '\uD83D\uDEE0\uFE0F',
+}
+
+interface CategoryData {
+  name: string
+  slug: string
+  description?: string
+  pluginCount: number
+}
+
+interface CategoriesSSRProps {
+  categories: CategoryData[]
+  totalPlugins: number
+}
+
+export const CategoriesSSR: React.FC<CategoriesSSRProps> = ({ categories, totalPlugins }) => {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <nav className="bg-white border-b border-gray-200 sticky top-0 z-50">
@@ -31,7 +53,7 @@ export const SSRLayout: React.FC<{ children: React.ReactNode; title?: string }> 
             <div className="hidden lg:flex items-center gap-1">
               <a
                 href="/categories"
-                className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100"
+                className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-blue-600 bg-blue-50"
               >
                 Categories
               </a>
@@ -91,9 +113,43 @@ export const SSRLayout: React.FC<{ children: React.ReactNode; title?: string }> 
           </div>
         </div>
       </nav>
-      <main className="flex-1 py-8">
-        <div className="max-w-7xl mx-auto px-4">{children}</div>
+
+      <main className="flex-1">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+          <div className="mb-8">
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">Browse Categories</h1>
+            <p className="text-gray-500">
+              Explore {totalPlugins} plugins organized by category
+            </p>
+          </div>
+
+          {categories.length > 0 ? (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+              {categories.map(cat => (
+                <a
+                  key={cat.slug}
+                  href={`/search?category=${encodeURIComponent(cat.slug)}`}
+                  className="flex flex-col items-center gap-2 p-4 bg-white rounded-xl border border-gray-200 hover:border-blue-300 hover:shadow-sm transition-all text-center group"
+                >
+                  <span className="text-2xl">{iconMap[cat.slug] ?? '\uD83D\uDDC2\uFE0F'}</span>
+                  <span className="text-sm font-medium text-gray-700 group-hover:text-blue-600">
+                    {cat.name}
+                  </span>
+                  <span className="text-xs text-gray-400">{cat.pluginCount} plugins</span>
+                </a>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-16">
+              <p className="text-gray-500">No categories available yet.</p>
+              <a href="/" className="text-blue-500 hover:underline mt-2 inline-block">
+                Back to marketplace
+              </a>
+            </div>
+          )}
+        </div>
       </main>
+
       <footer className="py-6 text-center text-gray-500 text-sm border-t border-gray-200 bg-white mt-auto">
         <p className="flex items-center justify-center gap-2">
           <span className="font-medium text-gray-700">xbrowser marketplace</span>

@@ -24,3 +24,13 @@ code {
 #root {
   min-height: 100vh;
 }
+
+/*
+ * SSR-to-CSR seamless transition.
+ *
+ * Strategy: The SSR HTML inside #root is visually preserved while React
+ * hydrates. We add `data-ssr` to #root in the server HTML. When React's
+ * createRoot replaces #root's children, we remove the attribute. The CSS
+ * below keeps #root visible throughout — the attribute is purely a signal
+ * that the inline transition script uses.
+ */

@@ -76,10 +76,29 @@ export default {
       url.pathname === '/' ||
       url.pathname === '/robots.txt' ||
       url.pathname === '/sitemap.xml' ||
+      url.pathname === '/plugins' ||
+      url.pathname === '/categories' ||
+      url.pathname === '/cli' ||
       /^\/plugin\/[^/]+$/.test(url.pathname)
 
     if (isSeoPath) {
       return wrappedApp.fetch(request, env, ctx)
+    }
+
+    const noindexPaths = ['/login', '/register', '/search', '/notifications', '/admin']
+    const needsNoindex = noindexPaths.some(p => url.pathname.startsWith(p))
+
+    if (needsNoindex && env.ASSETS) {
+      const spaResponse = await env.ASSETS.fetch(new Request(new URL('/index.html', request.url)))
+      const html = await spaResponse.text()
+      const injected = html.replace(
+        '</head>',
+        '<meta name="robots" content="noindex, nofollow"></head>'
+      )
+      return new Response(injected, {
+        status: spaResponse.status,
+        headers: spaResponse.headers,
+      })
     }
 
     if (env.ASSETS) {

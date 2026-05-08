@@ -1,5 +1,7 @@
 export { renderToHTML, buildDocument, parseManifest, type AssetManifest } from './render'
 export { PluginDetailSSR, type PluginSSRData } from './pages/PluginDetailSSR'
 export { HomeSSR } from './pages/HomeSSR'
+export { CategoriesSSR } from './pages/CategoriesSSR'
+export { CliSSR } from './pages/CliSSR'
 export { renderPage } from './render-legacy'
 export { getHtmlTemplate } from './template'
