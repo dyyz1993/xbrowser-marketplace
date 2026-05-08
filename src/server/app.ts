@@ -441,10 +441,24 @@ ${urls
             : {}),
         }
 
+        let spaTemplate: string | undefined
+        const assets = (c.env as AppBindings).ASSETS
+        if (assets) {
+          try {
+            const spaResponse = await assets.fetch(new Request(new URL('/index.html', c.req.url)))
+            if (spaResponse.ok) {
+              spaTemplate = await spaResponse.text()
+            }
+          } catch {
+            // Template fetch failed, fall back to no-template mode
+          }
+        }
+
         const html = buildDocument({
           title: `${p.name} - ${SEO_SITE_NAME}`,
           description: truncate(p.description, 160),
           content,
+          spaTemplate,
           extraHead: `<script type="application/ld+json">${JSON.stringify(jsonLd)}</script>${
             p.screenshotUrl
               ? `<meta property="og:image" content="${p.screenshotUrl}" /><meta name="twitter:image" content="${p.screenshotUrl}" />`

@@ -1,16 +1,18 @@
 import React from 'react'
 import { renderToString } from 'react-dom/server'
 
-/**
- * Render a React element to HTML string
- */
 export function renderToHTML(element: React.ReactElement): string {
   return renderToString(element)
 }
 
-/**
- * Build full HTML document
- */
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+}
+
 export function buildDocument({
   title,
   description,
@@ -18,6 +20,7 @@ export function buildDocument({
   cssFiles = [],
   jsFiles = [],
   extraHead = '',
+  spaTemplate,
 }: {
   title: string
   description: string
@@ -25,7 +28,12 @@ export function buildDocument({
   cssFiles?: string[]
   jsFiles?: string[]
   extraHead?: string
+  spaTemplate?: string
 }): string {
+  if (spaTemplate) {
+    return buildFromTemplate(spaTemplate, title, description, content, extraHead)
+  }
+
   const cssLinks = [...new Set(cssFiles)]
     .map(f => `    <link rel="stylesheet" href="${f}">`)
     .join('\n')
@@ -58,17 +66,37 @@ ${jsScripts}
 </html>`
 }
 
-function escapeHtml(str: string): string {
-  return str
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
+function buildFromTemplate(
+  template: string,
+  title: string,
+  description: string,
+  content: string,
+  extraHead: string
+): string {
+  let html = template
+
+  html = html.replace(/<title>[^<]*<\/title>/, `<title>${escapeHtml(title)}</title>`)
+
+  html = html.replace(
+    /<meta\s+name="description"[^>]*\/?>/,
+    `<meta name="description" content="${escapeHtml(description)}" />`
+  )
+
+  const seoMeta = `<meta property="og:title" content="${escapeHtml(title)}" />
+    <meta property="og:description" content="${escapeHtml(description)}" />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="${escapeHtml(title)}" />
+    <meta name="twitter:description" content="${escapeHtml(description)}" />`
+
+  const headInject = extraHead ? `${extraHead}\n    ${seoMeta}` : seoMeta
+  html = html.replace('</head>', `    ${headInject}\n  </head>`)
+
+  html = html.replace(/<div id="root"><\/div>/, `<div id="root">${content}</div>`)
+
+  return html
 }
 
-/**
- * Parse Vite manifest to get asset file paths
- */
 export interface AssetManifest {
   css: string[]
   js: string[]
@@ -83,7 +111,7 @@ export function parseManifest(
   for (const [key, entry] of Object.entries(manifest)) {
     if (key.includes('admin')) continue
     if (entry.css) entry.css.forEach(f => css.add('/' + f))
-    if (key.includes('main') || key.includes('index')) js.add('/' + entry.file)
+    if (key.includes('main') || key === 'index.html') js.add('/' + entry.file)
     if (entry.imports) {
       for (const imp of entry.imports) {
         const imported = manifest[imp]
