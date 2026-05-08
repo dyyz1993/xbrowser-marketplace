@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "npm run build:client && npm run build:ssg && npm run build:server",
     "build:client": "vite build",
-    "build:ssg": "node --import tsx scripts/prerender.ts",
+    "build:ssg": "node --import tsx scripts/prerender.tsx",
     "build:server": "tsup",
     "build:cli": "tsup --config tsup.config.ts",
     "build:cloudflare": "npm run build:client && npm run build:ssg && tsup --config tsup.config.ts",
