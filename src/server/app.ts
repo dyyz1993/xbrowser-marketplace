@@ -326,7 +326,7 @@ export function createApp<T extends AppBindings = AppBindings>(_options: CreateA
     .get('/robots.txt', c => {
       const body = `User-agent: *
 Allow: /
-Allow: /plugins/
+Allow: /plugin/
 Disallow: /api/
 Disallow: /admin/
 
@@ -346,7 +346,7 @@ Sitemap: ${SEO_BASE_URL}/sitemap.xml
           { loc: SEO_BASE_URL, lastmod: now, changefreq: 'daily', priority: '1.0' },
           { loc: `${SEO_BASE_URL}/plugins`, lastmod: now, changefreq: 'daily', priority: '0.9' },
           ...approved.map(p => ({
-            loc: `${SEO_BASE_URL}/plugins/${p.slug}`,
+            loc: `${SEO_BASE_URL}/plugin/${p.slug}`,
             lastmod: p.updatedAt.toISOString().split('T')[0],
             changefreq: 'weekly',
             priority: '0.8',
@@ -378,7 +378,7 @@ ${urls
         return c.text(xml, 200, { 'Content-Type': 'application/xml; charset=utf-8' })
       }
     })
-    .get('/plugins/:slug', async c => {
+    .get('/plugin/:slug', async c => {
       const slug = c.req.param('slug')
 
       try {
@@ -428,7 +428,7 @@ ${urls
           operatingSystem: 'Any',
           version: p.version,
           author: { '@type': 'Person', name: p.authorName },
-          url: `${SEO_BASE_URL}/plugins/${p.slug}`,
+          url: `${SEO_BASE_URL}/plugin/${p.slug}`,
           offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
           ...(avgRating
             ? {
@@ -463,7 +463,7 @@ ${urls
             p.screenshotUrl
               ? `<meta property="og:image" content="${p.screenshotUrl}" /><meta name="twitter:image" content="${p.screenshotUrl}" />`
               : ''
-          }<meta property="og:url" content="${SEO_BASE_URL}/plugins/${p.slug}" />`,
+          }<meta property="og:url" content="${SEO_BASE_URL}/plugin/${p.slug}" />`,
         })
 
         return c.html(html)

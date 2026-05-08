@@ -76,7 +76,7 @@ export default {
       url.pathname === '/' ||
       url.pathname === '/robots.txt' ||
       url.pathname === '/sitemap.xml' ||
-      /^\/plugins\/[^/]+$/.test(url.pathname)
+      /^\/plugin\/[^/]+$/.test(url.pathname)
 
     if (isSeoPath) {
       return wrappedApp.fetch(request, env, ctx)
