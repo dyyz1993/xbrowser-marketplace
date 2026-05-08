@@ -1,19 +1,13 @@
-/**
- * Application entry point
- *
- * If the server has pre-rendered content (SSR), hydrate it to attach event
- * handlers without destroying the existing DOM.  Otherwise fall back to a
- * normal client-side render (pure SPA).
- */
-
-import { hydrateRoot, createRoot } from 'react-dom/client'
+import React from 'react'
+import ReactDOM from 'react-dom/client'
 import { App } from './App'
 import './index.css'
 
-const rootEl = document.getElementById('root')!
+const rootElement = document.getElementById('root')
+if (!rootElement) throw new Error('Root element not found')
 
-if (rootEl.hasChildNodes()) {
-  hydrateRoot(rootEl, <App />)
-} else {
-  createRoot(rootEl).render(<App />)
-}
+ReactDOM.createRoot(rootElement).render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+)

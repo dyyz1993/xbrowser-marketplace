@@ -576,7 +576,8 @@ ${urls
         })
 
         return c.html(html)
-      } catch {
+      } catch (err) {
+        console.error('[SSR /] Error rendering homepage:', err)
         const assets = (c.env as AppBindings).ASSETS
         if (!assets) return c.notFound()
         return assets.fetch(new Request(new URL('/index.html', c.req.url)))
