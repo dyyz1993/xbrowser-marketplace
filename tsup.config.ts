@@ -22,6 +22,8 @@ export default defineConfig([
       'pino',
       'pino-pretty',
       'dotenv',
+      'react',
+      'react-dom',
     ],
     treeshake: true,
     dts: false,

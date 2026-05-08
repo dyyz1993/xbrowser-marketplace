@@ -3,6 +3,7 @@ import { OpenAPIHono } from '@hono/zod-openapi'
 import { HTTPException } from 'hono/http-exception'
 import type { ContentfulStatusCode } from 'hono/utils/http-status'
 import { ZodError } from 'zod'
+import React from 'react'
 import type { AppBindings, CreateAppOptions } from './types/bindings'
 import { AppError } from './utils/app-error'
 import { autoRegisterRealtime } from './core/realtime-scanner'
@@ -13,6 +14,7 @@ import { auditLogMiddleware } from './middleware/audit-log'
 import { createModuleLoggerSync } from './utils/logger'
 import { adminApiRoutes, clientApiRoutes } from './route-registry'
 import { fileRoutes } from './module-file/routes/file-routes'
+import { renderToHTML, buildDocument, PluginDetailSSR, type PluginSSRData } from './ssr'
 
 export { type AppBindings, type CreateAppOptions } from './types/bindings'
 
@@ -312,19 +314,8 @@ export function createApp<T extends AppBindings = AppBindings>(_options: CreateA
 
   autoRegisterRealtime(openapiApp)
 
-  autoRegisterRealtime(openapiApp)
-
   const SEO_BASE_URL = 'https://xbrowser-marketplace.dyyz1993.workers.dev'
   const SEO_SITE_NAME = 'xbrowser Plugin Marketplace'
-
-  function escapeHtml(str: string): string {
-    return str
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#39;')
-  }
 
   function truncate(str: string, maxLen: number): string {
     if (str.length <= maxLen) return str
@@ -389,19 +380,6 @@ ${urls
     })
     .get('/plugins/:slug', async c => {
       const slug = c.req.param('slug')
-      const ua = c.req.header('user-agent') || ''
-      const accept = c.req.header('accept') || ''
-      const isBot =
-        accept.includes('text/html') ||
-        /bot|crawler|spider|facebookexternalhit|twitterbot|linkedinbot|slackbot|discordbot|preview/i.test(
-          ua
-        )
-
-      if (!isBot) {
-        const assets = (c.env as AppBindings).ASSETS
-        if (!assets) return c.notFound()
-        return assets.fetch(new Request(new URL('/index.html', c.req.url)))
-      }
 
       try {
         const { getDb } = await import('./db')
@@ -409,13 +387,39 @@ ${urls
         const { eq } = await import('drizzle-orm')
         const db = await getDb()
         const rows = await db.select().from(plugins).where(eq(plugins.slug, slug)).limit(1)
+
         if (rows.length === 0) return c.notFound()
 
         const p = rows[0]
-        const title = `${p.name} - ${SEO_SITE_NAME}`
-        const desc = truncate(p.description, 160)
-        const pageUrl = `${SEO_BASE_URL}/plugins/${p.slug}`
-        const jsonLd = JSON.stringify({
+
+        let avgRating = 0
+        let reviewCount = 0
+        try {
+          const { getReviewStatsForPlugin } =
+            await import('./module-plugin/services/plugin-review-service')
+          const stats = await getReviewStatsForPlugin(p.id)
+          if (stats.reviewCount > 0) {
+            avgRating = stats.avgRating
+            reviewCount = stats.reviewCount
+          }
+        } catch {
+          // Review stats are optional
+        }
+
+        const pluginData: PluginSSRData = {
+          name: p.name,
+          description: p.description,
+          avgRating,
+          reviewCount,
+          downloads: p.downloadCount ?? 0,
+          author: p.authorName ?? 'Unknown',
+          category: 'other',
+          version: p.version ?? '1.0.0',
+        }
+
+        const content = renderToHTML(React.createElement(PluginDetailSSR, { plugin: pluginData }))
+
+        const jsonLd = {
           '@context': 'https://schema.org',
           '@type': 'SoftwareApplication',
           name: p.name,
@@ -424,50 +428,29 @@ ${urls
           operatingSystem: 'Any',
           version: p.version,
           author: { '@type': 'Person', name: p.authorName },
-          url: pageUrl,
+          url: `${SEO_BASE_URL}/plugins/${p.slug}`,
           offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+          ...(avgRating
+            ? {
+                aggregateRating: {
+                  '@type': 'AggregateRating',
+                  ratingValue: avgRating,
+                  reviewCount,
+                },
+              }
+            : {}),
+        }
+
+        const html = buildDocument({
+          title: `${p.name} - ${SEO_SITE_NAME}`,
+          description: truncate(p.description, 160),
+          content,
+          extraHead: `<script type="application/ld+json">${JSON.stringify(jsonLd)}</script>${
+            p.screenshotUrl
+              ? `<meta property="og:image" content="${p.screenshotUrl}" /><meta name="twitter:image" content="${p.screenshotUrl}" />`
+              : ''
+          }<meta property="og:url" content="${SEO_BASE_URL}/plugins/${p.slug}" />`,
         })
-
-        const metaTags = [
-          `<title>${escapeHtml(title)}</title>`,
-          `<meta name="description" content="${escapeHtml(desc)}" />`,
-          `<meta property="og:title" content="${escapeHtml(title)}" />`,
-          `<meta property="og:description" content="${escapeHtml(desc)}" />`,
-          `<meta property="og:url" content="${escapeHtml(pageUrl)}" />`,
-          `<meta property="og:type" content="article" />`,
-          `<meta property="og:site_name" content="${escapeHtml(SEO_SITE_NAME)}" />`,
-          `<link rel="canonical" href="${escapeHtml(pageUrl)}" />`,
-          `<meta name="twitter:card" content="summary" />`,
-          `<meta name="twitter:title" content="${escapeHtml(title)}" />`,
-          `<meta name="twitter:description" content="${escapeHtml(desc)}" />`,
-        ]
-        if (p.screenshotUrl) {
-          metaTags.push(`<meta property="og:image" content="${escapeHtml(p.screenshotUrl)}" />`)
-          metaTags.push(`<meta name="twitter:image" content="${escapeHtml(p.screenshotUrl)}" />`)
-          metaTags.push(`<meta name="twitter:card" content="summary_large_image" />`)
-        }
-        metaTags.push(`<script type="application/ld+json">${jsonLd}</script>`)
-
-        const assets = (c.env as AppBindings).ASSETS
-        if (!assets) return c.notFound()
-        const htmlResp = await assets.fetch(new Request(new URL('/index.html', c.req.url)))
-        if (!htmlResp.ok) return c.notFound()
-        let html = await htmlResp.text()
-
-        const headClose = html.indexOf('</head>')
-        if (headClose !== -1) {
-          const titleMatch = html.indexOf('<title')
-          let insertPoint = headClose
-          if (titleMatch !== -1 && titleMatch < headClose) {
-            const titleEnd = html.indexOf('</title>', titleMatch)
-            if (titleEnd !== -1) {
-              const afterTitle = titleEnd + '</title>'.length
-              const nlIdx = html.indexOf('\n', afterTitle)
-              insertPoint = nlIdx !== -1 && nlIdx <= headClose ? nlIdx + 1 : headClose
-            }
-          }
-          html = html.slice(0, insertPoint) + metaTags.join('\n') + '\n' + html.slice(insertPoint)
-        }
 
         return c.html(html)
       } catch {
