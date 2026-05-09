@@ -50,10 +50,16 @@ function getInitialCategories(): Category[] {
       id: '',
       name: c.name,
       slug: c.slug,
-      description: 'description' in c ? ((c as Record<string, unknown>).description as string | null) : null,
+      description:
+        'description' in c ? ((c as Record<string, unknown>).description as string | null) : null,
       icon: null,
       sortOrder: null,
-      pluginCount: 'count' in c ? ((c as Record<string, unknown>).count as number) : ('pluginCount' in c ? ((c as Record<string, unknown>).pluginCount as number) : 0),
+      pluginCount:
+        'count' in c
+          ? ((c as Record<string, unknown>).count as number)
+          : 'pluginCount' in c
+            ? ((c as Record<string, unknown>).pluginCount as number)
+            : 0,
     }))
   }
   return []

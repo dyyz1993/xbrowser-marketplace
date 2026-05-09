@@ -28,6 +28,7 @@ export const e2eTestLocation = {
     const hasSpecExtension = filename.endsWith('.spec.ts')
     const isSpecialFile =
       filename.endsWith('playwright.config.ts') ||
+      filename.endsWith('playwright-quality.config.ts') ||
       filename.endsWith('global-setup.ts') ||
       filename.endsWith('global-teardown.ts')
 
@@ -103,6 +104,7 @@ export const noE2ETestOutsideDir = {
     const isE2ETestFile = filename.includes('/tests/e2e/') || filename.includes('tests/e2e')
     const isSpecialFile =
       filename.endsWith('playwright.config.ts') ||
+      filename.endsWith('playwright-quality.config.ts') ||
       filename.endsWith('global-setup.ts') ||
       filename.endsWith('global-teardown.ts')
 

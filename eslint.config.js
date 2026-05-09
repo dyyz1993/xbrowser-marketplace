@@ -175,6 +175,7 @@ export default tseslint.config(
   {
     files: ['tests/e2e/**/*.ts'],
     rules: {
+      'no-console': 'off',
       'local-rules/e2e-test-location': 'error',
     },
   },

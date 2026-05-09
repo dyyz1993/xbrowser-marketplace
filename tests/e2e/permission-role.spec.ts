@@ -96,7 +96,11 @@ test.describe('Permission & Role Management', () => {
 
   test.describe('Role List', () => {
     test('should display all roles in the role list', async ({ page }) => {
-      await navigateToAdminPage(page, '/system/roles', '[data-testid="roles-container"], [data-testid="permission-denied-message"]')
+      await navigateToAdminPage(
+        page,
+        '/system/roles',
+        '[data-testid="roles-container"], [data-testid="permission-denied-message"]'
+      )
       await page.waitForLoadState('networkidle')
 
       const deniedMessage = page.locator('[data-testid="permission-denied-message"]')
@@ -109,7 +113,10 @@ test.describe('Permission & Role Management', () => {
           await page.reload()
           await page.waitForLoadState('networkidle')
         }
-        await page.waitForSelector('[data-testid="roles-container"], [data-testid="permission-denied-message"]', { timeout: 20000 })
+        await page.waitForSelector(
+          '[data-testid="roles-container"], [data-testid="permission-denied-message"]',
+          { timeout: 20000 }
+        )
       }
 
       await expect(page.locator('[data-testid="roles-container"]')).toBeVisible()
@@ -241,7 +248,11 @@ test.describe('Permission & Role Management', () => {
         data: { name: 'Deletable Role', code: 'deletable_role' },
       })
 
-      await navigateToAdminPage(page, '/system/roles', '[data-testid="roles-container"], [data-testid="permission-denied-message"]')
+      await navigateToAdminPage(
+        page,
+        '/system/roles',
+        '[data-testid="roles-container"], [data-testid="permission-denied-message"]'
+      )
 
       const deniedMessage = page.locator('[data-testid="permission-denied-message"]')
       if (await deniedMessage.isVisible().catch(() => false)) {

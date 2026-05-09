@@ -16,7 +16,11 @@ import { fileURLToPath } from 'node:url'
 import { ProxyAgent, setGlobalDispatcher } from 'undici'
 
 const proxyUrl =
-  process.env.https_proxy || process.env.HTTPS_PROXY || process.env.http_proxy || process.env.HTTP_PROXY || process.env.all_proxy
+  process.env.https_proxy ||
+  process.env.HTTPS_PROXY ||
+  process.env.http_proxy ||
+  process.env.HTTP_PROXY ||
+  process.env.all_proxy
 if (proxyUrl) {
   console.log(`  Using proxy: ${proxyUrl}`)
   setGlobalDispatcher(new ProxyAgent(proxyUrl))
@@ -25,8 +29,7 @@ if (proxyUrl) {
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const ROOT = path.resolve(__dirname, '..')
 
-const API_BASE =
-  process.env.SSG_API_URL || 'https://xbrowser-marketplace.dyyz1993.workers.dev'
+const API_BASE = process.env.SSG_API_URL || 'https://xbrowser-marketplace.dyyz1993.workers.dev'
 const DIST_CLIENT = path.join(ROOT, 'dist/client')
 const SEO_BASE_URL = 'https://xbrowser-marketplace.dyyz1993.workers.dev'
 
@@ -84,17 +87,11 @@ ${extraHead}`
     `<meta name="description" content="${escapeHtml(description)}" />`
   )
 
-  html = html.replace(
-    /<meta\s+(?:property|name)=["'](?:og:|twitter:)[^"']*["'][^>]*\/?>/g,
-    ''
-  )
+  html = html.replace(/<meta\s+(?:property|name)=["'](?:og:|twitter:)[^"']*["'][^>]*\/?>/g, '')
 
   html = html.replace('</head>', `${seoMeta}\n  </head>`)
 
-  html = html.replace(
-    /<div id="root"><\/div>/,
-    `<div id="root" data-ssg="true">${content}</div>`
-  )
+  html = html.replace(/<div id="root"><\/div>/, `<div id="root" data-ssg="true">${content}</div>`)
 
   return html
 }
@@ -103,7 +100,9 @@ function writePage(filePath: string, html: string): void {
   const dir = path.dirname(filePath)
   fs.mkdirSync(dir, { recursive: true })
   fs.writeFileSync(filePath, html)
-  console.log(`  Written ${path.relative(DIST_CLIENT, filePath)} (${(html.length / 1024).toFixed(1)} KB)`)
+  console.log(
+    `  Written ${path.relative(DIST_CLIENT, filePath)} (${(html.length / 1024).toFixed(1)} KB)`
+  )
 }
 
 async function buildSSG(): Promise<void> {
@@ -266,10 +265,7 @@ async function buildSSG(): Promise<void> {
       ssgData: { plugin: pluginData },
       extraHead: `<script type="application/ld+json">${JSON.stringify(jsonLd)}</script>`,
     })
-    writePage(
-      path.join(DIST_CLIENT, 'plugin', pluginSummary.slug, 'index.html'),
-      detailHtml
-    )
+    writePage(path.join(DIST_CLIENT, 'plugin', pluginSummary.slug, 'index.html'), detailHtml)
     pluginCount++
   }
   console.log(`  Generated ${pluginCount} plugin detail pages`)
@@ -300,7 +296,8 @@ async function buildSSG(): Promise<void> {
   const cliContent = renderToString(React.createElement(CliSSR))
   const cliHtml = injectIntoTemplate(template, {
     title: 'CLI Tool - xbrowser Plugin Marketplace',
-    description: 'Install and use xbrowser CLI to browse, install, and publish browser automation plugins.',
+    description:
+      'Install and use xbrowser CLI to browse, install, and publish browser automation plugins.',
     canonicalPath: '/cli',
     content: cliContent,
     ssgData: null,

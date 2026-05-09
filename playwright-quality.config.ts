@@ -26,9 +26,7 @@ export default defineConfig({
       use: {
         ...devices['Desktop Chrome'],
         launchOptions: {
-          args: [
-            '--proxy-server=http://127.0.0.1:7890',
-          ],
+          args: ['--proxy-server=http://127.0.0.1:7890'],
         },
       },
     },

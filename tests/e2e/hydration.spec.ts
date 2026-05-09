@@ -1,11 +1,24 @@
 import { test, expect } from '@playwright/test'
 
-const SITE_URL = process.env.PLAYWRIGHT_TEST_BASE_URL || process.env.E2E_BASE_URL || 'http://localhost:3010'
+const SITE_URL =
+  process.env.PLAYWRIGHT_TEST_BASE_URL || process.env.E2E_BASE_URL || 'http://localhost:3010'
 
 async function seedPluginsForHydration() {
   const plugins = [
-    { name: 'Hydration Test Plugin A', slug: 'hydration-test-a', category: 'tools', status: 'approved', description: 'Test plugin A for hydration' },
-    { name: 'Hydration Test Plugin B', slug: 'hydration-test-b', category: 'productivity', status: 'approved', description: 'Test plugin B for hydration' },
+    {
+      name: 'Hydration Test Plugin A',
+      slug: 'hydration-test-a',
+      category: 'tools',
+      status: 'approved',
+      description: 'Test plugin A for hydration',
+    },
+    {
+      name: 'Hydration Test Plugin B',
+      slug: 'hydration-test-b',
+      category: 'productivity',
+      status: 'approved',
+      description: 'Test plugin B for hydration',
+    },
   ]
   for (const plugin of plugins) {
     await fetch(`${SITE_URL}/api/__test__/seed-plugin`, {
@@ -23,8 +36,6 @@ test.describe('SSR Hydration Quality', () => {
     await fetch(`${SITE_URL}/api/__test__/cleanup`, { method: 'POST' })
     await fetch(`${SITE_URL}/api/__test__/seed`, { method: 'POST' })
     await seedPluginsForHydration()
-
-    const mutations: { type: string; target: string; addedCount: number; removedCount: number }[] = []
 
     await page.goto(SITE_URL + '/', { waitUntil: 'domcontentloaded' })
 
@@ -47,7 +58,10 @@ test.describe('SSR Hydration Quality', () => {
           const target = m.target as HTMLElement
           const tag = target.tagName || target.nodeName || 'text'
           const id = target.id ? `#${target.id}` : ''
-          const cls = target.className && typeof target.className === 'string' ? `.${target.className.split(' ').slice(0, 2).join('.')}` : ''
+          const cls =
+            target.className && typeof target.className === 'string'
+              ? `.${target.className.split(' ').slice(0, 2).join('.')}`
+              : ''
           ;(window as any).__mutations.push({
             type: m.type,
             target: `${tag}${id}${cls}`.substring(0, 80),
@@ -86,22 +100,39 @@ test.describe('SSR Hydration Quality', () => {
     console.log(`Hydrated title: ${hydratedTitle}`)
     console.log(`Total DOM mutations: ${allMutations.length}`)
 
-    const majorMutations = allMutations.filter((m: { addedCount: number; removedCount: number }) => m.addedCount > 5 || m.removedCount > 5)
+    const majorMutations = allMutations.filter(
+      (m: { addedCount: number; removedCount: number }) => m.addedCount > 5 || m.removedCount > 5
+    )
     console.log(`Major mutations (added/removed > 5 nodes): ${majorMutations.length}`)
 
-    const rootReplacements = allMutations.filter((m: { target: string; removedCount: number }) => m.target.includes('#root') && m.removedCount > 0)
+    const rootReplacements = allMutations.filter(
+      (m: { target: string; removedCount: number }) =>
+        m.target.includes('#root') && m.removedCount > 0
+    )
     console.log(`Root-level replacements: ${rootReplacements.length}`)
 
     console.log('\nFirst 20 mutations:')
-    allMutations.slice(0, 20).forEach((m: { type: string; target: string; addedCount: number; removedCount: number }, i: number) => {
-      console.log(`  ${i + 1}. ${m.type} on ${m.target} (+${m.addedCount}/-${m.removedCount})`)
-    })
+    allMutations
+      .slice(0, 20)
+      .forEach(
+        (
+          m: { type: string; target: string; addedCount: number; removedCount: number },
+          i: number
+        ) => {
+          console.log(`  ${i + 1}. ${m.type} on ${m.target} (+${m.addedCount}/-${m.removedCount})`)
+        }
+      )
 
     if (majorMutations.length > 0) {
       console.log('\nMajor mutations detail:')
-      majorMutations.forEach((m: { type: string; target: string; addedCount: number; removedCount: number }, i: number) => {
-        console.log(`  ${i + 1}. ${m.type} on ${m.target} (+${m.addedCount}/-${m.removedCount})`)
-      })
+      majorMutations.forEach(
+        (
+          m: { type: string; target: string; addedCount: number; removedCount: number },
+          i: number
+        ) => {
+          console.log(`  ${i + 1}. ${m.type} on ${m.target} (+${m.addedCount}/-${m.removedCount})`)
+        }
+      )
     }
 
     if (rootReplacements.length > 0) {
@@ -121,7 +152,9 @@ test.describe('SSR Hydration Quality', () => {
 
     const clsValue = await page.evaluate(() => {
       let cls = 0
-      const entries = performance.getEntriesByType('layout-shift') as Array<PerformanceEntry & { hadRecentInput?: boolean; value?: number }>
+      const entries = performance.getEntriesByType('layout-shift') as Array<
+        PerformanceEntry & { hadRecentInput?: boolean; value?: number }
+      >
       for (const entry of entries) {
         if (!entry.hadRecentInput && entry.value) {
           cls += entry.value
@@ -132,7 +165,9 @@ test.describe('SSR Hydration Quality', () => {
 
     console.log(`\n=== CLS Results ===`)
     console.log(`CLS score: ${clsValue.toFixed(4)}`)
-    console.log(`Rating: ${clsValue < 0.1 ? '✅ Good' : clsValue < 0.25 ? '⚠️ Needs Improvement' : '❌ Poor'}`)
+    console.log(
+      `Rating: ${clsValue < 0.1 ? '✅ Good' : clsValue < 0.25 ? '⚠️ Needs Improvement' : '❌ Poor'}`
+    )
     console.log(`Google threshold: Good < 0.1, Poor > 0.25`)
 
     expect(clsValue).toBeLessThan(0.5)
@@ -158,7 +193,12 @@ test.describe('SSR Hydration Quality', () => {
           })
         }
       })
-      observer.observe(document.getElementById('root')!, { childList: true, subtree: true, attributes: true, characterData: true })
+      observer.observe(document.getElementById('root')!, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        characterData: true,
+      })
       ;(window as any).__observer = observer
     })
 
@@ -176,13 +216,23 @@ test.describe('SSR Hydration Quality', () => {
     console.log(`Hydrated title: ${hydratedTitle}`)
     console.log(`Total mutations: ${mutations.length}`)
 
-    const rootMutations = mutations.filter((m: { target: string; removedCount: number }) => m.target.includes('#root') && m.removedCount > 0)
+    const rootMutations = mutations.filter(
+      (m: { target: string; removedCount: number }) =>
+        m.target.includes('#root') && m.removedCount > 0
+    )
     if (rootMutations.length > 0) {
       console.log(`⚠️ ROOT WAS CLEARED - SSR content was replaced, not hydrated`)
     }
 
-    mutations.slice(0, 10).forEach((m: { type: string; target: string; addedCount: number; removedCount: number }, i: number) => {
-      console.log(`  ${i + 1}. ${m.type} on ${m.target} (+${m.addedCount}/-${m.removedCount})`)
-    })
+    mutations
+      .slice(0, 10)
+      .forEach(
+        (
+          m: { type: string; target: string; addedCount: number; removedCount: number },
+          i: number
+        ) => {
+          console.log(`  ${i + 1}. ${m.type} on ${m.target} (+${m.addedCount}/-${m.removedCount})`)
+        }
+      )
   })
 })

@@ -44,25 +44,22 @@ async function measurePerformance(page: any, url: string) {
 async function measureCLS(page: any, url: string, duration = 3000) {
   await page.goto(url, { waitUntil: 'domcontentloaded' })
 
-  const cls = await page.evaluate(
-    async ms => {
-      return new Promise<number>(resolve => {
-        let clsValue = 0
-        const observer = new PerformanceObserver(list => {
-          for (const entry of list.getEntries()) {
-            const ls = entry as any
-            if (!ls.hadRecentInput) clsValue += ls.value
-          }
-        })
-        observer.observe({ type: 'layout-shift', buffered: true })
-        setTimeout(() => {
-          observer.disconnect()
-          resolve(clsValue)
-        }, ms)
+  const cls = await page.evaluate(async ms => {
+    return new Promise<number>(resolve => {
+      let clsValue = 0
+      const observer = new PerformanceObserver(list => {
+        for (const entry of list.getEntries()) {
+          const ls = entry as any
+          if (!ls.hadRecentInput) clsValue += ls.value
+        }
       })
-    },
-    duration,
-  )
+      observer.observe({ type: 'layout-shift', buffered: true })
+      setTimeout(() => {
+        observer.disconnect()
+        resolve(clsValue)
+      }, ms)
+    })
+  }, duration)
 
   return cls
 }
@@ -186,27 +183,27 @@ test.describe('Performance Metrics (Core Web Vitals)', () => {
 
       console.log(`\n=== ${name} Performance ===`)
       console.log(
-        `  TTFB:         ${metrics.ttfb}ms  ${metrics.ttfb < 800 ? '✅' : metrics.ttfb < 1800 ? '⚠️' : '❌'}`,
+        `  TTFB:         ${metrics.ttfb}ms  ${metrics.ttfb < 800 ? '✅' : metrics.ttfb < 1800 ? '⚠️' : '❌'}`
       )
       console.log(
-        `  FCP:          ${metrics.fcp}ms  ${metrics.fcp < 1800 ? '✅' : metrics.fcp < 3000 ? '⚠️' : '❌'}`,
+        `  FCP:          ${metrics.fcp}ms  ${metrics.fcp < 1800 ? '✅' : metrics.fcp < 3000 ? '⚠️' : '❌'}`
       )
       console.log(
-        `  LCP:          ${metrics.lcp}ms  ${metrics.lcp < 2500 ? '✅' : metrics.lcp < 4000 ? '⚠️' : '❌'}`,
+        `  LCP:          ${metrics.lcp}ms  ${metrics.lcp < 2500 ? '✅' : metrics.lcp < 4000 ? '⚠️' : '❌'}`
       )
       console.log(
-        `  TTI:          ${metrics.tti}ms  ${metrics.tti < 3800 ? '✅' : metrics.tti < 7000 ? '⚠️' : '❌'}`,
+        `  TTI:          ${metrics.tti}ms  ${metrics.tti < 3800 ? '✅' : metrics.tti < 7000 ? '⚠️' : '❌'}`
       )
       console.log(`  DOM Complete: ${metrics.domComplete}ms`)
       console.log(`  Load:         ${metrics.loadComplete}ms`)
       console.log(
-        `  JS:           ${metrics.jsResourceCount} files, ${(metrics.jsSize / 1024).toFixed(1)}KB`,
+        `  JS:           ${metrics.jsResourceCount} files, ${(metrics.jsSize / 1024).toFixed(1)}KB`
       )
       console.log(
-        `  CSS:          ${metrics.cssResourceCount} files, ${(metrics.cssSize / 1024).toFixed(1)}KB`,
+        `  CSS:          ${metrics.cssResourceCount} files, ${(metrics.cssSize / 1024).toFixed(1)}KB`
       )
       console.log(
-        `  Total:        ${(metrics.totalTransferSize / 1024).toFixed(1)}KB (${metrics.totalRequests} requests)`,
+        `  Total:        ${(metrics.totalTransferSize / 1024).toFixed(1)}KB (${metrics.totalRequests} requests)`
       )
 
       expect(metrics.ttfb, `TTFB should be < 2500ms (proxy-adjusted)`).toBeLessThan(2500)
@@ -268,7 +265,7 @@ test.describe('Hydration Quality', () => {
 
     console.log(`\n=== Homepage CLS ===`)
     console.log(
-      `  CLS: ${cls.toFixed(4)} ${cls < 0.1 ? '✅ Good' : cls < 0.25 ? '⚠️ Needs Improvement' : '❌ Poor'}`,
+      `  CLS: ${cls.toFixed(4)} ${cls < 0.1 ? '✅ Good' : cls < 0.25 ? '⚠️ Needs Improvement' : '❌ Poor'}`
     )
 
     expect(cls, 'CLS should be < 0.1 (Good)').toBeLessThan(0.1)
@@ -279,7 +276,7 @@ test.describe('Hydration Quality', () => {
 
     console.log(`\n=== Plugin Detail CLS ===`)
     console.log(
-      `  CLS: ${cls.toFixed(4)} ${cls < 0.1 ? '✅ Good' : cls < 0.25 ? '⚠️ Needs Improvement' : '❌ Poor'}`,
+      `  CLS: ${cls.toFixed(4)} ${cls < 0.1 ? '✅ Good' : cls < 0.25 ? '⚠️ Needs Improvement' : '❌ Poor'}`
     )
 
     expect(cls, 'CLS should be < 0.3').toBeLessThan(0.3)
@@ -436,7 +433,9 @@ test.describe('SEO Validation', () => {
     const xml = await response!.text()
 
     const urlCount = (xml.match(/<loc>/g) || []).length
-    const hasHomepage = xml.includes('<loc>https://xbrowser-marketplace.dyyz1993.workers.dev</loc>') || xml.includes('<loc>https://xbrowser-marketplace.dyyz1993.workers.dev/</loc>')
+    const hasHomepage =
+      xml.includes('<loc>https://xbrowser-marketplace.dyyz1993.workers.dev</loc>') ||
+      xml.includes('<loc>https://xbrowser-marketplace.dyyz1993.workers.dev/</loc>')
     const hasPlugin = xml.includes('/plugin/')
     const hasCategories = xml.includes('/categories')
     const hasNo1970 = !xml.includes('1970-')
