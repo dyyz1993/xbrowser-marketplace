@@ -24,7 +24,9 @@ export const CliSSR: React.FC = () => {
                 <rect width="7" height="5" x="14" y="3" rx="1" />
               </svg>
               <span className="hidden sm:inline">xbrowser</span>
-              <span className="text-xs font-normal text-gray-400 hidden md:inline">marketplace</span>
+              <span className="text-xs font-normal text-gray-400 hidden md:inline">
+                marketplace
+              </span>
             </a>
             <div className="hidden lg:flex items-center gap-1">
               <a
@@ -209,7 +211,9 @@ xbrowser record`}
                     <pre className="bg-gray-900 text-green-400 px-4 py-3 rounded-lg font-mono text-sm overflow-x-auto">
                       curl -o plugin-dev.md https://xbrowser.dev/skills/plugin-dev.md
                     </pre>
-                    <p className="text-sm font-medium text-gray-700">Place in your skills directory:</p>
+                    <p className="text-sm font-medium text-gray-700">
+                      Place in your skills directory:
+                    </p>
                     <pre className="bg-gray-900 text-green-400 px-4 py-3 rounded-lg font-mono text-sm overflow-x-auto">
                       {`# For Claude Code / OpenCode
 mv plugin-dev.md .opencode/skills/

@@ -14,7 +14,15 @@ import { auditLogMiddleware } from './middleware/audit-log'
 import { createModuleLoggerSync } from './utils/logger'
 import { adminApiRoutes, clientApiRoutes } from './route-registry'
 import { fileRoutes } from './module-file/routes/file-routes'
-import { renderToHTML, buildDocument, PluginDetailSSR, HomeSSR, CategoriesSSR, CliSSR, type PluginSSRData } from './ssr'
+import {
+  renderToHTML,
+  buildDocument,
+  PluginDetailSSR,
+  HomeSSR,
+  CategoriesSSR,
+  CliSSR,
+  type PluginSSRData,
+} from './ssr'
 
 export { type AppBindings, type CreateAppOptions } from './types/bindings'
 
@@ -347,14 +355,18 @@ Sitemap: ${SEO_BASE_URL}/sitemap.xml
         const now = new Date().toISOString().split('T')[0]
         const urls = [
           { loc: SEO_BASE_URL, lastmod: now, changefreq: 'daily', priority: '1.0' },
-          { loc: `${SEO_BASE_URL}/categories`, lastmod: now, changefreq: 'weekly', priority: '0.9' },
+          {
+            loc: `${SEO_BASE_URL}/categories`,
+            lastmod: now,
+            changefreq: 'weekly',
+            priority: '0.9',
+          },
           { loc: `${SEO_BASE_URL}/cli`, lastmod: now, changefreq: 'monthly', priority: '0.7' },
           ...approved.map(p => {
             let date: Date
             if (p.updatedAt instanceof Date) {
-              date = p.updatedAt.getTime() < 1e12
-                ? new Date(p.updatedAt.getTime() * 1000)
-                : p.updatedAt
+              date =
+                p.updatedAt.getTime() < 1e12 ? new Date(p.updatedAt.getTime() * 1000) : p.updatedAt
             } else {
               const raw = Number(p.updatedAt)
               date = new Date(raw > 1e12 ? raw : raw * 1000)
@@ -510,10 +522,7 @@ ${urls
           .orderBy(desc(plugins.createdAt))
           .limit(12)
 
-        const allApproved = await db
-          .select()
-          .from(plugins)
-          .where(eq(plugins.status, 'approved'))
+        const allApproved = await db.select().from(plugins).where(eq(plugins.status, 'approved'))
         const totalPlugins = allApproved.length
 
         const catRows = await db.select().from(pluginCategories)
@@ -609,10 +618,7 @@ ${urls
 
         const catRows = await db.select().from(pluginCategories)
 
-        const allApproved = await db
-          .select()
-          .from(plugins)
-          .where(eq(plugins.status, 'approved'))
+        const allApproved = await db.select().from(plugins).where(eq(plugins.status, 'approved'))
         const totalPlugins = allApproved.length
 
         const approvedIds = allApproved.map(p => p.id)
@@ -687,7 +693,8 @@ ${urls
 
         const html = buildDocument({
           title: `CLI Documentation - ${SEO_SITE_NAME}`,
-          description: 'Install and use xbrowser CLI to browse, install, and publish browser automation plugins.',
+          description:
+            'Install and use xbrowser CLI to browse, install, and publish browser automation plugins.',
           content,
           spaTemplate,
           canonicalPath: '/cli',

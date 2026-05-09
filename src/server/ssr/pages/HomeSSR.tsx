@@ -46,7 +46,9 @@ export const HomeSSR: React.FC<HomeSSRProps> = ({ plugins, categories, totalPlug
                 <rect width="7" height="5" x="14" y="3" rx="1" />
               </svg>
               <span className="hidden sm:inline">xbrowser</span>
-              <span className="text-xs font-normal text-gray-400 hidden md:inline">marketplace</span>
+              <span className="text-xs font-normal text-gray-400 hidden md:inline">
+                marketplace
+              </span>
             </a>
             <div className="hidden lg:flex items-center gap-1">
               <a
@@ -140,7 +142,9 @@ export const HomeSSR: React.FC<HomeSSRProps> = ({ plugins, categories, totalPlug
               >
                 <path d="M16.5 21a4.5 4.5 0 1 0 0-9h-1.8A7 7 0 1 0 4 14.5" />
               </svg>
-              <span className="text-sm font-semibold text-gray-900">{totalPlugins.toLocaleString()}</span>
+              <span className="text-sm font-semibold text-gray-900">
+                {totalPlugins.toLocaleString()}
+              </span>
               <span className="text-xs text-gray-500">Plugins</span>
             </div>
           </div>

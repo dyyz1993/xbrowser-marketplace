@@ -54,7 +54,9 @@ export const PluginDetailSSR: React.FC<{ plugin: PluginSSRData }> = ({ plugin })
                 <rect width="7" height="5" x="14" y="3" rx="1" />
               </svg>
               <span className="hidden sm:inline">xbrowser</span>
-              <span className="text-xs font-normal text-gray-400 hidden md:inline">marketplace</span>
+              <span className="text-xs font-normal text-gray-400 hidden md:inline">
+                marketplace
+              </span>
             </a>
             <div className="hidden lg:flex items-center gap-1">
               <a

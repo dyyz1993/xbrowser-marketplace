@@ -48,7 +48,9 @@ export const CategoriesSSR: React.FC<CategoriesSSRProps> = ({ categories, totalP
                 <rect width="7" height="5" x="14" y="3" rx="1" />
               </svg>
               <span className="hidden sm:inline">xbrowser</span>
-              <span className="text-xs font-normal text-gray-400 hidden md:inline">marketplace</span>
+              <span className="text-xs font-normal text-gray-400 hidden md:inline">
+                marketplace
+              </span>
             </a>
             <div className="hidden lg:flex items-center gap-1">
               <a
@@ -118,9 +120,7 @@ export const CategoriesSSR: React.FC<CategoriesSSRProps> = ({ categories, totalP
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
           <div className="mb-8">
             <h1 className="text-2xl font-bold text-gray-900 mb-2">Browse Categories</h1>
-            <p className="text-gray-500">
-              Explore {totalPlugins} plugins organized by category
-            </p>
+            <p className="text-gray-500">Explore {totalPlugins} plugins organized by category</p>
           </div>
 
           {categories.length > 0 ? (
