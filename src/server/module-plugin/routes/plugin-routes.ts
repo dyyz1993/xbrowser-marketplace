@@ -26,6 +26,7 @@ import {
   CategorySlugSchema,
 } from '../plugin.types'
 import * as pluginService from '../services/plugin-service'
+import { parsePositiveInt } from '../../utils/parse'
 
 const listPluginsRoute = createRoute({
   method: 'get',
@@ -201,12 +202,6 @@ const getStatsRoute = createRoute({
     200: successResponse(StatsSchema, 'Marketplace stats'),
   },
 })
-
-function parsePositiveInt(value: string | undefined, defaultValue: number): number {
-  if (!value) return defaultValue
-  const parsed = parseInt(value, 10)
-  return isNaN(parsed) || parsed < 1 ? defaultValue : parsed
-}
 
 export const pluginRoutes = new OpenAPIHono()
   .openapi(listPluginsRoute, async c => {

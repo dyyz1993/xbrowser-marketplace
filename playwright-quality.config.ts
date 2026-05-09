@@ -7,8 +7,8 @@ export default defineConfig({
   expect: { timeout: 15000 },
   retries: 0,
   workers: 1,
-  globalSetup: undefined as any,
-  globalTeardown: undefined as any,
+  globalSetup: undefined as unknown as string,
+  globalTeardown: undefined as unknown as string,
   reporter: [['list']],
   outputDir: 'playwright-artifacts',
   use: {

@@ -73,7 +73,7 @@ const localRules = {
 }
 
 export default tseslint.config(
-  { ignores: ['dist', '.pi', 'lint-scripts', 'e2e', 'scripts'] },
+  { ignores: ['dist', '.pi', 'lint-scripts', 'e2e', 'scripts', 'coverage'] },
   {
     extends: [eslint.configs.recommended, ...tseslint.configs.recommended],
     files: ['**/*.{ts,tsx}'],

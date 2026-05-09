@@ -3,6 +3,18 @@ import { test, expect } from '@playwright/test'
 const SITE_URL =
   process.env.PLAYWRIGHT_TEST_BASE_URL || process.env.E2E_BASE_URL || 'http://localhost:3010'
 
+interface MutationRecord {
+  type: string
+  target: string
+  addedCount: number
+  removedCount: number
+}
+
+interface HydrationGlobals {
+  __mutations: MutationRecord[]
+  __observer: MutationObserver
+}
+
 async function seedPluginsForHydration() {
   const plugins = [
     {
@@ -52,7 +64,7 @@ test.describe('SSR Hydration Quality', () => {
     const ssrTitle = await page.evaluate(() => document.title)
 
     await page.evaluate(() => {
-      ;(window as any).__mutations = []
+      ;(window as unknown as HydrationGlobals).__mutations = []
       const observer = new MutationObserver(muts => {
         for (const m of muts) {
           const target = m.target as HTMLElement
@@ -62,7 +74,7 @@ test.describe('SSR Hydration Quality', () => {
             target.className && typeof target.className === 'string'
               ? `.${target.className.split(' ').slice(0, 2).join('.')}`
               : ''
-          ;(window as any).__mutations.push({
+          ;(window as unknown as HydrationGlobals).__mutations.push({
             type: m.type,
             target: `${tag}${id}${cls}`.substring(0, 80),
             addedCount: m.addedNodes.length,
@@ -76,14 +88,14 @@ test.describe('SSR Hydration Quality', () => {
         attributes: true,
         characterData: true,
       })
-      ;(window as any).__observer = observer
+      ;(window as unknown as HydrationGlobals).__observer = observer
     })
 
     await page.waitForTimeout(3000)
 
     const allMutations = await page.evaluate(() => {
-      ;(window as any).__observer?.disconnect()
-      return (window as any).__mutations || []
+      ;(window as unknown as HydrationGlobals).__observer?.disconnect()
+      return (window as unknown as HydrationGlobals).__mutations || []
     })
 
     const hydratedNodeCount = await page.evaluate(() => {
@@ -179,13 +191,13 @@ test.describe('SSR Hydration Quality', () => {
     const ssrTitle = await page.evaluate(() => document.title)
 
     await page.evaluate(() => {
-      ;(window as any).__mutations = []
+      ;(window as unknown as HydrationGlobals).__mutations = []
       const observer = new MutationObserver(muts => {
         for (const m of muts) {
           const target = m.target as HTMLElement
           const tag = target.tagName || 'text'
           const id = target.id ? `#${target.id}` : ''
-          ;(window as any).__mutations.push({
+          ;(window as unknown as HydrationGlobals).__mutations.push({
             type: m.type,
             target: `${tag}${id}`.substring(0, 80),
             addedCount: m.addedNodes.length,
@@ -199,14 +211,14 @@ test.describe('SSR Hydration Quality', () => {
         attributes: true,
         characterData: true,
       })
-      ;(window as any).__observer = observer
+      ;(window as unknown as HydrationGlobals).__observer = observer
     })
 
     await page.waitForTimeout(3000)
 
     const mutations = await page.evaluate(() => {
-      ;(window as any).__observer?.disconnect()
-      return (window as any).__mutations || []
+      ;(window as unknown as HydrationGlobals).__observer?.disconnect()
+      return (window as unknown as HydrationGlobals).__mutations || []
     })
 
     const hydratedTitle = await page.evaluate(() => document.title)

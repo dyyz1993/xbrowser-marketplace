@@ -1,8 +1,21 @@
-import { test, expect } from '@playwright/test'
+import { test, expect, type Page } from '@playwright/test'
 
 const SITE_URL = 'https://xbrowser-marketplace.dyyz1993.workers.dev'
 
-async function measurePerformance(page: any, url: string) {
+interface MutationEntry {
+  type: string
+  target: string
+  added: number
+  removed: number
+  attributeName: string
+}
+
+interface HydrationGlobals {
+  __mutations: MutationEntry[]
+  __observer: MutationObserver
+}
+
+async function measurePerformance(page: Page, url: string) {
   await page.goto(url, { waitUntil: 'load', timeout: 60000 })
 
   const metrics = await page.evaluate(() => {
@@ -41,7 +54,7 @@ async function measurePerformance(page: any, url: string) {
   return metrics
 }
 
-async function measureCLS(page: any, url: string, duration = 3000) {
+async function measureCLS(page: Page, url: string, duration = 3000) {
   await page.goto(url, { waitUntil: 'domcontentloaded' })
 
   const cls = await page.evaluate(async ms => {
@@ -49,7 +62,7 @@ async function measureCLS(page: any, url: string, duration = 3000) {
       let clsValue = 0
       const observer = new PerformanceObserver(list => {
         for (const entry of list.getEntries()) {
-          const ls = entry as any
+          const ls = entry as PerformanceEntry & { hadRecentInput?: boolean; value?: number }
           if (!ls.hadRecentInput) clsValue += ls.value
         }
       })
@@ -64,7 +77,7 @@ async function measureCLS(page: any, url: string, duration = 3000) {
   return cls
 }
 
-async function measureHydration(page: any, url: string) {
+async function measureHydration(page: Page, url: string) {
   await page.goto(url, { waitUntil: 'domcontentloaded' })
 
   const hasSSG = await page.evaluate(() => {
@@ -85,11 +98,11 @@ async function measureHydration(page: any, url: string) {
   })
 
   await page.evaluate(() => {
-    ;(window as any).__mutations = []
+    ;(window as unknown as HydrationGlobals).__mutations = []
     const observer = new MutationObserver(mutations => {
       for (const m of mutations) {
         const target = m.target as HTMLElement
-        ;(window as any).__mutations.push({
+        ;(window as unknown as HydrationGlobals).__mutations.push({
           type: m.type,
           target: `${target.tagName || 'text'}${target.id ? '#' + target.id : ''}`.substring(0, 60),
           added: m.addedNodes.length,
@@ -104,14 +117,14 @@ async function measureHydration(page: any, url: string) {
       attributes: true,
       characterData: true,
     })
-    ;(window as any).__observer = observer
+    ;(window as unknown as HydrationGlobals).__observer = observer
   })
 
   await page.waitForTimeout(4000)
 
   const mutations = await page.evaluate(() => {
-    ;(window as any).__observer?.disconnect()
-    return (window as any).__mutations || []
+    ;(window as unknown as HydrationGlobals).__observer?.disconnect()
+    return (window as unknown as HydrationGlobals).__mutations || []
   })
 
   const hydratedState = await page.evaluate(() => {
@@ -123,8 +136,8 @@ async function measureHydration(page: any, url: string) {
     }
   })
 
-  const rootReplaced = mutations.some((m: any) => m.target.includes('#root') && m.removed > 10)
-  const majorMutations = mutations.filter((m: any) => m.added > 3 || m.removed > 3)
+  const rootReplaced = mutations.some((m: MutationEntry) => m.target.includes('#root') && m.removed > 10)
+  const majorMutations = mutations.filter((m: MutationEntry) => m.added > 3 || m.removed > 3)
 
   return {
     hasSSG: true,
@@ -139,7 +152,7 @@ async function measureHydration(page: any, url: string) {
   }
 }
 
-async function validateSEO(page: any, url: string) {
+async function validateSEO(page: Page, url: string) {
   await page.goto(url, { waitUntil: 'domcontentloaded' })
 
   const seo = await page.evaluate(() => {
@@ -231,7 +244,7 @@ test.describe('Hydration Quality', () => {
       console.log(`  Root replaced:     ${result.rootReplaced ? '❌ YES (bad)' : '✅ NO (good)'}`)
       if (result.mutations.length > 0) {
         console.log('  First mutations:')
-        result.mutations.forEach((m: any, i: number) => {
+        result.mutations.forEach((m: MutationEntry, i: number) => {
           console.log(`    ${i + 1}. ${m.type} on ${m.target} (+${m.added}/-${m.removed})`)
         })
       }

@@ -4,18 +4,7 @@ import { eq } from 'drizzle-orm'
 import { generateUUID } from '../../utils/uuid'
 import { ConflictError, NotFoundError, AuthenticationError } from '../../utils/app-error'
 import { compareSync, hashSync } from 'bcryptjs'
-
-type DeveloperRow = typeof developers.$inferSelect
-
-function toProfile(row: DeveloperRow) {
-  return {
-    id: row.id,
-    username: row.username,
-    email: row.email,
-    role: row.role,
-    createdAt: row.createdAt.getTime(),
-  }
-}
+import { toProfile } from '../../utils/profile'
 
 export async function registerDeveloper(data: {
   username: string

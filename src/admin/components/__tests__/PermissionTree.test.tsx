@@ -2,18 +2,19 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { PermissionTree } from '../PermissionTree'
 import type { PermissionInfo, PermissionCategory } from '@shared/modules/permission'
+import { Permission } from '@shared/modules/permission/permissions'
 
 const mockPermissions: PermissionInfo[] = [
-  { permission: 'user:view' as any, label: '查看用户', category: 'user' },
-  { permission: 'user:create' as any, label: '创建用户', category: 'user' },
-  { permission: 'user:edit' as any, label: '编辑用户', category: 'user' },
-  { permission: 'content:view' as any, label: '查看内容', category: 'content' },
-  { permission: 'content:create' as any, label: '创建内容', category: 'content' },
+  { permission: Permission.USER_VIEW, label: '查看用户', category: 'user' },
+  { permission: Permission.USER_CREATE, label: '创建用户', category: 'user' },
+  { permission: Permission.USER_EDIT, label: '编辑用户', category: 'user' },
+  { permission: Permission.CONTENT_VIEW, label: '查看内容', category: 'content' },
+  { permission: Permission.CONTENT_CREATE, label: '创建内容', category: 'content' },
 ]
 
 const mockCategories: Record<string, PermissionCategory> = {
-  user: { label: '用户管理', permissions: ['user:view', 'user:create', 'user:edit'] as any[] },
-  content: { label: '内容管理', permissions: ['content:view', 'content:create'] as any[] },
+  user: { label: '用户管理', permissions: [Permission.USER_VIEW, Permission.USER_CREATE, Permission.USER_EDIT] },
+  content: { label: '内容管理', permissions: [Permission.CONTENT_VIEW, Permission.CONTENT_CREATE] },
 }
 
 vi.mock('@shared/modules/permission/permission-dependencies', () => ({

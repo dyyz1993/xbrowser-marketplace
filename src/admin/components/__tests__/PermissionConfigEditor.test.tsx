@@ -2,11 +2,12 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { PermissionConfigEditor } from '../PermissionConfigEditor'
 import type { PermissionInfo } from '@shared/modules/permission'
+import { Permission } from '@shared/modules/permission/permissions'
 
 const mockPermissions: PermissionInfo[] = [
-  { permission: 'user:view' as any, label: '查看用户', category: 'user' },
-  { permission: 'user:create' as any, label: '创建用户', category: 'user' },
-  { permission: 'content:view' as any, label: '查看内容', category: 'content' },
+  { permission: Permission.USER_VIEW, label: '查看用户', category: 'user' },
+  { permission: Permission.USER_CREATE, label: '创建用户', category: 'user' },
+  { permission: Permission.CONTENT_VIEW, label: '查看内容', category: 'content' },
 ]
 
 vi.mock('antd', async () => {

@@ -34,6 +34,7 @@ import {
   PromoteDeveloperBodySchema,
 } from '@shared/modules/plugins'
 import * as adminService from '../services/admin-plugin-service'
+import { parsePositiveInt } from '../../utils/parse'
 
 const adminAuth = authMiddleware({ requiredRole: Role.SUPER_ADMIN })
 const adminOrDevAuth = authMiddleware({ requiredRole: Role.SUPER_ADMIN })
@@ -250,12 +251,6 @@ const deleteCategoryRoute = createRoute({
     404: errorResponse('Category not found'),
   },
 })
-
-function parsePositiveInt(value: string | undefined, defaultValue: number): number {
-  if (!value) return defaultValue
-  const parsed = parseInt(value, 10)
-  return isNaN(parsed) || parsed < 1 ? defaultValue : parsed
-}
 
 export const pluginAdminRoutes = new OpenAPIHono()
   .openapi(getDashboardRoute, async c => {

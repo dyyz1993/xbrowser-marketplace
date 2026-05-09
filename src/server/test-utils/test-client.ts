@@ -16,6 +16,7 @@ import { extendHonoClient, type ExtendedClientOptions } from '@shared/core/hono-
  *
  * 注意：使用 any 避免深度的类型推导问题 (TS2589)
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type TestClient = any
 
 export interface TestClientOptions {
@@ -43,7 +44,7 @@ export function createTestClient(baseUrl?: string, options?: TestClientOptions):
       headers: defaultHeaders,
       webSocket: options?.webSocket ? (url: string | URL) => options.webSocket!(url) : undefined,
       sse: sseFactory as (url: string) => unknown,
-    } as ExtendedClientOptions) as any
+    } as ExtendedClientOptions) as unknown as TestClient
     return extendHonoClient(baseClient) as TestClient
   }
   const baseClient = hc('http://localhost', {
@@ -58,6 +59,6 @@ export function createTestClient(baseUrl?: string, options?: TestClientOptions):
       return app.fetch(request)
     },
     sse: sseFactory as (url: string) => unknown,
-  } as ExtendedClientOptions) as any
+  } as ExtendedClientOptions) as unknown as TestClient
   return extendHonoClient(baseClient) as TestClient
 }
