@@ -136,7 +136,9 @@ async function measureHydration(page: Page, url: string) {
     }
   })
 
-  const rootReplaced = mutations.some((m: MutationEntry) => m.target.includes('#root') && m.removed > 10)
+  const rootReplaced = mutations.some(
+    (m: MutationEntry) => m.target.includes('#root') && m.removed > 10
+  )
   const majorMutations = mutations.filter((m: MutationEntry) => m.added > 3 || m.removed > 3)
 
   return {

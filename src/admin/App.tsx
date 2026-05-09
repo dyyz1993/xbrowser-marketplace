@@ -69,25 +69,103 @@ export const App: React.FC = () => {
                 <Layout>
                   <Routes>
                     <Route path="/" element={<Navigate to="/dashboard" replace />} />
-                    <Route path="/dashboard" element={<Suspense fallback={<Loading />}><PluginDashboardPage /></Suspense>} />
-                    <Route path="/plugins/review" element={<Suspense fallback={<Loading />}><PluginReviewPage /></Suspense>} />
-                    <Route path="/plugins/manage" element={<Suspense fallback={<Loading />}><PluginManagementPage /></Suspense>} />
-                    <Route path="/plugins/categories" element={<Suspense fallback={<Loading />}><CategoryManagementPage /></Suspense>} />
-                    <Route path="/users" element={<Suspense fallback={<Loading />}><UsersPage /></Suspense>} />
-                    <Route path="/system/settings" element={<Suspense fallback={<Loading />}><SettingsPage /></Suspense>} />
-                    <Route path="/system/logs" element={<Suspense fallback={<Loading />}><SystemLogsPage /></Suspense>} />
-                    <Route path="/system/permissions" element={<Suspense fallback={<Loading />}><PermissionsPage /></Suspense>} />
-                    <Route path="/system/roles" element={<Suspense fallback={<Loading />}><RolesPage /></Suspense>} />
-                    <Route path="/system/monitor" element={<Suspense fallback={<Loading />}><MonitorPage /></Suspense>} />
+                    <Route
+                      path="/dashboard"
+                      element={
+                        <Suspense fallback={<Loading />}>
+                          <PluginDashboardPage />
+                        </Suspense>
+                      }
+                    />
+                    <Route
+                      path="/plugins/review"
+                      element={
+                        <Suspense fallback={<Loading />}>
+                          <PluginReviewPage />
+                        </Suspense>
+                      }
+                    />
+                    <Route
+                      path="/plugins/manage"
+                      element={
+                        <Suspense fallback={<Loading />}>
+                          <PluginManagementPage />
+                        </Suspense>
+                      }
+                    />
+                    <Route
+                      path="/plugins/categories"
+                      element={
+                        <Suspense fallback={<Loading />}>
+                          <CategoryManagementPage />
+                        </Suspense>
+                      }
+                    />
+                    <Route
+                      path="/users"
+                      element={
+                        <Suspense fallback={<Loading />}>
+                          <UsersPage />
+                        </Suspense>
+                      }
+                    />
+                    <Route
+                      path="/system/settings"
+                      element={
+                        <Suspense fallback={<Loading />}>
+                          <SettingsPage />
+                        </Suspense>
+                      }
+                    />
+                    <Route
+                      path="/system/logs"
+                      element={
+                        <Suspense fallback={<Loading />}>
+                          <SystemLogsPage />
+                        </Suspense>
+                      }
+                    />
+                    <Route
+                      path="/system/permissions"
+                      element={
+                        <Suspense fallback={<Loading />}>
+                          <PermissionsPage />
+                        </Suspense>
+                      }
+                    />
+                    <Route
+                      path="/system/roles"
+                      element={
+                        <Suspense fallback={<Loading />}>
+                          <RolesPage />
+                        </Suspense>
+                      }
+                    />
+                    <Route
+                      path="/system/monitor"
+                      element={
+                        <Suspense fallback={<Loading />}>
+                          <MonitorPage />
+                        </Suspense>
+                      }
+                    />
                     {process.env.NODE_ENV !== 'production' && (
                       <>
                         <Route
                           path="/media-test"
-                          element={<Suspense fallback={<Loading />}><MediaTestPage /></Suspense>}
+                          element={
+                            <Suspense fallback={<Loading />}>
+                              <MediaTestPage />
+                            </Suspense>
+                          }
                         />
                         <Route
                           path="/test-captcha"
-                          element={<Suspense fallback={<Loading />}><TestCaptchaPage /></Suspense>}
+                          element={
+                            <Suspense fallback={<Loading />}>
+                              <TestCaptchaPage />
+                            </Suspense>
+                          }
                         />
                       </>
                     )}

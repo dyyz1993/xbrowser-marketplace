@@ -13,7 +13,10 @@ const mockPermissions: PermissionInfo[] = [
 ]
 
 const mockCategories: Record<string, PermissionCategory> = {
-  user: { label: '用户管理', permissions: [Permission.USER_VIEW, Permission.USER_CREATE, Permission.USER_EDIT] },
+  user: {
+    label: '用户管理',
+    permissions: [Permission.USER_VIEW, Permission.USER_CREATE, Permission.USER_EDIT],
+  },
   content: { label: '内容管理', permissions: [Permission.CONTENT_VIEW, Permission.CONTENT_CREATE] },
 }
 
