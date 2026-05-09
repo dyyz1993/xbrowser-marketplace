@@ -29,6 +29,11 @@ jobs:
       - name: Build for Cloudflare
         run: npm run build:cloudflare
 
+      - name: Build SSG pages
+        run: npm run build:ssg
+        env:
+          SSG_API_URL: https://xbrowser-marketplace.dyyz1993.workers.dev
+
       - name: Deploy to Cloudflare Workers
         run: npx wrangler deploy
         env:
