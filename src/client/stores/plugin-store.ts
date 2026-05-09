@@ -8,6 +8,98 @@ import type {
   SearchParams,
 } from '@shared/modules/plugins'
 import { pluginApi } from '@client/services/plugin-api'
+import {
+  getSSGData,
+  isSSGPage,
+  type SSGHomeData,
+  type SSGPluginDetailData,
+  type SSGCategoriesData,
+} from '@client/lib/ssg-data'
+
+function getInitialPlugins(): PluginListItem[] {
+  if (!isSSGPage()) return []
+  const data = getSSGData<SSGHomeData>()
+  if (!data?.plugins) return []
+  return data.plugins.map(p => ({
+    id: '',
+    name: p.name,
+    slug: p.slug,
+    description: p.description,
+    authorName: '',
+    version: '',
+    status: 'approved',
+    downloadCount: p.downloads,
+    viewCount: 0,
+    featured: false,
+    screenshotUrl: null,
+    tags: [],
+    siteUrls: [],
+    commands: [],
+    createdAt: 0,
+    updatedAt: 0,
+    avgRating: p.avgRating,
+  }))
+}
+
+function getInitialCategories(): Category[] {
+  if (!isSSGPage()) return []
+  const data = getSSGData<SSGHomeData | SSGCategoriesData>()
+  if (!data) return []
+  if ('categories' in data && Array.isArray(data.categories)) {
+    return data.categories.map(c => ({
+      id: '',
+      name: c.name,
+      slug: c.slug,
+      description: 'description' in c ? ((c as Record<string, unknown>).description as string | null) : null,
+      icon: null,
+      sortOrder: null,
+      pluginCount: 'count' in c ? ((c as Record<string, unknown>).count as number) : ('pluginCount' in c ? ((c as Record<string, unknown>).pluginCount as number) : 0),
+    }))
+  }
+  return []
+}
+
+function getInitialCurrentPlugin(): PluginDetail | null {
+  if (!isSSGPage()) return null
+  const data = getSSGData<SSGPluginDetailData>()
+  if (!data?.plugin) return null
+  const p = data.plugin
+  return {
+    id: '',
+    name: p.name,
+    slug: p.slug,
+    description: p.description,
+    authorId: '',
+    authorName: p.author,
+    version: p.version,
+    status: 'approved',
+    downloadCount: p.downloads,
+    viewCount: 0,
+    featured: false,
+    screenshotUrl: null,
+    tags: [],
+    siteUrls: [],
+    commands: [],
+    createdAt: 0,
+    updatedAt: 0,
+    avgRating: p.avgRating,
+    reviewCount: p.reviewCount,
+    readme: null,
+    repositoryUrl: null,
+    homepageUrl: null,
+    npmPackage: null,
+    license: null,
+    categories: [],
+    versions: [],
+  }
+}
+
+function getInitialPagination() {
+  if (!isSSGPage()) return { page: 1, pageSize: 20, total: 0 }
+  const data = getSSGData<SSGHomeData>()
+  if (!data) return { page: 1, pageSize: 20, total: 0 }
+  return { page: 1, pageSize: 20, total: data.totalPlugins ?? data.plugins?.length ?? 0 }
+}
 
 interface PluginState {
   plugins: PluginListItem[]
@@ -34,15 +126,15 @@ interface PluginState {
 }
 
 export const usePluginStore = create<PluginState>((set, get) => ({
-  plugins: [],
-  currentPlugin: null,
-  categories: [],
+  plugins: getInitialPlugins(),
+  currentPlugin: getInitialCurrentPlugin(),
+  categories: getInitialCategories(),
   stats: null,
   searchQuery: '',
   selectedCategory: null,
   loading: false,
   error: null,
-  pagination: { page: 1, pageSize: 20, total: 0 },
+  pagination: getInitialPagination(),
 
   fetchPlugins: async (params = {}) => {
     set({ loading: true, error: null })
@@ -173,6 +265,16 @@ export const usePluginStore = create<PluginState>((set, get) => ({
   },
 
   fetchPlugin: async (slug: string) => {
+    const existing = get().currentPlugin
+    if (existing && existing.slug === slug) {
+      try {
+        const result = await pluginApi.get(slug)
+        if (result.success) set({ currentPlugin: result.data })
+      } catch {
+        // keep SSG data
+      }
+      return
+    }
     set({ loading: true, error: null, currentPlugin: null })
     try {
       const result = await pluginApi.get(slug)
@@ -193,6 +295,7 @@ export const usePluginStore = create<PluginState>((set, get) => ({
         set({ categories: result.data })
       }
     } catch (err) {
+      if (get().categories.length > 0) return
       console.error('Failed to fetch categories:', err)
     }
   },

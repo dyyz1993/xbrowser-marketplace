@@ -434,6 +434,7 @@ ${urls
         }
 
         const pluginData: PluginSSRData = {
+          slug: p.slug,
           name: p.name,
           description: p.description,
           avgRating,

@@ -1,6 +1,7 @@
 import React from 'react'
 
 export interface PluginSSRData {
+  slug: string
   name: string
   description: string
   avgRating: number

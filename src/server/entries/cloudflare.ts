@@ -72,40 +72,53 @@ export default {
       return wrappedApp.fetch(request, env, ctx)
     }
 
-    const isSeoPath =
-      url.pathname === '/' ||
-      url.pathname === '/robots.txt' ||
-      url.pathname === '/sitemap.xml' ||
-      url.pathname === '/plugins' ||
-      url.pathname === '/categories' ||
-      url.pathname === '/cli' ||
-      /^\/plugin\/[^/]+$/.test(url.pathname)
-
-    if (isSeoPath) {
+    if (url.pathname === '/robots.txt' || url.pathname === '/sitemap.xml') {
       return wrappedApp.fetch(request, env, ctx)
+    }
+
+    const staticPaths = ['/', '/categories', '/cli']
+    const isStaticPage = staticPaths.includes(url.pathname)
+    const isPluginPage = /^\/plugin\/[^/]+$/.test(url.pathname)
+
+    if ((isStaticPage || isPluginPage) && env.ASSETS) {
+      const assetResponse = await env.ASSETS.fetch(request)
+      if (assetResponse.status === 200) {
+        return assetResponse
+      }
     }
 
     const noindexPaths = ['/login', '/register', '/search', '/notifications', '/admin']
     const needsNoindex = noindexPaths.some(p => url.pathname.startsWith(p))
 
-    if (needsNoindex && env.ASSETS) {
-      const spaResponse = await env.ASSETS.fetch(new Request(new URL('/index.html', request.url)))
-      const html = await spaResponse.text()
-      const injected = html.replace(
-        '</head>',
-        '<meta name="robots" content="noindex, nofollow"></head>'
-      )
-      return new Response(injected, {
-        status: spaResponse.status,
-        headers: spaResponse.headers,
-      })
-    }
-
     if (env.ASSETS) {
+      const shellUrl = needsNoindex
+        ? new Request(new URL('/index.spa.html', request.url))
+        : undefined
+
+      if (needsNoindex && shellUrl) {
+        const spaResponse = await env.ASSETS.fetch(shellUrl)
+        if (spaResponse.ok) {
+          const html = await spaResponse.text()
+          const injected = html.replace(
+            '</head>',
+            '<meta name="robots" content="noindex, nofollow"></head>'
+          )
+          return new Response(injected, {
+            status: spaResponse.status,
+            headers: spaResponse.headers,
+          })
+        }
+      }
+
       const assetResponse = await env.ASSETS.fetch(request)
       if (assetResponse.status !== 404) {
         return assetResponse
       }
+
+      const spaResponse = await env.ASSETS.fetch(
+        new Request(new URL('/index.spa.html', request.url))
+      )
+      if (spaResponse.ok) return spaResponse
     }
 
     return wrappedApp.fetch(request, env, ctx)

@@ -16,7 +16,7 @@
     "start": "NODE_ENV=production node dist/server/node.js",
     "start:dev": "NODE_ENV=development node --import tsx src/server/entries/node.ts",
     "dev:cf": "wrangler dev",
-    "deploy:cf": "npm run build:cloudflare && wrangler deploy",
+    "deploy:cf": "npm run build:cloudflare && npm run build:ssg && wrangler deploy",
     "typecheck": "tsc --noEmit && eslint . --max-warnings=0",
     "test": "vitest",
     "test:smart": "node --import tsx/esm lint-scripts/smart-test.ts",
@@ -56,7 +56,8 @@
     "dev:context": "node --import tsx/esm lint-scripts/dev-context-analyzer.ts",
     "dev:guide": "node --import tsx/esm lint-scripts/dev-guide-generator.ts",
     "ai:context": "node --import tsx/esm lint-scripts/ai-context-generator.ts",
-    "analyze": "npm run build:client && open bundle-analysis.html"
+    "analyze": "npm run build:client && open bundle-analysis.html",
+    "build:ssg": "node --import tsx/esm scripts/build-ssg.ts"
   },
   "dependencies": {
     "@hono/node-server": "^1.14.4",
