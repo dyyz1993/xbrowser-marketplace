@@ -4,6 +4,8 @@ function getBaseUrl(): string {
   return process.env.PLAYWRIGHT_TEST_BASE_URL || 'http://localhost:3010'
 }
 
+test.describe.configure({ mode: 'serial' })
+
 test.describe('Plugin Marketplace', () => {
   async function seedPlugins(page: import('@playwright/test').Page) {
     const plugins = [

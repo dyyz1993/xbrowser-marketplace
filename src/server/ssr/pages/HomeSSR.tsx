@@ -178,6 +178,7 @@ export const HomeSSR: React.FC<HomeSSRProps> = ({ plugins, categories, totalPlug
                 <a
                   key={plugin.slug}
                   href={`/plugin/${plugin.slug}`}
+                  data-testid="plugin-card"
                   className="block bg-white rounded-xl border border-gray-200 hover:border-blue-300 hover:shadow-md p-5 group"
                 >
                   <div className="flex items-start justify-between gap-3 mb-3">

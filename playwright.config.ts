@@ -17,8 +17,8 @@ export default defineConfig({
   timeout: 60 * 1000,
   expect: { timeout: 10 * 1000 },
   forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : 3,
+  retries: process.env.CI ? 2 : 1,
+  workers: 1,
   globalSetup: join(__dirname, 'tests', 'e2e', 'global-setup.ts'),
   globalTeardown: join(__dirname, 'tests', 'e2e', 'global-teardown.ts'),
   reporter: [

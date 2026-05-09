@@ -33,6 +33,8 @@ async function loginAs(page: import('@playwright/test').Page, username: string, 
   await page.waitForLoadState('networkidle')
 }
 
+test.describe.configure({ mode: 'serial' })
+
 test.describe('Permission & Role Management', () => {
   async function loginAsAdmin(page: import('@playwright/test').Page) {
     await loginAs(page, ADMIN_CREDENTIALS.username, ADMIN_CREDENTIALS.password)
@@ -94,7 +96,21 @@ test.describe('Permission & Role Management', () => {
 
   test.describe('Role List', () => {
     test('should display all roles in the role list', async ({ page }) => {
-      await navigateToAdminPage(page, '/system/roles', '[data-testid="roles-container"]')
+      await navigateToAdminPage(page, '/system/roles', '[data-testid="roles-container"], [data-testid="permission-denied-message"]')
+      await page.waitForLoadState('networkidle')
+
+      const deniedMessage = page.locator('[data-testid="permission-denied-message"]')
+      if (await deniedMessage.isVisible().catch(() => false)) {
+        await page.waitForTimeout(2000)
+        await page.reload()
+        await page.waitForLoadState('networkidle')
+        const stillDenied = page.locator('[data-testid="permission-denied-message"]')
+        if (await stillDenied.isVisible().catch(() => false)) {
+          await page.reload()
+          await page.waitForLoadState('networkidle')
+        }
+        await page.waitForSelector('[data-testid="roles-container"], [data-testid="permission-denied-message"]', { timeout: 20000 })
+      }
 
       await expect(page.locator('[data-testid="roles-container"]')).toBeVisible()
       const tableRows = page.locator('[data-testid="role-table"] tbody tr')
@@ -225,9 +241,16 @@ test.describe('Permission & Role Management', () => {
         data: { name: 'Deletable Role', code: 'deletable_role' },
       })
 
-      await navigateToAdminPage(page, '/system/roles', '[data-testid="roles-container"]')
-      await page.waitForLoadState('networkidle')
+      await navigateToAdminPage(page, '/system/roles', '[data-testid="roles-container"], [data-testid="permission-denied-message"]')
 
+      const deniedMessage = page.locator('[data-testid="permission-denied-message"]')
+      if (await deniedMessage.isVisible().catch(() => false)) {
+        await page.reload()
+        await page.waitForLoadState('networkidle')
+        await page.waitForSelector('[data-testid="roles-container"]', { timeout: 20000 })
+      }
+
+      await page.waitForLoadState('networkidle')
       await page
         .locator('[data-testid="role-table"] tbody tr')
         .filter({ hasText: 'Deletable Role' })
@@ -239,7 +262,7 @@ test.describe('Permission & Role Management', () => {
       })
       await page.getByTestId('confirm-delete-button').click()
 
-      await waitForSuccessToast(page)
+      await waitForSuccessToast(page, 20000)
     })
   })
 

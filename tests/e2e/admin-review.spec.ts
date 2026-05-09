@@ -45,6 +45,8 @@ async function navigateToAdminPage(
   await page.waitForSelector(waitForSelector, { timeout: 20000 })
 }
 
+test.describe.configure({ mode: 'serial' })
+
 test.describe('Admin Review', () => {
   async function loginAsAdmin(page: import('@playwright/test').Page) {
     await page.goto(`${getBaseUrl()}/admin/login`)
@@ -102,6 +104,7 @@ test.describe('Admin Review', () => {
       await seedPendingPlugins(page)
       await navigateToAdminPage(page, '/plugins/review', '[data-testid="review-list-container"]')
 
+      await page.waitForSelector('[data-testid="review-item"]', { timeout: 15000 })
       await expect(page.locator('[data-testid="review-list-container"]')).toBeVisible()
       const rows = page.locator('[data-testid="review-item"]')
       await expect(rows).toHaveCount(3)
@@ -137,6 +140,8 @@ test.describe('Admin Review', () => {
       await seedPendingPlugins(page)
       await navigateToAdminPage(page, '/plugins/review', '[data-testid="review-list-container"]')
 
+      await page.waitForSelector('[data-testid="review-item"]', { timeout: 15000 })
+
       await page
         .locator('[data-testid="review-item"]')
         .first()
@@ -156,6 +161,8 @@ test.describe('Admin Review', () => {
     test('should reject a pending plugin with reason', async ({ page }) => {
       await seedPendingPlugins(page)
       await navigateToAdminPage(page, '/plugins/review', '[data-testid="review-list-container"]')
+
+      await page.waitForSelector('[data-testid="review-item"]', { timeout: 15000 })
 
       await page
         .locator('[data-testid="review-item"]')
@@ -185,6 +192,8 @@ test.describe('Admin Review', () => {
       await seedPendingPlugins(page)
       await navigateToAdminPage(page, '/plugins/review', '[data-testid="review-list-container"]')
 
+      await page.waitForSelector('[data-testid="review-item"]', { timeout: 15000 })
+
       await page
         .locator('[data-testid="review-item"]')
         .nth(0)
@@ -206,6 +215,8 @@ test.describe('Admin Review', () => {
     test('should batch reject selected plugins', async ({ page }) => {
       await seedPendingPlugins(page)
       await navigateToAdminPage(page, '/plugins/review', '[data-testid="review-list-container"]')
+
+      await page.waitForSelector('[data-testid="review-item"]', { timeout: 15000 })
 
       await page
         .locator('[data-testid="review-item"]')
@@ -264,6 +275,8 @@ test.describe('Admin Review', () => {
     test('should delete a plugin with confirmation', async ({ page }) => {
       await seedPendingPlugins(page)
       await navigateToAdminPage(page, '/plugins/review', '[data-testid="review-list-container"]')
+
+      await page.waitForSelector('[data-testid="review-item"]', { timeout: 15000 })
 
       const initialCount = await page.locator('[data-testid="review-item"]').count()
 

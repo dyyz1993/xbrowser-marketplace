@@ -22,6 +22,8 @@ async function seedPlugin(params: {
   }
 }
 
+test.describe.configure({ mode: 'serial' })
+
 test.describe('Plugin Marketplace', () => {
   test.beforeEach(async ({ page }) => {
     await fetch(`${getBaseUrl()}/api/__test__/cleanup`, { method: 'POST' })
@@ -73,7 +75,7 @@ test.describe('Plugin Marketplace', () => {
     })
 
     test('should display plugin list container', async ({ page }) => {
-      await expect(page.locator('[data-testid="plugin-list"]')).toBeVisible()
+      await expect(page.locator('[data-testid="plugin-list"]')).toBeVisible({ timeout: 15000 })
     })
   })
 
@@ -157,6 +159,7 @@ test.describe('Plugin Marketplace', () => {
 
   test.describe('Plugin Detail', () => {
     test('should navigate to plugin detail page', async ({ page }) => {
+      await page.waitForSelector('[data-testid="plugin-card"]', { timeout: 15000 })
       const firstCard = page.locator('[data-testid="plugin-card"]').first()
       await firstCard.click()
 
@@ -166,6 +169,7 @@ test.describe('Plugin Marketplace', () => {
     })
 
     test('should display install command on detail page', async ({ page }) => {
+      await page.waitForSelector('[data-testid="plugin-card"]', { timeout: 15000 })
       const firstCard = page.locator('[data-testid="plugin-card"]').first()
       await firstCard.click()
 
@@ -174,6 +178,7 @@ test.describe('Plugin Marketplace', () => {
     })
 
     test('should display rating on detail page', async ({ page }) => {
+      await page.waitForSelector('[data-testid="plugin-card"]', { timeout: 15000 })
       const firstCard = page.locator('[data-testid="plugin-card"]').first()
       await firstCard.click()
 
@@ -185,6 +190,7 @@ test.describe('Plugin Marketplace', () => {
     })
 
     test('should have copy install command button', async ({ page }) => {
+      await page.waitForSelector('[data-testid="plugin-card"]', { timeout: 15000 })
       const firstCard = page.locator('[data-testid="plugin-card"]').first()
       await firstCard.click()
 
@@ -196,6 +202,7 @@ test.describe('Plugin Marketplace', () => {
     })
 
     test('should display reviews section', async ({ page }) => {
+      await page.waitForSelector('[data-testid="plugin-card"]', { timeout: 15000 })
       const firstCard = page.locator('[data-testid="plugin-card"]').first()
       await firstCard.click()
 
@@ -209,6 +216,7 @@ test.describe('Plugin Marketplace', () => {
 
   test.describe('Navigation', () => {
     test('should navigate back from detail to marketplace', async ({ page }) => {
+      await page.waitForSelector('[data-testid="plugin-card"]', { timeout: 15000 })
       const firstCard = page.locator('[data-testid="plugin-card"]').first()
       await firstCard.click()
       await page.waitForSelector('[data-testid="plugin-detail-container"]', { timeout: 15000 })

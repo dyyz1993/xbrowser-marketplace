@@ -21,6 +21,8 @@ async function loginAsAdmin(page: import('@playwright/test').Page) {
   await page.waitForTimeout(1000)
 }
 
+test.describe.configure({ mode: 'serial' })
+
 test.describe('Admin Plugin Review Flow', () => {
   test.beforeEach(async ({ page }) => {
     await fetch(`${getBaseUrl()}/api/__test__/cleanup`, { method: 'POST' })
@@ -67,6 +69,7 @@ test.describe('Admin Plugin Review Flow', () => {
   })
 
   test('should display pending plugins', async ({ page }) => {
+    await page.waitForSelector('[data-testid="review-item"]', { timeout: 15000 })
     const items = page.locator('[data-testid="review-item"]')
     await expect(items).toHaveCount(2, { timeout: 10000 })
   })
