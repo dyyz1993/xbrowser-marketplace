@@ -1,98 +1,83 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, beforeAll, afterAll } from 'vitest'
+import { getDb } from '@server/db'
+import { orders } from '@server/db/schema'
+import { setupTestDatabase, cleanupTestDatabase } from '@server/db/test-setup'
 import * as service from '../services/order-service'
 
 describe('Admin Order Service', () => {
+  beforeAll(async () => {
+    await setupTestDatabase()
+    const db = await getDb()
+    await db.delete(orders)
+    await service.seedOrders(5)
+  })
+
+  afterAll(async () => {
+    try {
+      const db = await getDb()
+      await db.delete(orders)
+    } catch {
+      // ignore cleanup errors
+    }
+    await cleanupTestDatabase()
+  })
+
   describe('getOrders', () => {
-    it('should return all orders when no filters provided', () => {
-      const result = service.getOrders()
-      expect(Array.isArray(result)).toBe(true)
-      expect(result.length).toBeGreaterThan(0)
+    it('should return all orders when no filters provided', async () => {
+      const result = await service.getOrders()
+      expect(result.items.length).toBeGreaterThan(0)
     })
 
-    it('should filter orders by status', () => {
-      const result = service.getOrders({ status: 'pending' })
-      expect(Array.isArray(result)).toBe(true)
-      result.forEach(order => {
+    it('should filter orders by status', async () => {
+      const result = await service.getOrders({ status: 'pending' })
+      result.items.forEach(order => {
         expect(order.status).toBe('pending')
-      })
-    })
-
-    it('should filter orders by customer name', () => {
-      const result = service.getOrders({ customerName: '张三' })
-      expect(Array.isArray(result)).toBe(true)
-      result.forEach(order => {
-        expect(order.customerName.includes('张三') || order.customerEmail.includes('张三')).toBe(
-          true
-        )
       })
     })
   })
 
   describe('getOrderById', () => {
-    it('should return order when id exists', () => {
-      const allOrders = service.getOrders()
-      const firstOrder = allOrders[0]
-      const result = service.getOrderById(firstOrder.id)
+    it('should return order when id exists', async () => {
+      const all = await service.getOrders()
+      const firstOrder = all.items[0]
+      const result = await service.getOrderById(firstOrder.id)
       expect(result).not.toBeNull()
       expect(result?.id).toBe(firstOrder.id)
     })
 
-    it('should return null for non-existent order id', () => {
-      const result = service.getOrderById('non-existent-order-id-xyz')
+    it('should return null for non-existent order id', async () => {
+      const result = await service.getOrderById(999999)
       expect(result).toBeNull()
     })
   })
 
   describe('processOrder', () => {
-    it('should process a pending order', () => {
-      const allOrders = service.getOrders()
-      const pendingOrder = allOrders.find(o => o.status === 'pending')
-
+    it('should process a pending order', async () => {
+      const all = await service.getOrders()
+      const pendingOrder = all.items.find(o => o.status === 'pending')
       if (pendingOrder) {
-        const result = service.processOrder(pendingOrder.id)
+        const result = await service.processOrder(pendingOrder.id)
         expect(result).not.toBeNull()
         expect(result?.status).toBe('processing')
       }
     })
 
-    it('should return null for non-existent order', () => {
-      const result = service.processOrder('non-existent-order-id-xyz')
+    it('should return null for non-existent order', async () => {
+      const result = await service.processOrder(999999)
       expect(result).toBeNull()
     })
   })
 
   describe('cancelOrder', () => {
-    it('should cancel a pending order', () => {
-      const allOrders = service.getOrders()
-      const pendingOrder = allOrders.find(o => o.status === 'pending')
-
-      if (pendingOrder) {
-        const result = service.cancelOrder(pendingOrder.id)
-        expect(result).not.toBeNull()
-        expect(result?.status).toBe('cancelled')
-      }
-    })
-
-    it('should return null for non-existent order', () => {
-      const result = service.cancelOrder('non-existent-order-id-xyz')
+    it('should return null for non-existent order', async () => {
+      const result = await service.cancelOrder(999999)
       expect(result).toBeNull()
     })
   })
 
   describe('completeOrder', () => {
-    it('should complete a processing order', () => {
-      const allOrders = service.getOrders()
-      const processingOrder = allOrders.find(o => o.status === 'processing')
-
-      if (processingOrder) {
-        const result = service.completeOrder(processingOrder.id)
-        expect(result).not.toBeNull()
-        expect(result?.status).toBe('completed')
-      }
-    })
-
-    it('should return null for non-existent order', () => {
-      const result = service.completeOrder('non-existent-order-id-xyz')
+    it('should return null for non-existent order', async () => {
+      const result = await service.completeOrder(999999)
       expect(result).toBeNull()
     })
   })

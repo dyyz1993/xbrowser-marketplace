@@ -206,6 +206,85 @@ export async function setupTestDatabase(): Promise<void> {
       created_at INTEGER NOT NULL DEFAULT (unixepoch() * 1000),
       updated_at INTEGER NOT NULL DEFAULT (unixepoch() * 1000)
     );
+
+    CREATE TABLE IF NOT EXISTS orders (
+      id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+      order_no TEXT NOT NULL UNIQUE,
+      user_id TEXT NOT NULL,
+      customer_name TEXT NOT NULL,
+      customer_email TEXT NOT NULL,
+      product_name TEXT NOT NULL,
+      amount INTEGER NOT NULL,
+      status TEXT DEFAULT 'pending' NOT NULL,
+      payment_method TEXT,
+      transaction_id TEXT,
+      created_at INTEGER NOT NULL DEFAULT (unixepoch() * 1000),
+      updated_at INTEGER NOT NULL DEFAULT (unixepoch() * 1000)
+    );
+
+    CREATE TABLE IF NOT EXISTS tickets (
+      id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+      ticket_no TEXT NOT NULL UNIQUE,
+      user_id TEXT NOT NULL,
+      customer_name TEXT NOT NULL,
+      customer_email TEXT NOT NULL,
+      subject TEXT NOT NULL,
+      description TEXT NOT NULL,
+      status TEXT DEFAULT 'open' NOT NULL,
+      priority TEXT DEFAULT 'medium' NOT NULL,
+      category TEXT DEFAULT 'general' NOT NULL,
+      assigned_to TEXT,
+      created_at INTEGER NOT NULL DEFAULT (unixepoch() * 1000),
+      updated_at INTEGER NOT NULL DEFAULT (unixepoch() * 1000)
+    );
+
+    CREATE TABLE IF NOT EXISTS ticket_messages (
+      id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+      ticket_id INTEGER NOT NULL,
+      user_id TEXT NOT NULL,
+      author TEXT NOT NULL,
+      content TEXT NOT NULL,
+      is_admin INTEGER DEFAULT 0 NOT NULL,
+      created_at INTEGER NOT NULL DEFAULT (unixepoch() * 1000),
+      FOREIGN KEY (ticket_id) REFERENCES tickets(id) ON UPDATE no action ON DELETE no action
+    );
+
+    CREATE TABLE IF NOT EXISTS disputes (
+      id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+      dispute_no TEXT NOT NULL UNIQUE,
+      order_id INTEGER NOT NULL,
+      user_id TEXT NOT NULL,
+      customer_name TEXT NOT NULL,
+      customer_email TEXT NOT NULL,
+      type TEXT DEFAULT 'other' NOT NULL,
+      status TEXT DEFAULT 'pending' NOT NULL,
+      description TEXT NOT NULL,
+      resolution TEXT,
+      amount INTEGER NOT NULL,
+      resolved_at INTEGER,
+      resolved_by TEXT,
+      created_at INTEGER NOT NULL DEFAULT (unixepoch() * 1000),
+      updated_at INTEGER NOT NULL DEFAULT (unixepoch() * 1000),
+      FOREIGN KEY (order_id) REFERENCES orders(id) ON UPDATE no action ON DELETE no action
+    );
+
+    CREATE TABLE IF NOT EXISTS contents (
+      id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+      title TEXT NOT NULL,
+      slug TEXT NOT NULL UNIQUE,
+      category TEXT DEFAULT 'article' NOT NULL,
+      content TEXT NOT NULL,
+      summary TEXT,
+      author_id TEXT NOT NULL,
+      author_name TEXT NOT NULL,
+      status TEXT DEFAULT 'draft' NOT NULL,
+      tags TEXT,
+      view_count INTEGER DEFAULT 0,
+      like_count INTEGER DEFAULT 0,
+      published_at INTEGER,
+      created_at INTEGER NOT NULL DEFAULT (unixepoch() * 1000),
+      updated_at INTEGER NOT NULL DEFAULT (unixepoch() * 1000)
+    );
   `
 
   const statements = migrationSQL.split(';').filter(s => s.trim())

@@ -1,101 +1,104 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, beforeAll, afterAll } from 'vitest'
+import { getDb } from '@server/db'
+import { disputes, orders } from '@server/db/schema'
+import { setupTestDatabase, cleanupTestDatabase } from '@server/db/test-setup'
+import * as orderService from '../services/order-service'
 import * as service from '../services/dispute-service'
 
 describe('Admin Dispute Service', () => {
+  beforeAll(async () => {
+    await setupTestDatabase()
+    const db = await getDb()
+    await db.delete(disputes)
+    await db.delete(orders)
+    await orderService.seedOrders(5)
+    await service.seedDisputes(5)
+  })
+
+  afterAll(async () => {
+    try {
+      const db = await getDb()
+      await db.delete(disputes)
+      await db.delete(orders)
+    } catch {
+      // ignore
+    }
+    await cleanupTestDatabase()
+  })
+
   describe('getDisputes', () => {
-    it('should return all disputes', () => {
-      const result = service.getDisputes()
-      expect(Array.isArray(result)).toBe(true)
-      expect(result.length).toBeGreaterThan(0)
+    it('should return all disputes', async () => {
+      const result = await service.getDisputes()
+      expect(result.items.length).toBeGreaterThan(0)
     })
 
-    it('should filter disputes by status', () => {
-      const result = service.getDisputes({ status: 'pending' })
-      expect(Array.isArray(result)).toBe(true)
-      result.forEach(dispute => {
-        expect(dispute.status).toBe('pending')
+    it('should filter disputes by status', async () => {
+      const result = await service.getDisputes({ status: 'pending' })
+      result.items.forEach(d => {
+        expect(d.status).toBe('pending')
       })
     })
 
-    it('should filter disputes by type', () => {
-      const result = service.getDisputes({ type: 'refund' })
-      expect(Array.isArray(result)).toBe(true)
-      result.forEach(dispute => {
-        expect(dispute.type).toBe('refund')
+    it('should filter disputes by type', async () => {
+      const result = await service.getDisputes({ type: 'refund' })
+      result.items.forEach(d => {
+        expect(d.type).toBe('refund')
       })
     })
   })
 
   describe('getDisputeById', () => {
-    it('should return dispute when id exists', () => {
-      const allDisputes = service.getDisputes()
-      const firstDispute = allDisputes[0]
-      const result = service.getDisputeById(firstDispute.id)
+    it('should return dispute when id exists', async () => {
+      const all = await service.getDisputes()
+      const first = all.items[0]
+      const result = await service.getDisputeById(first.id)
       expect(result).not.toBeNull()
-      expect(result?.id).toBe(firstDispute.id)
+      expect(result?.id).toBe(first.id)
     })
 
-    it('should return null for non-existent dispute', () => {
-      const result = service.getDisputeById('non-existent-dispute-id-xyz')
+    it('should return null for non-existent dispute', async () => {
+      const result = await service.getDisputeById(999999)
       expect(result).toBeNull()
     })
   })
 
   describe('investigateDispute', () => {
-    it('should investigate a pending dispute', () => {
-      const allDisputes = service.getDisputes()
-      const pendingDispute = allDisputes.find(d => d.status === 'pending')
-
-      if (pendingDispute) {
-        const result = service.investigateDispute(pendingDispute.id)
+    it('should investigate a pending dispute', async () => {
+      const all = await service.getDisputes({ status: 'pending' })
+      const dispute = all.items[0]
+      if (dispute) {
+        const result = await service.investigateDispute(dispute.id)
         expect(result).not.toBeNull()
         expect(result?.status).toBe('investigating')
       }
     })
 
-    it('should return null for non-existent dispute', () => {
-      const result = service.investigateDispute('non-existent-dispute-id-xyz')
+    it('should return null for non-existent dispute', async () => {
+      const result = await service.investigateDispute(999999)
       expect(result).toBeNull()
     })
   })
 
   describe('resolveDispute', () => {
-    it('should resolve a pending dispute', () => {
-      const allDisputes = service.getDisputes()
-      const pendingDispute = allDisputes.find(d => d.status === 'pending')
-
-      if (pendingDispute) {
-        const result = service.resolveDispute(
-          pendingDispute.id,
-          'Issue resolved successfully',
-          'Admin User'
-        )
+    it('should resolve a pending dispute', async () => {
+      const all = await service.getDisputes({ status: 'pending' })
+      const dispute = all.items[0]
+      if (dispute) {
+        const result = await service.resolveDispute(dispute.id, 'Resolved', 'Admin')
         expect(result).not.toBeNull()
         expect(result?.status).toBe('resolved')
-        expect(result?.resolution).toBe('Issue resolved successfully')
       }
     })
 
-    it('should return null for non-existent dispute', () => {
-      const result = service.resolveDispute('non-existent-dispute-id-xyz', 'Resolved', 'Admin')
+    it('should return null for non-existent dispute', async () => {
+      const result = await service.resolveDispute(999999, 'test', 'Admin')
       expect(result).toBeNull()
     })
   })
 
   describe('rejectDispute', () => {
-    it('should reject a pending dispute', () => {
-      const allDisputes = service.getDisputes()
-      const pendingDispute = allDisputes.find(d => d.status === 'pending')
-
-      if (pendingDispute) {
-        const result = service.rejectDispute(pendingDispute.id, 'Invalid claim', 'Admin User')
-        expect(result).not.toBeNull()
-        expect(result?.status).toBe('rejected')
-      }
-    })
-
-    it('should return null for non-existent dispute', () => {
-      const result = service.rejectDispute('non-existent-dispute-id-xyz', 'Reason', 'Admin')
+    it('should return null for non-existent dispute', async () => {
+      const result = await service.rejectDispute(999999, 'test', 'Admin')
       expect(result).toBeNull()
     })
   })

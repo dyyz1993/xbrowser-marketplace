@@ -1,124 +1,143 @@
-import { generateDisputeNo, randomDate } from '@server/utils/generate'
+import { getDb } from '@server/db'
+import { disputes } from '@server/db/schema'
+import { eq, desc, and, sql } from 'drizzle-orm'
+import { generateDisputeNo } from '@server/utils/generate'
 
-export interface Dispute {
-  id: string
-  disputeNo: string
-  orderId: string
-  orderNo: string
-  customerName: string
-  customerEmail: string
-  type: 'refund' | 'product_quality' | 'service_quality' | 'delivery' | 'other'
-  status: 'pending' | 'investigating' | 'resolved' | 'rejected'
-  description: string
-  resolution?: string
-  amount: number
-  createdAt: string
-  updatedAt: string
-  resolvedAt?: string
-  resolvedBy?: string
+export async function getDisputes(filters?: {
+  status?: string
+  type?: string
+  page?: number
+  limit?: number
+}): Promise<{ items: (typeof disputes.$inferSelect)[]; total: number }> {
+  const db = await getDb()
+  const page = filters?.page ?? 1
+  const limit = filters?.limit ?? 20
+  const offset = (page - 1) * limit
+
+  const conditions = []
+  if (filters?.status) conditions.push(eq(disputes.status, filters.status))
+  if (filters?.type) conditions.push(eq(disputes.type, filters.type))
+
+  const where = conditions.length > 0 ? and(...conditions) : undefined
+
+  const [items, countResult] = await Promise.all([
+    db
+      .select()
+      .from(disputes)
+      .where(where)
+      .orderBy(desc(disputes.createdAt))
+      .limit(limit)
+      .offset(offset),
+    db
+      .select({ count: sql<number>`count(*)` })
+      .from(disputes)
+      .where(where),
+  ])
+
+  return { items, total: countResult[0]?.count ?? 0 }
 }
 
-const DISPUTE_TYPES = ['refund', 'product_quality', 'service_quality', 'delivery', 'other'] as const
-const DISPUTE_STATUSES = ['pending', 'investigating', 'resolved', 'rejected'] as const
-
-const DISPUTE_DESCRIPTIONS = [
-  '商品与描述不符，要求退款',
-  '商品质量问题，要求换货',
-  '服务态度差，要求赔偿',
-  '配送延迟，要求补偿',
-  '订单金额错误，要求更正',
-]
-
-const RESOLUTIONS = [
-  '已同意退款，3-5个工作日内到账',
-  '已安排换货，预计3天内送达',
-  '已发放优惠券作为补偿',
-  '已部分退款，问题已解决',
-  '经核实，驳回争议申请',
-]
-
-function randomElement<T>(array: readonly T[]): T {
-  return array[Math.floor(Math.random() * array.length)]
+export async function getDisputeById(id: number) {
+  const db = await getDb()
+  const result = await db.select().from(disputes).where(eq(disputes.id, id)).limit(1)
+  return result[0] ?? null
 }
 
-export const MOCK_DISPUTES: Dispute[] = Array.from({ length: 15 }, (_, index) => {
-  const type = randomElement(DISPUTE_TYPES)
-  const status = randomElement(DISPUTE_STATUSES)
-  const createdAt = randomDate(new Date('2024-01-01'), new Date())
-  const isResolved = status === 'resolved' || status === 'rejected'
+export async function investigateDispute(id: number) {
+  const db = await getDb()
+  const existing = await getDisputeById(id)
+  if (!existing || existing.status !== 'pending') return null
+  const now = new Date()
+  await db
+    .update(disputes)
+    .set({ status: 'investigating', updatedAt: now })
+    .where(eq(disputes.id, id))
+  return { ...existing, status: 'investigating' as const, updatedAt: now }
+}
 
+export async function resolveDispute(id: number, resolution: string, resolvedBy: string) {
+  const db = await getDb()
+  const existing = await getDisputeById(id)
+  if (!existing || (existing.status !== 'pending' && existing.status !== 'investigating'))
+    return null
+  const now = new Date()
+  await db
+    .update(disputes)
+    .set({ status: 'resolved', resolution, resolvedBy, resolvedAt: now, updatedAt: now })
+    .where(eq(disputes.id, id))
   return {
-    id: `dispute-${index + 1}`,
-    disputeNo: generateDisputeNo(),
-    orderId: `order-${Math.floor(Math.random() * 25) + 1}`,
-    orderNo: `ORD${Math.random().toString(36).substring(2, 8).toUpperCase()}`,
-    customerName: ['张三', '李四', '王五', '赵六', '钱七'][index % 5],
-    customerEmail: ['zhangsan', 'lisi', 'wangwu', 'zhaoliu', 'qianqi'][index % 5] + '@example.com',
-    type,
-    status,
-    description: randomElement(DISPUTE_DESCRIPTIONS),
-    resolution: isResolved ? randomElement(RESOLUTIONS) : undefined,
-    amount: Math.floor(Math.random() * 5000) + 100,
-    createdAt,
-    updatedAt: isResolved ? randomDate(new Date(createdAt), new Date()) : createdAt,
-    resolvedAt: isResolved ? randomDate(new Date(createdAt), new Date()) : undefined,
-    resolvedBy: isResolved ? '客服小王' : undefined,
+    ...existing,
+    status: 'resolved' as const,
+    resolution,
+    resolvedBy,
+    resolvedAt: now,
+    updatedAt: now,
   }
-})
-
-export function getDisputes(filters?: {
-  status?: Dispute['status']
-  type?: Dispute['type']
-}): Dispute[] {
-  let result = [...MOCK_DISPUTES]
-
-  if (filters?.status) {
-    result = result.filter(d => d.status === filters.status)
-  }
-
-  if (filters?.type) {
-    result = result.filter(d => d.type === filters.type)
-  }
-
-  return result.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
 }
 
-export function getDisputeById(id: string): Dispute | null {
-  return MOCK_DISPUTES.find(d => d.id === id) || null
+export async function rejectDispute(id: number, reason: string, rejectedBy: string) {
+  const db = await getDb()
+  const existing = await getDisputeById(id)
+  if (!existing || (existing.status !== 'pending' && existing.status !== 'investigating'))
+    return null
+  const now = new Date()
+  await db
+    .update(disputes)
+    .set({
+      status: 'rejected',
+      resolution: reason,
+      resolvedBy: rejectedBy,
+      resolvedAt: now,
+      updatedAt: now,
+    })
+    .where(eq(disputes.id, id))
+  return {
+    ...existing,
+    status: 'rejected' as const,
+    resolution: reason,
+    resolvedBy: rejectedBy,
+    resolvedAt: now,
+    updatedAt: now,
+  }
 }
 
-export function investigateDispute(id: string): Dispute | null {
-  const dispute = MOCK_DISPUTES.find(d => d.id === id)
-  if (dispute && dispute.status === 'pending') {
-    dispute.status = 'investigating'
-    dispute.updatedAt = new Date().toISOString()
-    return dispute
-  }
-  return null
-}
+export async function seedDisputes(count: number = 15) {
+  const db = await getDb()
+  const customerNames = ['张三', '李四', '王五', '赵六', '钱七']
+  const types = ['refund', 'product_quality', 'service_quality', 'delivery', 'other'] as const
+  const statuses = ['pending', 'investigating', 'resolved', 'rejected'] as const
+  const descriptions = [
+    '商品与描述不符，要求退款',
+    '商品质量问题，要求换货',
+    '服务态度差，要求赔偿',
+    '配送延迟，要求补偿',
+    '订单金额错误，要求更正',
+  ]
+  const resolutions = [
+    '已同意退款，3-5个工作日内到账',
+    '已安排换货，预计3天内送达',
+    '已发放优惠券作为补偿',
+    '已部分退款，问题已解决',
+  ]
 
-export function resolveDispute(id: string, resolution: string, resolvedBy: string): Dispute | null {
-  const dispute = MOCK_DISPUTES.find(d => d.id === id)
-  if (dispute && (dispute.status === 'pending' || dispute.status === 'investigating')) {
-    dispute.status = 'resolved'
-    dispute.resolution = resolution
-    dispute.resolvedAt = new Date().toISOString()
-    dispute.resolvedBy = resolvedBy
-    dispute.updatedAt = dispute.resolvedAt
-    return dispute
-  }
-  return null
-}
+  for (let i = 0; i < count; i++) {
+    const type = types[Math.floor(Math.random() * types.length)]
+    const status = statuses[Math.floor(Math.random() * statuses.length)]
+    const isResolved = status === 'resolved' || status === 'rejected'
 
-export function rejectDispute(id: string, reason: string, rejectedBy: string): Dispute | null {
-  const dispute = MOCK_DISPUTES.find(d => d.id === id)
-  if (dispute && (dispute.status === 'pending' || dispute.status === 'investigating')) {
-    dispute.status = 'rejected'
-    dispute.resolution = reason
-    dispute.resolvedAt = new Date().toISOString()
-    dispute.resolvedBy = rejectedBy
-    dispute.updatedAt = dispute.resolvedAt
-    return dispute
+    await db.insert(disputes).values({
+      disputeNo: generateDisputeNo(),
+      orderId: i + 1,
+      userId: `user-${(i % 5) + 1}`,
+      customerName: customerNames[i % 5],
+      customerEmail: `${['zhangsan', 'lisi', 'wangwu', 'zhaoliu', 'qianqi'][i % 5]}@example.com`,
+      type,
+      status,
+      description: descriptions[Math.floor(Math.random() * descriptions.length)],
+      resolution: isResolved ? resolutions[Math.floor(Math.random() * resolutions.length)] : null,
+      amount: Math.floor(Math.random() * 5000) + 100,
+      resolvedAt: isResolved ? new Date() : null,
+      resolvedBy: isResolved ? '客服小王' : null,
+    })
   }
-  return null
 }

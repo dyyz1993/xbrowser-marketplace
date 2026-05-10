@@ -42,6 +42,18 @@ const MediaTestPage = React.lazy(() =>
 const TestCaptchaPage = React.lazy(() =>
   import('./pages/TestCaptchaPage').then(m => ({ default: m.TestCaptchaPage }))
 )
+const OrdersPage = React.lazy(() =>
+  import('./pages/OrdersPage').then(m => ({ default: m.OrdersPage }))
+)
+const TicketsPage = React.lazy(() =>
+  import('./pages/TicketsPage').then(m => ({ default: m.TicketsPage }))
+)
+const DisputesPage = React.lazy(() =>
+  import('./pages/DisputesPage').then(m => ({ default: m.DisputesPage }))
+)
+const ContentPage = React.lazy(() =>
+  import('./pages/ContentPage').then(m => ({ default: m.ContentPage }))
+)
 
 const Loading = () => (
   <div className="flex items-center justify-center h-64">
@@ -106,6 +118,38 @@ export const App: React.FC = () => {
                       element={
                         <Suspense fallback={<Loading />}>
                           <UsersPage />
+                        </Suspense>
+                      }
+                    />
+                    <Route
+                      path="/orders"
+                      element={
+                        <Suspense fallback={<Loading />}>
+                          <OrdersPage />
+                        </Suspense>
+                      }
+                    />
+                    <Route
+                      path="/tickets"
+                      element={
+                        <Suspense fallback={<Loading />}>
+                          <TicketsPage />
+                        </Suspense>
+                      }
+                    />
+                    <Route
+                      path="/disputes"
+                      element={
+                        <Suspense fallback={<Loading />}>
+                          <DisputesPage />
+                        </Suspense>
+                      }
+                    />
+                    <Route
+                      path="/content"
+                      element={
+                        <Suspense fallback={<Loading />}>
+                          <ContentPage />
                         </Suspense>
                       }
                     />

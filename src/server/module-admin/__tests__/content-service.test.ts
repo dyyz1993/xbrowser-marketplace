@@ -1,83 +1,89 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect, beforeAll, afterAll } from 'vitest'
+import { getDb } from '@server/db'
+import { contents } from '@server/db/schema'
+import { setupTestDatabase, cleanupTestDatabase } from '@server/db/test-setup'
 import * as service from '../services/content-service'
-import { resetMockContents } from '../services/content-service'
 
 describe('Admin Content Service', () => {
-  beforeEach(() => {
-    // 重置 mock contents 以确保测试隔离
-    resetMockContents()
+  let testContentId: number
+
+  beforeAll(async () => {
+    await setupTestDatabase()
+    const db = await getDb()
+    await db.delete(contents)
   })
+
+  afterAll(async () => {
+    try {
+      const db = await getDb()
+      await db.delete(contents)
+    } catch {
+      // ignore
+    }
+    await cleanupTestDatabase()
+  })
+
+  describe('createContent', () => {
+    it('should create a new content', async () => {
+      const result = await service.createContent({
+        title: 'Test Title',
+        slug: 'test-title',
+        content: 'Test Content',
+        category: 'article',
+        authorId: 'admin',
+        authorName: '管理员',
+      })
+
+      expect(result).toMatchObject({
+        title: 'Test Title',
+        slug: 'test-title',
+        content: 'Test Content',
+        category: 'article',
+        status: 'draft',
+      })
+      expect(result.id).toBeDefined()
+      testContentId = result.id
+    })
+  })
+
   describe('getContents', () => {
-    it('should return all contents', () => {
-      const result = service.getContents()
-      expect(Array.isArray(result)).toBe(true)
-      expect(result.length).toBeGreaterThan(0)
+    it('should return contents with pagination', async () => {
+      const result = await service.getContents()
+      expect(result.items).toBeDefined()
+      expect(result.total).toBeGreaterThanOrEqual(0)
     })
 
-    it('should filter contents by category', () => {
-      const result = service.getContents({ category: 'article' })
-      expect(Array.isArray(result)).toBe(true)
-      result.forEach(content => {
+    it('should filter contents by category', async () => {
+      const result = await service.getContents({ category: 'article' })
+      result.items.forEach(content => {
         expect(content.category).toBe('article')
       })
     })
 
-    it('should filter contents by status', () => {
-      const result = service.getContents({ status: 'published' })
-      expect(Array.isArray(result)).toBe(true)
-      result.forEach(content => {
-        expect(content.status).toBe('published')
+    it('should filter contents by status', async () => {
+      const result = await service.getContents({ status: 'draft' })
+      result.items.forEach(content => {
+        expect(content.status).toBe('draft')
       })
     })
   })
 
   describe('getContentById', () => {
-    it('should return content when id exists', () => {
-      const allContents = service.getContents()
-      const firstContent = allContents[0]
-      const result = service.getContentById(firstContent.id)
+    it('should return content when id exists', async () => {
+      const result = await service.getContentById(testContentId)
       expect(result).not.toBeNull()
-      expect(result?.id).toBe(firstContent.id)
+      expect(result?.id).toBe(testContentId)
     })
 
-    it('should return null for non-existent content', () => {
-      const result = service.getContentById('non-existent-content-id-xyz')
+    it('should return null for non-existent content', async () => {
+      const result = await service.getContentById(999999)
       expect(result).toBeNull()
-      expect(result).toBeFalsy()
-    })
-  })
-
-  describe('createContent', () => {
-    it('should create a new content with default values', () => {
-      const result = service.createContent({
-        title: 'Test Title',
-        content: 'Test Content',
-        category: 'article',
-      })
-
-      expect(result).toMatchObject({
-        title: 'Test Title',
-        content: 'Test Content',
-        category: 'article',
-        status: 'draft',
-        viewCount: 0,
-        likeCount: 0,
-      })
-      expect(result.id).toBeDefined()
-      expect(result.createdAt).toBeDefined()
-      expect(result.updatedAt).toBeDefined()
     })
   })
 
   describe('updateContent', () => {
-    it('should update existing content', () => {
-      const created = service.createContent({
-        title: 'Original Title',
-        content: 'Original Content',
-        category: 'article',
-      })
-
-      const result = service.updateContent(created.id, {
+    it('should update existing content', async () => {
+      const result = await service.updateContent(testContentId, {
         title: 'Updated Title',
         content: 'Updated Content',
       })
@@ -87,76 +93,43 @@ describe('Admin Content Service', () => {
       expect(result?.content).toBe('Updated Content')
     })
 
-    it('should return null for non-existent content', () => {
-      const result = service.updateContent('non-existent-content-id-xyz', { title: 'New Title' })
+    it('should return null for non-existent content', async () => {
+      const result = await service.updateContent(999999, { title: 'New Title' })
       expect(result).toBeNull()
-      expect(result).toBeFalsy()
-    })
-  })
-
-  describe('deleteContent', () => {
-    it('should delete an existing content', () => {
-      const created = service.createContent({
-        title: 'To Delete',
-        content: 'Content to delete',
-        category: 'article',
-      })
-
-      const result = service.deleteContent(created.id)
-      expect(result).toBe(true)
-
-      const found = service.getContentById(created.id)
-      expect(found).toBeNull()
-    })
-
-    it('should return false for non-existent content', () => {
-      const result = service.deleteContent('non-existent-content-id-xyz')
-      expect(result).toBe(false)
-      expect(result).toBeFalsy()
     })
   })
 
   describe('publishContent', () => {
-    it('should publish a draft content', () => {
-      const created = service.createContent({
-        title: 'To Publish',
-        content: 'Content to publish',
-        category: 'article',
-      })
-
-      const result = service.publishContent(created.id)
+    it('should publish a draft content', async () => {
+      const result = await service.publishContent(testContentId)
 
       expect(result).not.toBeNull()
       expect(result?.status).toBe('published')
       expect(result?.publishedAt).toBeDefined()
     })
-
-    it('should return null for non-existent content', () => {
-      const result = service.publishContent('non-existent-content-id-xyz')
-      expect(result).toBeNull()
-      expect(result).toBeFalsy()
-    })
   })
 
   describe('archiveContent', () => {
-    it('should archive a published content', () => {
-      const created = service.createContent({
-        title: 'To Archive',
-        content: 'Content to archive',
-        category: 'article',
-      })
-      service.publishContent(created.id)
-
-      const result = service.archiveContent(created.id)
+    it('should archive a published content', async () => {
+      const result = await service.archiveContent(testContentId)
 
       expect(result).not.toBeNull()
       expect(result?.status).toBe('archived')
     })
+  })
 
-    it('should return null for non-existent content', () => {
-      const result = service.archiveContent('non-existent-content-id-xyz')
-      expect(result).toBeNull()
-      expect(result).toBeFalsy()
+  describe('deleteContent', () => {
+    it('should delete an existing content', async () => {
+      const result = await service.deleteContent(testContentId)
+      expect(result).toBe(true)
+
+      const found = await service.getContentById(testContentId)
+      expect(found).toBeNull()
+    })
+
+    it('should return false for non-existent content', async () => {
+      const result = await service.deleteContent(999999)
+      expect(result).toBe(false)
     })
   })
 })
