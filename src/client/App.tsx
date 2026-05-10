@@ -6,6 +6,8 @@ import { HomePage } from './pages/Home'
 import { PluginDetailPage } from './pages/PluginDetail'
 import { CategoriesPage } from './pages/Categories'
 import { CLIPage } from './pages/CLI'
+import { LoginPage } from './pages/LoginPage'
+import { RegisterPage } from './pages/RegisterPage'
 
 const SearchPage = lazy(() => import('./pages/Search').then(m => ({ default: m.SearchPage })))
 const NotificationPage = lazy(() =>
@@ -37,6 +39,8 @@ export const App: React.FC = () => {
           <Route path="/plugin/:slug" element={<PluginDetailPage />} />
           <Route path="/categories" element={<CategoriesPage />} />
           <Route path="/cli" element={<CLIPage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
           <Route
             path="/search"
             element={

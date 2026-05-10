@@ -1,21 +1,14 @@
 import React, { useEffect, useState, useCallback } from 'react'
 import { Link } from 'react-router-dom'
-import { Package, Clock, CheckCircle, XCircle, Trash2 } from 'lucide-react'
+import { Package, Clock, CheckCircle, XCircle, Trash2, Edit } from 'lucide-react'
 import { useAuthStore } from '@client/stores/authStore'
-import { pluginApi } from '@client/services/plugin-api'
+import { apiClient } from '@client/services/apiClient'
+import type { PluginListItem } from '@shared/modules/plugins'
 
 type PluginStatus = 'pending' | 'approved' | 'rejected' | 'removed'
 
-interface DeveloperPlugin {
-  id: string
-  name: string
-  slug: string
-  description: string
-  version: string
+interface DeveloperPlugin extends PluginListItem {
   status: PluginStatus
-  downloadCount: number
-  createdAt: number
-  updatedAt: number
 }
 
 const STATUS_CONFIG: Record<
@@ -30,6 +23,7 @@ const STATUS_CONFIG: Record<
 
 export const DeveloperDashboardPage: React.FC = () => {
   const isAuthenticated = useAuthStore(s => s.isAuthenticated)
+  const token = useAuthStore(s => s.token)
   const [plugins, setPlugins] = useState<DeveloperPlugin[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -38,9 +32,10 @@ export const DeveloperDashboardPage: React.FC = () => {
     setLoading(true)
     setError(null)
     try {
-      const result = await pluginApi.list({ limit: 100 })
-      if (result.success && result.data) {
-        setPlugins(result.data.items as unknown as DeveloperPlugin[])
+      const res = await apiClient.api.plugins.mine.$get()
+      const result = await res.json()
+      if (result.success) {
+        setPlugins((result.data as unknown as { items: DeveloperPlugin[] }).items)
       } else {
         setError('Failed to load plugins')
       }
@@ -51,13 +46,28 @@ export const DeveloperDashboardPage: React.FC = () => {
     }
   }, [])
 
+  const handleDelete = useCallback(async (slug: string) => {
+    if (!confirm('Are you sure you want to remove this plugin?')) return
+    try {
+      const res = await apiClient.api.plugins[':slug'].$delete({
+        param: { slug },
+      })
+      const result = await res.json()
+      if (result.success) {
+        setPlugins(prev => prev.filter(p => p.slug !== slug))
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Delete failed')
+    }
+  }, [])
+
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthenticated && token) {
       fetchMyPlugins()
     } else {
       setLoading(false)
     }
-  }, [isAuthenticated, fetchMyPlugins])
+  }, [isAuthenticated, token, fetchMyPlugins])
 
   if (!isAuthenticated) {
     return (
@@ -67,7 +77,14 @@ export const DeveloperDashboardPage: React.FC = () => {
       >
         <Package className="w-16 h-16 text-gray-300 mx-auto mb-4" />
         <h2 className="text-2xl font-bold text-gray-900 mb-2">Login Required</h2>
-        <p className="text-gray-600">You need to be logged in to view your plugins.</p>
+        <p className="text-gray-600 mb-6">You need to be logged in to view your plugins.</p>
+        <Link
+          to="/login"
+          className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          data-testid="developer-dashboard-login-link"
+        >
+          Sign In
+        </Link>
       </div>
     )
   }
@@ -116,13 +133,14 @@ export const DeveloperDashboardPage: React.FC = () => {
       ) : (
         <div className="space-y-4" data-testid="developer-plugin-list">
           {plugins.map(plugin => {
-            const statusCfg = STATUS_CONFIG[plugin.status] || STATUS_CONFIG.pending
+            const statusCfg =
+              STATUS_CONFIG[(plugin.status as PluginStatus) || 'pending'] || STATUS_CONFIG.pending
             const StatusIcon = statusCfg.icon
             return (
               <div
                 key={plugin.id}
                 className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow"
-                data-testid="developer-plugin-item"
+                data-testid={`developer-plugin-item-${plugin.slug}`}
               >
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
@@ -147,6 +165,24 @@ export const DeveloperDashboardPage: React.FC = () => {
                       <span>{plugin.downloadCount} downloads</span>
                       <span>Updated {new Date(plugin.updatedAt).toLocaleDateString()}</span>
                     </div>
+                  </div>
+                  <div className="flex items-center gap-2 ml-4">
+                    <Link
+                      to={`/publish?edit=${plugin.slug}`}
+                      className="p-2 text-gray-400 hover:text-blue-600 transition-colors"
+                      title="Edit"
+                      data-testid={`developer-plugin-edit-${plugin.slug}`}
+                    >
+                      <Edit className="w-4 h-4" />
+                    </Link>
+                    <button
+                      onClick={() => handleDelete(plugin.slug)}
+                      className="p-2 text-gray-400 hover:text-red-600 transition-colors"
+                      title="Delete"
+                      data-testid={`developer-plugin-delete-${plugin.slug}`}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
                   </div>
                 </div>
               </div>

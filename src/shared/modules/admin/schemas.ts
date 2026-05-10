@@ -6,6 +6,14 @@ export const SystemStatsSchema = z.object({
   pendingTodos: z.number(),
   completedTodos: z.number(),
   lastUpdated: z.string(),
+  totalPlugins: z.number().nullable().default(0),
+  pendingPlugins: z.number().nullable().default(0),
+  approvedPlugins: z.number().nullable().default(0),
+  rejectedPlugins: z.number().nullable().default(0),
+  totalDownloads: z.number().nullable().default(0),
+  totalViews: z.number().nullable().default(0),
+  totalReviews: z.number().nullable().default(0),
+  activeDevelopers: z.number().nullable().default(0),
 })
 
 export const HealthCheckSchema = z.object({

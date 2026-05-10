@@ -11,6 +11,7 @@ export type { PluginListItem, PluginDetail } from './plugin-utils'
 
 export {
   listPlugins,
+  listMyPlugins,
   searchPlugins,
   getPluginBySlug,
   getPluginVersions,

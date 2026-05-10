@@ -354,6 +354,24 @@ export async function getPluginsByCategory(
   return { items, total: countRows.length }
 }
 
+export async function listMyPlugins(authorId: string): Promise<{ items: PluginListItem[]; total: number }> {
+  const db = await getDb()
+
+  const rows: PluginRow[] = await db
+    .select()
+    .from(plugins)
+    .where(eq(plugins.authorId, authorId))
+    .orderBy(desc(plugins.updatedAt))
+
+  const statsMap = await getReviewStatsBatch(rows.map(r => r.id))
+  const items = rows.map(row => {
+    const stats = statsMap.get(row.id) ?? { avgRating: 0, reviewCount: 0 }
+    return toPluginListItem(row, stats)
+  })
+
+  return { items, total: rows.length }
+}
+
 export async function getStats() {
   const db = await getDb()
 

@@ -39,17 +39,52 @@ import { LRUCache } from '../../utils/lru-cache'
 export async function getSystemStats(): Promise<SystemStats> {
   const db = await getDb()
 
-  const [allTodos, pendingTodos, completedTodos] = await Promise.all([
+  const { plugins: pluginTable } = await import('../../db/schema')
+
+  const [
+    allTodos,
+    pendingTodos,
+    completedTodos,
+    allPlugins,
+    pendingPlugins,
+    approvedPlugins,
+    rejectedPlugins,
+    reviewRows,
+  ] = await Promise.all([
     db.select().from(todos),
     db.select().from(todos).where(eq(todos.status, 'pending')),
     db.select().from(todos).where(eq(todos.status, 'completed')),
+    db.select().from(pluginTable),
+    db.select().from(pluginTable).where(eq(pluginTable.status, 'pending')),
+    db.select().from(pluginTable).where(eq(pluginTable.status, 'approved')),
+    db.select().from(pluginTable).where(eq(pluginTable.status, 'rejected')),
+    (async () => {
+      try {
+        const { pluginReviews } = await import('../../db/schema')
+        return db.select().from(pluginReviews)
+      } catch {
+        return []
+      }
+    })(),
   ])
+
+  const totalDownloads = allPlugins.reduce((sum, p) => sum + (p.downloadCount ?? 0), 0)
+  const totalViews = allPlugins.reduce((sum, p) => sum + (p.viewCount ?? 0), 0)
+  const activeDevelopers = new Set(allPlugins.map(p => p.authorId)).size
 
   return {
     totalTodos: allTodos.length,
     pendingTodos: pendingTodos.length,
     completedTodos: completedTodos.length,
     lastUpdated: new Date().toISOString(),
+    totalPlugins: allPlugins.length,
+    pendingPlugins: pendingPlugins.length,
+    approvedPlugins: approvedPlugins.length,
+    rejectedPlugins: rejectedPlugins.length,
+    totalDownloads,
+    totalViews,
+    totalReviews: reviewRows.length,
+    activeDevelopers,
   }
 }
 

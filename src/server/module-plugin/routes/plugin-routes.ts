@@ -26,6 +26,7 @@ import {
   CategorySlugSchema,
 } from '../plugin.types'
 import * as pluginService from '../services/plugin-service'
+import { resolveDownloadUrl, R2Storage } from '../services/storage-service'
 import { parsePositiveInt } from '../../utils/parse'
 
 const listPluginsRoute = createRoute({
@@ -35,6 +36,18 @@ const listPluginsRoute = createRoute({
   request: { query: PluginListQuerySchema },
   responses: {
     200: successResponse(PluginListResponseSchema, 'List plugins'),
+  },
+})
+
+const listMyPluginsRoute = createRoute({
+  method: 'get',
+  path: '/plugins/mine',
+  tags: ['plugins'],
+  security: [{ Bearer: [] }],
+  middleware: [authMiddleware()],
+  responses: {
+    200: successResponse(PluginListResponseSchema, 'List my plugins'),
+    401: errorResponse('Unauthorized'),
   },
 })
 
@@ -171,6 +184,27 @@ const trackInstallRoute = createRoute({
   },
 })
 
+const downloadPluginRoute = createRoute({
+  method: 'get',
+  path: '/plugins/{slug}/versions/{version}/download',
+  tags: ['plugins'],
+  request: {
+    params: PluginSlugSchema.extend({ version: z.string() }),
+  },
+  responses: {
+    200: {
+      content: {
+        'application/octet-stream': {
+          schema: z.any().openapi({ type: 'string', format: 'binary' }),
+        },
+      },
+      description: 'Download plugin tarball',
+    },
+    302: { description: 'Redirect to npm tarball URL' },
+    404: errorResponse('Plugin or version not found'),
+  },
+})
+
 const listCategoriesRoute = createRoute({
   method: 'get',
   path: '/categories',
@@ -218,6 +252,11 @@ export const pluginRoutes = new OpenAPIHono()
       featured: query.featured === 'true' ? true : query.featured === 'false' ? false : undefined,
     })
     return c.json(success({ ...result, page, limit }), 200)
+  })
+  .openapi(listMyPluginsRoute, async c => {
+    const user = c.get('authUser')
+    const result = await pluginService.listMyPlugins(user.id)
+    return c.json(success({ ...result, page: 1, limit: 100 }), 200)
   })
   .openapi(searchPluginsRoute, async c => {
     const query = c.req.valid('query')
@@ -294,6 +333,49 @@ export const pluginRoutes = new OpenAPIHono()
     const { slug } = c.req.valid('param')
     const result = await pluginService.trackInstall(slug)
     return c.json(success(result), 200)
+  })
+  .openapi(downloadPluginRoute, async c => {
+    const { slug, version } = c.req.valid('param')
+    const plugin = await pluginService.getPluginBySlug(slug)
+
+    const versionRow = await pluginService.getPluginVersions(slug)
+    const targetVersion = versionRow.find(v => v.version === version)
+    if (!targetVersion) {
+      return c.json({ success: false, error: 'Version not found' }, 404)
+    }
+
+    await pluginService.trackInstall(slug)
+
+    if (plugin.npmPackage) {
+      const { NpmMirrorStorage } = await import('../services/storage-service')
+      const tarballUrl = NpmMirrorStorage.buildTarballUrl(plugin.npmPackage, version)
+      return c.redirect(tarballUrl, 302)
+    }
+
+    if (targetVersion.packageUrl) {
+      const downloadUrl = resolveDownloadUrl(targetVersion.packageUrl)
+      if (downloadUrl) {
+        return c.redirect(downloadUrl, 302)
+      }
+
+      if (targetVersion.packageUrl.startsWith('r2://')) {
+        const r2Key = R2Storage.getPluginKey(slug, version)
+        const env = c.env as { STORAGE?: R2Bucket } | undefined
+        if (env?.STORAGE) {
+          const object = await env.STORAGE.get(r2Key)
+          if (object) {
+            return new Response(object.body, {
+              headers: {
+                'Content-Type': 'application/gzip',
+                'Content-Disposition': `attachment; filename="${slug}-${version}.tar.gz"`,
+              },
+            })
+          }
+        }
+      }
+    }
+
+    return c.json({ success: false, error: 'No download available for this plugin' }, 404)
   })
   .openapi(listCategoriesRoute, async c => {
     const categories = await pluginService.listCategories()
