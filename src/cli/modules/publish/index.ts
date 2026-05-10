@@ -223,7 +223,7 @@ export function registerPublishCommands(program: Command) {
             if (checkRes.ok) {
               const existing = await checkRes.json()
               if (existing.success && existing.data) {
-                const currentVersion = existing.data.version || existing.data.latestVersion
+                const currentVersion = existing.data.version
                 if (currentVersion === version) {
                   logger.error(`Version '${version}' already exists for plugin '${slug}'`)
                   logger.info(
@@ -285,7 +285,7 @@ export function registerPublishCommands(program: Command) {
             if (checkRes.ok) {
               const existing = await checkRes.json()
               if (existing.success && existing.data) {
-                const currentVersion = existing.data.version || existing.data.latestVersion
+                const currentVersion = existing.data.version
                 if (currentVersion === options.version) {
                   logger.error(
                     `Version '${options.version}' already exists for plugin '${options.slug}'`

@@ -109,7 +109,7 @@ export async function publishPlugin(
     }
 
     const existingVersions = await db
-      .select({ id: pluginVersions.id })
+      .select()
       .from(pluginVersions)
       .where(
         and(eq(pluginVersions.pluginId, existing[0].id), eq(pluginVersions.version, data.version))
@@ -269,7 +269,7 @@ export async function publishVersion(
   }
 
   const existingVersions = await db
-    .select({ id: pluginVersions.id })
+    .select()
     .from(pluginVersions)
     .where(
       and(eq(pluginVersions.pluginId, pluginRows[0].id), eq(pluginVersions.version, data.version))
