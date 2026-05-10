@@ -7,7 +7,8 @@ import React from 'react'
 import type { AppBindings, CreateAppOptions } from './types/bindings'
 import { AppError } from './utils/app-error'
 import { autoRegisterRealtime } from './core/realtime-scanner'
-import { corsMiddleware, loggerMiddleware, errorHandlerMiddleware } from './middleware'
+import { corsMiddleware, loggerMiddleware, errorHandlerMiddleware, authMiddleware } from './middleware'
+import { Role } from '@shared/modules/permission'
 import { realtimeEnvMiddleware } from './middleware/realtime-env'
 import { captchaMiddleware } from './middleware/captcha'
 import { auditLogMiddleware } from './middleware/audit-log'
@@ -35,6 +36,27 @@ export function createApp<T extends AppBindings = AppBindings>(_options: CreateA
     .use('*', corsMiddleware())
     .use('*', realtimeEnvMiddleware())
     .use('/api/*', auditLogMiddleware())
+    .use('/api/admin/notifications/*', authMiddleware())
+    .use('/api/admin/me', authMiddleware())
+    .use('/api/admin/settings', authMiddleware({ requiredRole: Role.SUPER_ADMIN }))
+    .use('/api/admin/settings/:key', authMiddleware({ requiredRole: Role.SUPER_ADMIN }))
+    .use('/api/admin/stats', authMiddleware({ requiredRole: Role.SUPER_ADMIN }))
+    .use('/api/admin/health', authMiddleware({ requiredRole: Role.SUPER_ADMIN }))
+    .use('/api/admin/activity', authMiddleware({ requiredRole: Role.SUPER_ADMIN }))
+    .use('/api/admin/todos/all', authMiddleware({ requiredRole: Role.SUPER_ADMIN }))
+    .use('/api/admin/todos/export', authMiddleware())
+    .use('/api/admin/todos/export/token', authMiddleware())
+    .use('/api/admin/todos/export/stream', authMiddleware())
+    .use('/api/admin/monitor', authMiddleware({ requiredRole: Role.SUPER_ADMIN }))
+    .use('/api/admin/media', authMiddleware())
+    .use('/api/admin/media/*', authMiddleware())
+    .use('/api/admin/avatar', authMiddleware())
+    .use('/api/admin/avatar/*', authMiddleware())
+    .use('/api/admin/icon', authMiddleware())
+    .use('/api/admin/icon/*', authMiddleware())
+    .use('/api/auth/verify', authMiddleware())
+    .use('/api/audit-logs', authMiddleware())
+    .use('/api/roles', authMiddleware({ requiredRole: Role.SUPER_ADMIN }))
     .use(
       '/api/admin/*',
       captchaMiddleware({

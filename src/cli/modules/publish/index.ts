@@ -1,5 +1,5 @@
 import { Command } from 'commander'
-import { getClient, getBaseUrl } from '../../utils/api'
+import { getClient } from '../../utils/api'
 import { getLogger } from '../../utils/logger'
 import fs from 'node:fs'
 import path from 'node:path'
@@ -33,6 +33,7 @@ export function registerPublishCommands(program: Command) {
         npmPackage?: string
       }) => {
         const logger = getLogger()
+        const client = getClient()
 
         try {
           const metadata: Record<string, unknown> = {
@@ -48,6 +49,10 @@ export function registerPublishCommands(program: Command) {
           if (options.sites) metadata.sites = options.sites.split(',').map(s => s.trim())
           if (options.npmPackage) metadata.npmPackage = options.npmPackage
 
+          const form = new FormData()
+          const metadataBlob = new Blob([JSON.stringify(metadata)], { type: 'application/json' })
+          form.append('metadata', metadataBlob)
+
           if (options.file) {
             const filePath = path.resolve(options.file)
             if (!fs.existsSync(filePath)) {
@@ -55,61 +60,24 @@ export function registerPublishCommands(program: Command) {
               process.exit(1)
             }
 
-            const undici = await import('undici')
-            const form = new undici.FormData()
-            const metadataBlob = new Blob([JSON.stringify(metadata)], { type: 'application/json' })
-            form.append('metadata', metadataBlob)
-
             const fileBuffer = fs.readFileSync(filePath)
             const fileName = path.basename(filePath)
             form.append('files', new NodeFile([fileBuffer], fileName))
+          }
 
-            const baseUrl = getBaseUrl()
-            // eslint-disable-next-line local-rules/no-direct-fetch
-            const response = await fetch(`${baseUrl}/api/plugins/publish`, {
-              method: 'POST',
-              body: form as unknown as BodyInit,
-            })
+          const res = await client.api.plugins.publish.$post({ form })
+          const result = (await res.json()) as {
+            success: boolean
+            data?: unknown
+            error?: string
+          }
 
-            const result = (await response.json()) as {
-              success: boolean
-              data?: unknown
-              error?: string
-            }
-
-            if (result.success) {
-              logger.success(`Plugin "${options.name}" submitted for review!`)
-              logger.info('An admin will review and approve your plugin.')
-            } else {
-              logger.error(`Failed: ${result.error || 'Unknown error'}`)
-              process.exit(1)
-            }
+          if (result.success) {
+            logger.success(`Plugin "${options.name}" submitted for review!`)
+            logger.info('An admin will review and approve your plugin.')
           } else {
-            const undici = await import('undici')
-            const nativeForm = new undici.FormData()
-            const metadataBlob = new Blob([JSON.stringify(metadata)], { type: 'application/json' })
-            nativeForm.append('metadata', metadataBlob)
-
-            const baseUrl = getBaseUrl()
-            // eslint-disable-next-line local-rules/no-direct-fetch
-            const response = await fetch(`${baseUrl}/api/plugins/publish`, {
-              method: 'POST',
-              body: nativeForm as unknown as BodyInit,
-            })
-
-            const result = (await response.json()) as {
-              success: boolean
-              data?: unknown
-              error?: string
-            }
-
-            if (result.success) {
-              logger.success(`Plugin "${options.name}" submitted for review!`)
-              logger.info('An admin will review and approve your plugin.')
-            } else {
-              logger.error(`Failed: ${result.error || 'Unknown error'}`)
-              process.exit(1)
-            }
+            logger.error(`Failed: ${result.error || 'Unknown error'}`)
+            process.exit(1)
           }
         } catch (error) {
           getLogger().error(

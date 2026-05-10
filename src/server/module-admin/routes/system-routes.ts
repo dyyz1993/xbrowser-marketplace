@@ -1,9 +1,8 @@
 import { createRoute, z } from '@hono/zod-openapi'
 import { OpenAPIHono } from '@hono/zod-openapi'
-import { authMiddleware, type AuthUser } from '../../middleware/auth'
+import type { AuthUser } from '../../middleware/auth'
 import * as adminService from '../services/admin-service'
 import { successResponse, errorResponse, success } from '../../utils/route-helpers'
-import { Role } from '@shared/modules/permission'
 import {
   SystemStatsSchema,
   HealthCheckSchema,
@@ -16,7 +15,6 @@ const getStatsRoute = createRoute({
   path: '/admin/stats',
   tags: ['admin'],
   security: [{ Bearer: [] }],
-  middleware: [authMiddleware({ requiredRole: Role.SUPER_ADMIN })],
   responses: {
     200: successResponse(SystemStatsSchema, 'Get system statistics'),
     401: errorResponse('Unauthorized'),
@@ -29,7 +27,6 @@ const getHealthRoute = createRoute({
   path: '/admin/health',
   tags: ['admin'],
   security: [{ Bearer: [] }],
-  middleware: [authMiddleware({ requiredRole: Role.SUPER_ADMIN })],
   responses: {
     200: successResponse(HealthCheckSchema, 'Get system health'),
     401: errorResponse('Unauthorized'),
@@ -42,7 +39,6 @@ const getRecentActivityRoute = createRoute({
   path: '/admin/activity',
   tags: ['admin'],
   security: [{ Bearer: [] }],
-  middleware: [authMiddleware({ requiredRole: Role.SUPER_ADMIN })],
   request: {
     query: z.object({
       limit: z.string().optional(),
@@ -60,7 +56,6 @@ const clearAllTodosRoute = createRoute({
   path: '/admin/todos/all',
   tags: ['admin'],
   security: [{ Bearer: [] }],
-  middleware: [authMiddleware({ requiredRole: Role.SUPER_ADMIN })],
   responses: {
     200: successResponse(ClearTodosResultSchema, 'All todos cleared'),
     401: errorResponse('Unauthorized'),

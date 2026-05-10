@@ -1,8 +1,7 @@
 import { createRoute } from '@hono/zod-openapi'
 import { OpenAPIHono } from '@hono/zod-openapi'
-import { authMiddleware, type AuthUser } from '../../middleware/auth'
+import type { AuthUser } from '../../middleware/auth'
 import { successResponse, errorResponse, success } from '../../utils/route-helpers'
-import { Role } from '@shared/modules/permission'
 import { MonitorDataSchema } from '@shared/modules/admin'
 import * as monitorService from '../services/monitor-service'
 
@@ -11,7 +10,6 @@ const getMonitorRoute = createRoute({
   path: '/admin/monitor',
   tags: ['admin'],
   security: [{ Bearer: [] }],
-  middleware: [authMiddleware({ requiredRole: Role.SUPER_ADMIN })],
   responses: {
     200: successResponse(MonitorDataSchema, 'Get monitor data'),
     401: errorResponse('Unauthorized'),

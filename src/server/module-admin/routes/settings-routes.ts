@@ -1,8 +1,7 @@
 import { createRoute, z } from '@hono/zod-openapi'
 import { OpenAPIHono } from '@hono/zod-openapi'
-import { authMiddleware, type AuthUser } from '../../middleware/auth'
+import type { AuthUser } from '../../middleware/auth'
 import { successResponse, errorResponse, success } from '../../utils/route-helpers'
-import { Role } from '@shared/modules/permission'
 import * as settingsService from '../services/settings-service'
 
 const SettingItemSchema = z.object({
@@ -35,7 +34,6 @@ const getSettingsRoute = createRoute({
   path: '/admin/settings',
   tags: ['admin'],
   security: [{ Bearer: [] }],
-  middleware: [authMiddleware({ requiredRole: Role.SUPER_ADMIN })],
   responses: {
     200: successResponse(SettingListSchema, 'Get all settings'),
     401: errorResponse('Unauthorized'),
@@ -48,7 +46,6 @@ const getSettingByKeyRoute = createRoute({
   path: '/admin/settings/:key',
   tags: ['admin'],
   security: [{ Bearer: [] }],
-  middleware: [authMiddleware({ requiredRole: Role.SUPER_ADMIN })],
   request: {
     params: z.object({ key: z.string() }),
   },
@@ -65,7 +62,6 @@ const batchUpdateSettingsRoute = createRoute({
   path: '/admin/settings',
   tags: ['admin'],
   security: [{ Bearer: [] }],
-  middleware: [authMiddleware({ requiredRole: Role.SUPER_ADMIN })],
   request: {
     body: {
       content: { 'application/json': { schema: BatchUpdateSettingsSchema } },
@@ -83,7 +79,6 @@ const updateSettingByKeyRoute = createRoute({
   path: '/admin/settings/:key',
   tags: ['admin'],
   security: [{ Bearer: [] }],
-  middleware: [authMiddleware({ requiredRole: Role.SUPER_ADMIN })],
   request: {
     params: z.object({ key: z.string() }),
     body: {

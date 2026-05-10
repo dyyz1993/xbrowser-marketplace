@@ -1,6 +1,6 @@
 import { createRoute, z } from '@hono/zod-openapi'
 import { OpenAPIHono } from '@hono/zod-openapi'
-import { authMiddleware, type AuthUser } from '../../middleware/auth'
+import type { AuthUser } from '../../middleware/auth'
 import * as adminService from '../services/admin-service'
 import { errorResponse } from '../../utils/route-helpers'
 
@@ -9,7 +9,6 @@ const getAvatarRoute = createRoute({
   path: '/admin/avatar/:id',
   tags: ['media'],
   security: [{ Bearer: [] }],
-  middleware: [authMiddleware()],
   request: {
     params: z.object({
       id: z.string(),
@@ -33,7 +32,6 @@ const getIconRoute = createRoute({
   path: '/admin/icon/:name',
   tags: ['media'],
   security: [{ Bearer: [] }],
-  middleware: [authMiddleware()],
   request: {
     params: z.object({
       name: z.string(),
