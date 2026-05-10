@@ -38,7 +38,7 @@ function createCustomFetch() {
   })
 }
 
-// @ts-expect-error Hono RPC type depth exceeds TypeScript limit with large API surface
+// @ts-expect-error Hono RPC type depth exceeds TypeScript limit
 const rawClient: any = hc<AdminApiType>(baseUrl, {
   fetch: createCustomFetch() as typeof fetch,
   webSocket: url => new WSClientImpl(url),
