@@ -46,6 +46,14 @@ describe('DashboardPage', () => {
             pendingTodos: 10,
             completedTodos: 32,
             lastUpdated: '2025-01-01',
+            totalPlugins: 100,
+            pendingPlugins: 15,
+            approvedPlugins: 80,
+            rejectedPlugins: 5,
+            totalDownloads: 5000,
+            totalViews: 20000,
+            totalReviews: 350,
+            activeDevelopers: 25,
           },
         }),
     })
@@ -70,14 +78,14 @@ describe('DashboardPage', () => {
     render(<DashboardPage />)
 
     await waitFor(() => {
-      expect(screen.getByText('Total Todos')).toBeInTheDocument()
-      expect(screen.getByText('42')).toBeInTheDocument()
-      expect(screen.getByText('Pending')).toBeInTheDocument()
-      expect(screen.getByText('10')).toBeInTheDocument()
-      expect(screen.getByText('Completed')).toBeInTheDocument()
-      expect(screen.getByText('32')).toBeInTheDocument()
-      expect(screen.getByText('Last Updated')).toBeInTheDocument()
-      expect(screen.getByText('2025-01-01')).toBeInTheDocument()
+      expect(screen.getByText('Total Plugins')).toBeInTheDocument()
+      expect(screen.getByText('100')).toBeInTheDocument()
+      expect(screen.getByText('Total Downloads')).toBeInTheDocument()
+      expect(screen.getByText('5,000')).toBeInTheDocument()
+      expect(screen.getByText('Active Developers')).toBeInTheDocument()
+      expect(screen.getByText('25')).toBeInTheDocument()
+      expect(screen.getByText('Total Reviews')).toBeInTheDocument()
+      expect(screen.getByText('350')).toBeInTheDocument()
     })
   })
 

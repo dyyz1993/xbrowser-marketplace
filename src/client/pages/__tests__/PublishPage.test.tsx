@@ -86,10 +86,13 @@ describe('PublishPage', () => {
       expect(screen.getByTestId('plugin-name-input')).toBeInTheDocument()
     })
 
+    await user.clear(screen.getByTestId('plugin-name-input'))
     await user.type(screen.getByTestId('plugin-name-input'), 'Test Plugin')
+    await user.clear(screen.getByTestId('plugin-slug-input'))
     await user.type(screen.getByTestId('plugin-slug-input'), 'test-plugin')
-    await user.type(screen.getByTestId('plugin-version-input'), '1.0.0')
-    await user.type(screen.getByTestId('plugin-description-input'), 'A test plugin')
+    await user.clear(screen.getByTestId('plugin-version-input'))
+    await user.type(screen.getByTestId('plugin-version-input'), '2.0.0')
+    await user.type(screen.getByTestId('plugin-description-input'), 'A test plugin description')
 
     await user.click(screen.getByTestId('publish-submit-button'))
 

@@ -52,18 +52,23 @@ describe('DeveloperDashboardPage', () => {
       json: () =>
         Promise.resolve({
           success: true,
-          data: [
-            {
-              id: '1',
-              name: 'My Plugin',
-              slug: 'my-plugin',
-              status: 'approved',
-              version: '1.0.0',
-              downloadCount: 10,
-              createdAt: Date.now(),
-              updatedAt: Date.now(),
-            },
-          ],
+          data: {
+            items: [
+              {
+                id: '1',
+                name: 'My Plugin',
+                slug: 'my-plugin',
+                status: 'approved',
+                version: '1.0.0',
+                downloadCount: 10,
+                createdAt: Date.now(),
+                updatedAt: Date.now(),
+              },
+            ],
+            total: 1,
+            page: 1,
+            limit: 10,
+          },
         }),
     })
   })
