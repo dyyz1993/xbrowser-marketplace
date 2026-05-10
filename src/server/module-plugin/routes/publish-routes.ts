@@ -40,6 +40,7 @@ const publishVersionRoute = createRoute({
   responses: {
     201: successResponse(VersionSchema, 'Version published'),
     404: errorResponse('Plugin not found'),
+    409: errorResponse('Version already exists'),
   },
 })
 

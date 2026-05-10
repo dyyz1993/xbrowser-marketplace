@@ -34,21 +34,27 @@ export const plugins = sqliteTable('plugins', {
     .default(sql`(unixepoch() * 1000)`),
 })
 
-export const pluginVersions = sqliteTable('plugin_versions', {
-  id: text('id').primaryKey(),
-  pluginId: text('plugin_id')
-    .notNull()
-    .references(() => plugins.id),
-  version: text('version').notNull(),
-  changelog: text('changelog'),
-  packageUrl: text('package_url'),
-  fileSize: integer('file_size'),
-  checksum: text('checksum'),
-  status: text('status', { enum: pluginStatuses }).notNull().default('pending'),
-  publishedAt: integer('published_at', { mode: 'timestamp_ms' })
-    .notNull()
-    .default(sql`(unixepoch() * 1000)`),
-})
+export const pluginVersions = sqliteTable(
+  'plugin_versions',
+  {
+    id: text('id').primaryKey(),
+    pluginId: text('plugin_id')
+      .notNull()
+      .references(() => plugins.id),
+    version: text('version').notNull(),
+    changelog: text('changelog'),
+    packageUrl: text('package_url'),
+    fileSize: integer('file_size'),
+    checksum: text('checksum'),
+    status: text('status', { enum: pluginStatuses }).notNull().default('pending'),
+    publishedAt: integer('published_at', { mode: 'timestamp_ms' })
+      .notNull()
+      .default(sql`(unixepoch() * 1000)`),
+  },
+  table => [
+    uniqueIndex('idx_plugin_versions_plugin_id_version_unique').on(table.pluginId, table.version),
+  ]
+)
 
 export const pluginReviews = sqliteTable('plugin_reviews', {
   id: text('id').primaryKey(),

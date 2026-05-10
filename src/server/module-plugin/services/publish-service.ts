@@ -1,8 +1,8 @@
 import { getDb } from '../../db'
 import { plugins, pluginVersions } from '../../db/schema'
-import { eq, desc } from 'drizzle-orm'
+import { eq, desc, and } from 'drizzle-orm'
 import { generateUUID } from '../../utils/uuid'
-import { NotFoundError, AuthorizationError } from '../../utils/app-error'
+import { NotFoundError, AuthorizationError, ConflictError } from '../../utils/app-error'
 import type { CreateVersionInput } from '../plugin.types'
 import {
   R2Storage,
@@ -106,6 +106,20 @@ export async function publishPlugin(
   if (existing.length > 0) {
     if (existing[0].authorId !== authorId) {
       throw new AuthorizationError('Only the plugin author can publish updates')
+    }
+
+    const existingVersions = await db
+      .select({ id: pluginVersions.id })
+      .from(pluginVersions)
+      .where(
+        and(eq(pluginVersions.pluginId, existing[0].id), eq(pluginVersions.version, data.version))
+      )
+      .limit(1)
+
+    if (existingVersions.length > 0) {
+      throw new ConflictError(
+        `Version '${data.version}' already exists for plugin '${data.slug}'. Use a different version number.`
+      )
     }
 
     const updateData: Record<string, unknown> = {
@@ -252,6 +266,20 @@ export async function publishVersion(
 
   if (pluginRows[0].authorId !== authorId) {
     throw new AuthorizationError('Only the plugin author can publish versions')
+  }
+
+  const existingVersions = await db
+    .select({ id: pluginVersions.id })
+    .from(pluginVersions)
+    .where(
+      and(eq(pluginVersions.pluginId, pluginRows[0].id), eq(pluginVersions.version, data.version))
+    )
+    .limit(1)
+
+  if (existingVersions.length > 0) {
+    throw new ConflictError(
+      `Version '${data.version}' already exists for plugin '${slug}'. Use a different version number.`
+    )
   }
 
   const id = generateUUID()

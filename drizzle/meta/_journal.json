@@ -43,6 +43,13 @@
       "when": 1778382556626,
       "tag": "0005_stiff_thena",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1746897600000,
+      "tag": "0006_add_plugin_version_unique",
+      "breakpoints": true
     }
   ]
 }

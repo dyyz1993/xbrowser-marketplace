@@ -218,6 +218,28 @@ export function registerPublishCommands(program: Command) {
             form.append('files', new NodeFile([tarballBuffer], `${slug}-${version}.tar.gz`))
           }
 
+          try {
+            const checkRes = await client.api.plugins[':slug'].$get({ param: { slug } })
+            if (checkRes.ok) {
+              const existing = await checkRes.json()
+              if (existing.success && existing.data) {
+                const currentVersion = existing.data.version || existing.data.latestVersion
+                if (currentVersion === version) {
+                  logger.error(`Version '${version}' already exists for plugin '${slug}'`)
+                  logger.info(
+                    'Use a different version number or use "publish version" to publish a new version'
+                  )
+                  process.exit(1)
+                }
+                logger.warn(
+                  `Plugin '${slug}' already exists (current: v${currentVersion}). Publishing as new version v${version}`
+                )
+              }
+            }
+          } catch {
+            // Plugin doesn't exist yet, proceed with publish
+          }
+
           const res = await client.api.plugins.publish.$post({ form })
           const result = (await res.json()) as {
             success: boolean
@@ -256,6 +278,24 @@ export function registerPublishCommands(program: Command) {
         const client = getClient()
 
         try {
+          try {
+            const checkRes = await client.api.plugins[':slug'].$get({
+              param: { slug: options.slug },
+            })
+            if (checkRes.ok) {
+              const existing = await checkRes.json()
+              if (existing.success && existing.data) {
+                const currentVersion = existing.data.version || existing.data.latestVersion
+                if (currentVersion === options.version) {
+                  logger.error(`Version '${options.version}' already exists for plugin '${options.slug}'`)
+                  process.exit(1)
+                }
+              }
+            }
+          } catch {
+            // ignore
+          }
+
           if (options.file) {
             const filePath = path.resolve(options.file)
             if (!fs.existsSync(filePath)) {
