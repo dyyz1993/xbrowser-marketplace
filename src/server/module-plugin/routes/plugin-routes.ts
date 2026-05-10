@@ -241,6 +241,23 @@ const getStatsRoute = createRoute({
 })
 
 export const pluginRoutes = new OpenAPIHono()
+  .openapi(listCategoriesRoute, async c => {
+    const categories = await pluginService.listCategories()
+    return c.json(success(categories), 200)
+  })
+  .openapi(getCategoryPluginsRoute, async c => {
+    const { slug } = c.req.valid('param')
+    const query = c.req.valid('query')
+    const result = await pluginService.getPluginsByCategory(slug, {
+      page: parsePositiveInt(query.page, 1),
+      limit: parsePositiveInt(query.limit, 20),
+    })
+    return c.json(success(result), 200)
+  })
+  .openapi(getStatsRoute, async c => {
+    const stats = await pluginService.getStats()
+    return c.json(success(stats), 200)
+  })
   .openapi(listPluginsRoute, async c => {
     const query = c.req.valid('query')
     const page = parsePositiveInt(query.page, 1)
@@ -379,21 +396,4 @@ export const pluginRoutes = new OpenAPIHono()
     }
 
     return c.json({ success: false, error: 'No download available for this plugin' }, 404)
-  })
-  .openapi(listCategoriesRoute, async c => {
-    const categories = await pluginService.listCategories()
-    return c.json(success(categories), 200)
-  })
-  .openapi(getCategoryPluginsRoute, async c => {
-    const { slug } = c.req.valid('param')
-    const query = c.req.valid('query')
-    const result = await pluginService.getPluginsByCategory(slug, {
-      page: parsePositiveInt(query.page, 1),
-      limit: parsePositiveInt(query.limit, 20),
-    })
-    return c.json(success(result), 200)
-  })
-  .openapi(getStatsRoute, async c => {
-    const stats = await pluginService.getStats()
-    return c.json(success(stats), 200)
   })
