@@ -3,31 +3,12 @@ import { OpenAPIHono } from '@hono/zod-openapi'
 import type { AuthUser } from '../../middleware/auth'
 import { successResponse, errorResponse, success } from '../../utils/route-helpers'
 import * as settingsService from '../services/settings-service'
-
-const SettingItemSchema = z.object({
-  id: z.number(),
-  key: z.string(),
-  value: z.string(),
-  description: z.string().nullable(),
-  updatedAt: z.string(),
-})
-
-const SettingListSchema = z.array(SettingItemSchema)
-
-const UpdateSettingItemSchema = z.object({
-  key: z.string(),
-  value: z.string(),
-  description: z.string().optional(),
-})
-
-const BatchUpdateSettingsSchema = z.object({
-  items: z.array(UpdateSettingItemSchema),
-})
-
-const SingleSettingUpdateSchema = z.object({
-  value: z.string(),
-  description: z.string().optional(),
-})
+import {
+  SettingItemSchema,
+  SettingListSchema,
+  BatchUpdateSettingsSchema,
+  SingleSettingUpdateSchema,
+} from '@shared/modules/admin/schemas'
 
 const getSettingsRoute = createRoute({
   method: 'get',

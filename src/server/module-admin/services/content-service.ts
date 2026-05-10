@@ -2,10 +2,13 @@ import { getDb } from '@server/db'
 import { contents } from '@server/db/schema'
 import { eq, desc, and, sql } from 'drizzle-orm'
 
+type ContentCategory = (typeof contents.$inferSelect)['category']
+type ContentStatus = (typeof contents.$inferSelect)['status']
+
 export async function getContents(filters?: {
-  category?: string
-  status?: string
-  search?: string
+  category?: string | null
+  status?: string | null
+  search?: string | null
   page?: number
   limit?: number
 }): Promise<{ items: (typeof contents.$inferSelect)[]; total: number }> {
@@ -15,8 +18,8 @@ export async function getContents(filters?: {
   const offset = (page - 1) * limit
 
   const conditions = []
-  if (filters?.category) conditions.push(eq(contents.category, filters.category))
-  if (filters?.status) conditions.push(eq(contents.status, filters.status))
+  if (filters?.category) conditions.push(eq(contents.category, filters.category as ContentCategory))
+  if (filters?.status) conditions.push(eq(contents.status, filters.status as ContentStatus))
   if (filters?.search) {
     conditions.push(
       sql`(${contents.title} LIKE ${'%' + filters.search + '%'} OR ${contents.content} LIKE ${'%' + filters.search + '%'})`
@@ -25,21 +28,12 @@ export async function getContents(filters?: {
 
   const where = conditions.length > 0 ? and(...conditions) : undefined
 
-  const [items, countResult] = await Promise.all([
-    db
-      .select()
-      .from(contents)
-      .where(where)
-      .orderBy(desc(contents.createdAt))
-      .limit(limit)
-      .offset(offset),
-    db
-      .select({ count: sql<number>`count(*)` })
-      .from(contents)
-      .where(where),
-  ])
+  const allItems = await db.select().from(contents).where(where).orderBy(desc(contents.createdAt))
 
-  return { items, total: countResult[0]?.count ?? 0 }
+  const total = allItems.length
+  const items = allItems.slice(offset, offset + limit)
+
+  return { items, total }
 }
 
 export async function getContentById(id: number) {
@@ -48,16 +42,7 @@ export async function getContentById(id: number) {
   return result[0] ?? null
 }
 
-export async function createContent(data: {
-  title: string
-  slug: string
-  category: string
-  content: string
-  summary?: string
-  authorId: string
-  authorName: string
-  tags?: string
-}) {
+export async function createContent(data: typeof contents.$inferInsert) {
   const db = await getDb()
   const result = await db.insert(contents).values(data).returning()
   return result[0]

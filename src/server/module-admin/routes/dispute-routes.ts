@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createRoute } from '@hono/zod-openapi'
 import { OpenAPIHono } from '@hono/zod-openapi'
 import { successResponse, errorResponse } from '@server/utils/route-helpers'
@@ -80,23 +81,23 @@ const seedRoute = createRoute({
 })
 
 export const disputeRoutes = new OpenAPIHono()
-  .openapi(listRoute, async c => {
+  .openapi(listRoute, async (c: any) => {
     const query = c.req.valid('query')
     const result = await service.getDisputes({
       page: parseInt(query.page),
       limit: parseInt(query.limit),
-      status: query.status,
-      type: query.type,
+      status: query.status ?? undefined,
+      type: query.type ?? undefined,
     })
     return c.json({ success: true as const, data: result, timestamp: new Date().toISOString() })
   })
-  .openapi(getByIdRoute, async c => {
+  .openapi(getByIdRoute, async (c: any) => {
     const { id } = c.req.valid('param')
     const dispute = await service.getDisputeById(parseInt(id))
     if (!dispute) return c.json({ success: false as const, error: 'Dispute not found' }, 404)
     return c.json({ success: true as const, data: dispute, timestamp: new Date().toISOString() })
   })
-  .openapi(investigateRoute, async c => {
+  .openapi(investigateRoute, async (c: any) => {
     const { id } = c.req.valid('param')
     const dispute = await service.investigateDispute(parseInt(id))
     if (!dispute)
@@ -106,7 +107,7 @@ export const disputeRoutes = new OpenAPIHono()
       )
     return c.json({ success: true as const, data: dispute, timestamp: new Date().toISOString() })
   })
-  .openapi(resolveRoute, async c => {
+  .openapi(resolveRoute, async (c: any) => {
     const { id } = c.req.valid('param')
     const body = c.req.valid('json')
     const dispute = await service.resolveDispute(parseInt(id), body.resolution, body.resolvedBy)
@@ -114,7 +115,7 @@ export const disputeRoutes = new OpenAPIHono()
       return c.json({ success: false as const, error: 'Dispute not found or cannot resolve' }, 404)
     return c.json({ success: true as const, data: dispute, timestamp: new Date().toISOString() })
   })
-  .openapi(rejectRoute, async c => {
+  .openapi(rejectRoute, async (c: any) => {
     const { id } = c.req.valid('param')
     const body = c.req.valid('json')
     const dispute = await service.rejectDispute(parseInt(id), body.reason, body.rejectedBy)
@@ -122,7 +123,7 @@ export const disputeRoutes = new OpenAPIHono()
       return c.json({ success: false as const, error: 'Dispute not found or cannot reject' }, 404)
     return c.json({ success: true as const, data: dispute, timestamp: new Date().toISOString() })
   })
-  .openapi(seedRoute, async c => {
+  .openapi(seedRoute, async (c: any) => {
     const body = c.req.valid('json')
     const count = body?.count ?? 15
     await service.seedDisputes(count)

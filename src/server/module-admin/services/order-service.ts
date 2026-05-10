@@ -16,7 +16,7 @@ export async function getOrders(filters?: {
 
   const conditions = []
   if (filters?.status) {
-    conditions.push(eq(orders.status, filters.status))
+    conditions.push(eq(orders.status, filters.status as (typeof orders.$inferSelect)['status']))
   }
   if (filters?.customerName) {
     conditions.push(
@@ -26,21 +26,12 @@ export async function getOrders(filters?: {
 
   const where = conditions.length > 0 ? and(...conditions) : undefined
 
-  const [items, countResult] = await Promise.all([
-    db
-      .select()
-      .from(orders)
-      .where(where)
-      .orderBy(desc(orders.createdAt))
-      .limit(limit)
-      .offset(offset),
-    db
-      .select({ count: sql<number>`count(*)` })
-      .from(orders)
-      .where(where),
-  ])
+  const allItems = await db.select().from(orders).where(where).orderBy(desc(orders.createdAt))
 
-  return { items, total: countResult[0]?.count ?? 0 }
+  const total = allItems.length
+  const items = allItems.slice(offset, offset + limit)
+
+  return { items, total }
 }
 
 export async function getOrderById(id: number) {

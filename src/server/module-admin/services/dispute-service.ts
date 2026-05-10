@@ -1,11 +1,14 @@
 import { getDb } from '@server/db'
 import { disputes } from '@server/db/schema'
-import { eq, desc, and, sql } from 'drizzle-orm'
+import { eq, desc, and } from 'drizzle-orm'
 import { generateDisputeNo } from '@server/utils/generate'
 
+type DisputeStatus = (typeof disputes.$inferSelect)['status']
+type DisputeType = (typeof disputes.$inferSelect)['type']
+
 export async function getDisputes(filters?: {
-  status?: string
-  type?: string
+  status?: string | null
+  type?: string | null
   page?: number
   limit?: number
 }): Promise<{ items: (typeof disputes.$inferSelect)[]; total: number }> {
@@ -15,26 +18,17 @@ export async function getDisputes(filters?: {
   const offset = (page - 1) * limit
 
   const conditions = []
-  if (filters?.status) conditions.push(eq(disputes.status, filters.status))
-  if (filters?.type) conditions.push(eq(disputes.type, filters.type))
+  if (filters?.status) conditions.push(eq(disputes.status, filters.status as DisputeStatus))
+  if (filters?.type) conditions.push(eq(disputes.type, filters.type as DisputeType))
 
   const where = conditions.length > 0 ? and(...conditions) : undefined
 
-  const [items, countResult] = await Promise.all([
-    db
-      .select()
-      .from(disputes)
-      .where(where)
-      .orderBy(desc(disputes.createdAt))
-      .limit(limit)
-      .offset(offset),
-    db
-      .select({ count: sql<number>`count(*)` })
-      .from(disputes)
-      .where(where),
-  ])
+  const allItems = await db.select().from(disputes).where(where).orderBy(desc(disputes.createdAt))
 
-  return { items, total: countResult[0]?.count ?? 0 }
+  const total = allItems.length
+  const items = allItems.slice(offset, offset + limit)
+
+  return { items, total }
 }
 
 export async function getDisputeById(id: number) {

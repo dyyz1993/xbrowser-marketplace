@@ -1,12 +1,16 @@
 import { getDb } from '@server/db'
 import { tickets, ticketMessages } from '@server/db/schema'
-import { eq, desc, and, sql } from 'drizzle-orm'
+import { eq, desc, and } from 'drizzle-orm'
 import { generateTicketNo } from '@server/utils/generate'
 
+type TicketStatus = (typeof tickets.$inferSelect)['status']
+type TicketCategory = (typeof tickets.$inferSelect)['category']
+type TicketPriority = (typeof tickets.$inferSelect)['priority']
+
 export async function getTickets(filters?: {
-  status?: string
-  priority?: string
-  category?: string
+  status?: string | null
+  priority?: string | null
+  category?: string | null
   page?: number
   limit?: number
 }): Promise<{ items: (typeof tickets.$inferSelect)[]; total: number }> {
@@ -16,27 +20,18 @@ export async function getTickets(filters?: {
   const offset = (page - 1) * limit
 
   const conditions = []
-  if (filters?.status) conditions.push(eq(tickets.status, filters.status))
-  if (filters?.priority) conditions.push(eq(tickets.priority, filters.priority))
-  if (filters?.category) conditions.push(eq(tickets.category, filters.category))
+  if (filters?.status) conditions.push(eq(tickets.status, filters.status as TicketStatus))
+  if (filters?.priority) conditions.push(eq(tickets.priority, filters.priority as TicketPriority))
+  if (filters?.category) conditions.push(eq(tickets.category, filters.category as TicketCategory))
 
   const where = conditions.length > 0 ? and(...conditions) : undefined
 
-  const [items, countResult] = await Promise.all([
-    db
-      .select()
-      .from(tickets)
-      .where(where)
-      .orderBy(desc(tickets.createdAt))
-      .limit(limit)
-      .offset(offset),
-    db
-      .select({ count: sql<number>`count(*)` })
-      .from(tickets)
-      .where(where),
-  ])
+  const allItems = await db.select().from(tickets).where(where).orderBy(desc(tickets.createdAt))
 
-  return { items, total: countResult[0]?.count ?? 0 }
+  const total = allItems.length
+  const items = allItems.slice(offset, offset + limit)
+
+  return { items, total }
 }
 
 export async function getTicketById(id: number) {
@@ -133,7 +128,7 @@ export async function seedTickets(count: number = 20) {
         category,
         assignedTo,
       })
-      .returning({ id: tickets.id })
+      .returning()
 
     if (status !== 'open' && result[0]) {
       const replyCount = Math.floor(Math.random() * 3) + 1

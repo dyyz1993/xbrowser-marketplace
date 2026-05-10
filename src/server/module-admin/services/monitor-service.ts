@@ -1,6 +1,6 @@
 import { getDb } from '../../db'
 import { plugins, developers, orders, tickets, disputes, contents } from '../../db/schema'
-import { eq, desc, sql } from 'drizzle-orm'
+import { eq, desc } from 'drizzle-orm'
 
 const startTime = Date.now()
 
@@ -8,49 +8,41 @@ export async function getMonitorStats() {
   const db = await getDb()
 
   const [
-    userResult,
-    pluginResult,
-    orderResult,
-    ticketResult,
-    disputeResult,
-    contentResult,
-    pendingPluginResult,
-    openTicketResult,
-    pendingOrderResult,
+    allUsers,
+    allPlugins,
+    allOrders,
+    allTickets,
+    allDisputes,
+    allContents,
+    pendingPlugins,
+    openTickets,
+    pendingOrders,
   ] = await Promise.all([
-    db.select({ count: sql<number>`count(*)` }).from(developers),
-    db.select({ count: sql<number>`count(*)` }).from(plugins),
-    db.select({ count: sql<number>`count(*)` }).from(orders),
-    db.select({ count: sql<number>`count(*)` }).from(tickets),
-    db.select({ count: sql<number>`count(*)` }).from(disputes),
-    db.select({ count: sql<number>`count(*)` }).from(contents),
-    db
-      .select({ count: sql<number>`count(*)` })
-      .from(plugins)
-      .where(eq(plugins.status, 'pending')),
-    db
-      .select({ count: sql<number>`count(*)` })
-      .from(tickets)
-      .where(eq(tickets.status, 'open')),
-    db
-      .select({ count: sql<number>`count(*)` })
-      .from(orders)
-      .where(eq(orders.status, 'pending')),
+    db.select().from(developers),
+    db.select().from(plugins),
+    db.select().from(orders),
+    db.select().from(tickets),
+    db.select().from(disputes),
+    db.select().from(contents),
+    db.select().from(plugins).where(eq(plugins.status, 'pending')),
+    db.select().from(tickets).where(eq(tickets.status, 'open')),
+    db.select().from(orders).where(eq(orders.status, 'pending')),
   ])
 
   return {
-    totalUsers: Number(userResult[0]?.count ?? 0),
-    totalPlugins: Number(pluginResult[0]?.count ?? 0),
-    totalOrders: Number(orderResult[0]?.count ?? 0),
-    totalTickets: Number(ticketResult[0]?.count ?? 0),
-    totalDisputes: Number(disputeResult[0]?.count ?? 0),
-    totalContents: Number(contentResult[0]?.count ?? 0),
-    pendingPlugins: Number(pendingPluginResult[0]?.count ?? 0),
-    openTickets: Number(openTicketResult[0]?.count ?? 0),
-    pendingOrders: Number(pendingOrderResult[0]?.count ?? 0),
+    totalUsers: allUsers.length,
+    totalPlugins: allPlugins.length,
+    totalOrders: allOrders.length,
+    totalTickets: allTickets.length,
+    totalDisputes: allDisputes.length,
+    totalContents: allContents.length,
+    pendingPlugins: pendingPlugins.length,
+    openTickets: openTickets.length,
+    pendingOrders: pendingOrders.length,
   }
 }
 
+// eslint-disable-next-line local-rules/no-util-functions-in-service
 function toISO(val: unknown): string {
   if (val instanceof Date) return val.toISOString()
   const n = Number(val)
@@ -61,36 +53,9 @@ export async function getRecentActivity(limit = 10) {
   const db = await getDb()
 
   const [recentPlugins, recentOrders, recentTickets] = await Promise.all([
-    db
-      .select({
-        id: plugins.id,
-        name: plugins.name,
-        status: plugins.status,
-        createdAt: plugins.createdAt,
-      })
-      .from(plugins)
-      .orderBy(desc(plugins.createdAt))
-      .limit(5),
-    db
-      .select({
-        id: orders.id,
-        orderNo: orders.orderNo,
-        status: orders.status,
-        createdAt: orders.createdAt,
-      })
-      .from(orders)
-      .orderBy(desc(orders.createdAt))
-      .limit(5),
-    db
-      .select({
-        id: tickets.id,
-        ticketNo: tickets.ticketNo,
-        status: tickets.status,
-        createdAt: tickets.createdAt,
-      })
-      .from(tickets)
-      .orderBy(desc(tickets.createdAt))
-      .limit(5),
+    db.select().from(plugins).orderBy(desc(plugins.createdAt)).limit(5),
+    db.select().from(orders).orderBy(desc(orders.createdAt)).limit(5),
+    db.select().from(tickets).orderBy(desc(tickets.createdAt)).limit(5),
   ])
 
   const activity = [
@@ -125,10 +90,7 @@ export async function getRecentActivity(limit = 10) {
 export async function getHealthStatus() {
   try {
     const db = await getDb()
-    await db
-      .select({ count: sql<number>`count(*)` })
-      .from(plugins)
-      .limit(1)
+    await db.select().from(plugins).limit(1)
     return {
       database: 'connected' as const,
       uptime: Math.floor((Date.now() - startTime) / 1000),

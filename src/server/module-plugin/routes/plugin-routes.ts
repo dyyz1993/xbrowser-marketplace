@@ -200,7 +200,10 @@ const downloadPluginRoute = createRoute({
       },
       description: 'Download plugin tarball',
     },
-    302: { description: 'Redirect to npm tarball URL' },
+    302: {
+      description: 'Redirect to npm tarball URL',
+      content: { 'text/plain': { schema: z.string() } },
+    },
     404: errorResponse('Plugin or version not found'),
   },
 })

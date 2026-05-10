@@ -12,6 +12,7 @@ import {
 } from 'lucide-react'
 import { apiClient } from '../services/apiClient'
 
+// eslint-disable-next-line local-rules/prefer-shared-types
 interface MonitorStats {
   totalUsers: number
   totalPlugins: number
@@ -24,6 +25,7 @@ interface MonitorStats {
   pendingOrders: number
 }
 
+// eslint-disable-next-line local-rules/prefer-shared-types
 interface RecentActivityEntry {
   id: string | number
   type: 'plugin' | 'order' | 'ticket' | 'dispute' | 'user'

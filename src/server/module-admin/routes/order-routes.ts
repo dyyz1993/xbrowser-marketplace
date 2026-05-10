@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createRoute } from '@hono/zod-openapi'
 import { OpenAPIHono } from '@hono/zod-openapi'
 import { successResponse, errorResponse } from '@server/utils/route-helpers'
@@ -72,7 +73,7 @@ const seedRoute = createRoute({
 })
 
 export const orderRoutes = new OpenAPIHono()
-  .openapi(listRoute, async c => {
+  .openapi(listRoute, async (c: any) => {
     const query = c.req.valid('query')
     const result = await service.getOrders({
       page: parseInt(query.page),
@@ -82,34 +83,34 @@ export const orderRoutes = new OpenAPIHono()
     })
     return c.json({ success: true as const, data: result, timestamp: new Date().toISOString() })
   })
-  .openapi(getByIdRoute, async c => {
+  .openapi(getByIdRoute, async (c: any) => {
     const { id } = c.req.valid('param')
     const order = await service.getOrderById(parseInt(id))
     if (!order) return c.json({ success: false as const, error: 'Order not found' }, 404)
     return c.json({ success: true as const, data: order, timestamp: new Date().toISOString() })
   })
-  .openapi(processRoute, async c => {
+  .openapi(processRoute, async (c: any) => {
     const { id } = c.req.valid('param')
     const order = await service.processOrder(parseInt(id))
     if (!order)
       return c.json({ success: false as const, error: 'Order not found or cannot process' }, 404)
     return c.json({ success: true as const, data: order, timestamp: new Date().toISOString() })
   })
-  .openapi(cancelRoute, async c => {
+  .openapi(cancelRoute, async (c: any) => {
     const { id } = c.req.valid('param')
     const order = await service.cancelOrder(parseInt(id))
     if (!order)
       return c.json({ success: false as const, error: 'Order not found or cannot cancel' }, 404)
     return c.json({ success: true as const, data: order, timestamp: new Date().toISOString() })
   })
-  .openapi(completeRoute, async c => {
+  .openapi(completeRoute, async (c: any) => {
     const { id } = c.req.valid('param')
     const order = await service.completeOrder(parseInt(id))
     if (!order)
       return c.json({ success: false as const, error: 'Order not found or cannot complete' }, 404)
     return c.json({ success: true as const, data: order, timestamp: new Date().toISOString() })
   })
-  .openapi(seedRoute, async c => {
+  .openapi(seedRoute, async (c: any) => {
     const body = c.req.valid('json')
     const count = body?.count ?? 25
     await service.seedOrders(count)

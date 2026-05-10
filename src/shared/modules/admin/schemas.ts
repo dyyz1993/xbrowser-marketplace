@@ -95,6 +95,31 @@ export const DownloadTokenSchema = z.object({
   expiresIn: z.number(),
 })
 
+export const SettingItemSchema = z.object({
+  id: z.number(),
+  key: z.string(),
+  value: z.string(),
+  description: z.string().nullable(),
+  updatedAt: z.string(),
+})
+
+export const SettingListSchema = z.array(SettingItemSchema)
+
+export const UpdateSettingItemSchema = z.object({
+  key: z.string(),
+  value: z.string(),
+  description: z.string().nullish(),
+})
+
+export const BatchUpdateSettingsSchema = z.object({
+  items: z.array(UpdateSettingItemSchema),
+})
+
+export const SingleSettingUpdateSchema = z.object({
+  value: z.string(),
+  description: z.string().nullish(),
+})
+
 export type SystemStats = z.infer<typeof SystemStatsSchema>
 export type HealthCheck = z.infer<typeof HealthCheckSchema>
 export type RecentActivityItem = z.infer<typeof RecentActivityItemSchema>
@@ -116,10 +141,10 @@ export const OrderRowSchema = z.object({
   productName: z.string(),
   amount: z.number(),
   status: z.string(),
-  paymentMethod: z.string().nullable().optional(),
-  transactionId: z.string().nullable().optional(),
-  createdAt: z.number().nullable().optional(),
-  updatedAt: z.number().nullable().optional(),
+  paymentMethod: z.string().nullish(),
+  transactionId: z.string().nullish(),
+  createdAt: z.number().nullish(),
+  updatedAt: z.number().nullish(),
 })
 
 export const OrderListSchema = z.object({
@@ -134,7 +159,7 @@ export const TicketMessageSchema = z.object({
   author: z.string(),
   content: z.string(),
   isAdmin: z.boolean(),
-  createdAt: z.number().nullable().optional(),
+  createdAt: z.number().nullish(),
 })
 
 export const TicketRowSchema = z.object({
@@ -148,9 +173,9 @@ export const TicketRowSchema = z.object({
   status: z.string(),
   priority: z.string(),
   category: z.string(),
-  assignedTo: z.string().nullable().optional(),
-  createdAt: z.number().nullable().optional(),
-  updatedAt: z.number().nullable().optional(),
+  assignedTo: z.string().nullish(),
+  createdAt: z.number().nullish(),
+  updatedAt: z.number().nullish(),
 })
 
 export const TicketDetailSchema = TicketRowSchema.extend({
@@ -172,12 +197,12 @@ export const DisputeRowSchema = z.object({
   type: z.string(),
   status: z.string(),
   description: z.string(),
-  resolution: z.string().nullable().optional(),
+  resolution: z.string().nullish(),
   amount: z.number(),
-  resolvedAt: z.number().nullable().optional(),
-  resolvedBy: z.string().nullable().optional(),
-  createdAt: z.number().nullable().optional(),
-  updatedAt: z.number().nullable().optional(),
+  resolvedAt: z.number().nullish(),
+  resolvedBy: z.string().nullish(),
+  createdAt: z.number().nullish(),
+  updatedAt: z.number().nullish(),
 })
 
 export const DisputeListSchema = z.object({
@@ -191,16 +216,16 @@ export const ContentRowSchema = z.object({
   slug: z.string(),
   category: z.string(),
   content: z.string(),
-  summary: z.string().nullable().optional(),
+  summary: z.string().nullish(),
   authorId: z.string(),
   authorName: z.string(),
   status: z.string(),
-  tags: z.string().nullable().optional(),
-  viewCount: z.number().nullable().optional(),
-  likeCount: z.number().nullable().optional(),
-  publishedAt: z.number().nullable().optional(),
-  createdAt: z.number().nullable().optional(),
-  updatedAt: z.number().nullable().optional(),
+  tags: z.string().nullish(),
+  viewCount: z.number().nullish(),
+  likeCount: z.number().nullish(),
+  publishedAt: z.number().nullish(),
+  createdAt: z.number().nullish(),
+  updatedAt: z.number().nullish(),
 })
 
 export const ContentListSchema = z.object({
@@ -213,26 +238,26 @@ export const CreateContentSchema = z.object({
   slug: z.string().min(1),
   category: z.enum(['article', 'announcement', 'tutorial', 'news', 'policy']),
   content: z.string().min(1),
-  summary: z.string().optional(),
+  summary: z.string().nullish(),
   authorId: z.string().min(1),
   authorName: z.string().min(1),
-  tags: z.string().optional(),
+  tags: z.string().nullish(),
 })
 
 export const UpdateContentSchema = z.object({
-  title: z.string().min(1).optional(),
-  slug: z.string().min(1).optional(),
-  category: z.enum(['article', 'announcement', 'tutorial', 'news', 'policy']).optional(),
-  content: z.string().min(1).optional(),
-  summary: z.string().optional(),
-  tags: z.string().optional(),
+  title: z.string().min(1).nullish(),
+  slug: z.string().min(1).nullish(),
+  category: z.enum(['article', 'announcement', 'tutorial', 'news', 'policy']).nullish(),
+  content: z.string().min(1).nullish(),
+  summary: z.string().nullish(),
+  tags: z.string().nullish(),
 })
 
 export const DeletedResultSchema = z.object({ deleted: z.boolean() })
 
 export const CountResultSchema = z.object({ count: z.number() })
 
-export const SeedBodySchema = z.object({ count: z.number().optional() }).optional()
+export const SeedBodySchema = z.object({ count: z.number().nullish() }).nullish()
 
 export const ReplyTicketSchema = z.object({ content: z.string().min(1), author: z.string().min(1) })
 
@@ -249,33 +274,33 @@ export const RejectDisputeSchema = z.object({
 })
 
 export const OrderListQuerySchema = z.object({
-  page: z.string().optional().default('1'),
-  limit: z.string().optional().default('20'),
-  status: z.string().optional(),
-  search: z.string().optional(),
+  page: z.string().default('1'),
+  limit: z.string().default('20'),
+  status: z.string().nullish(),
+  search: z.string().nullish(),
 })
 
 export const TicketListQuerySchema = z.object({
-  page: z.string().optional().default('1'),
-  limit: z.string().optional().default('20'),
-  status: z.string().optional(),
-  priority: z.string().optional(),
-  category: z.string().optional(),
+  page: z.string().default('1'),
+  limit: z.string().default('20'),
+  status: z.string().nullish(),
+  priority: z.string().nullish(),
+  category: z.string().nullish(),
 })
 
 export const DisputeListQuerySchema = z.object({
-  page: z.string().optional().default('1'),
-  limit: z.string().optional().default('20'),
-  status: z.string().optional(),
-  type: z.string().optional(),
+  page: z.string().default('1'),
+  limit: z.string().default('20'),
+  status: z.string().nullish(),
+  type: z.string().nullish(),
 })
 
 export const ContentListQuerySchema = z.object({
-  page: z.string().optional().default('1'),
-  limit: z.string().optional().default('20'),
-  category: z.string().optional(),
-  status: z.string().optional(),
-  search: z.string().optional(),
+  page: z.string().default('1'),
+  limit: z.string().default('20'),
+  category: z.string().nullish(),
+  status: z.string().nullish(),
+  search: z.string().nullish(),
 })
 
 export const IdParamSchema = z.object({ id: z.string() })

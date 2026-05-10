@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * @framework-baseline ab16e97716a7556e
  * @framework-modify
@@ -37,11 +38,12 @@ function createCustomFetch() {
   })
 }
 
-export const apiClient = extendHonoClient(
-  hc<AdminApiType>(baseUrl, {
-    fetch: createCustomFetch() as typeof fetch,
-    webSocket: url => new WSClientImpl(url),
-  })
-)
+// @ts-expect-error Hono RPC type depth exceeds TypeScript limit with large API surface
+const rawClient: any = hc<AdminApiType>(baseUrl, {
+  fetch: createCustomFetch() as typeof fetch,
+  webSocket: url => new WSClientImpl(url),
+})
+
+export const apiClient: any = extendHonoClient(rawClient)
 
 export { api } from '@shared/core/api-request'

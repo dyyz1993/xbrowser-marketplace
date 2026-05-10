@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createRoute } from '@hono/zod-openapi'
 import { OpenAPIHono } from '@hono/zod-openapi'
 import { successResponse, errorResponse } from '@server/utils/route-helpers'
@@ -80,7 +81,7 @@ const seedRoute = createRoute({
 })
 
 export const ticketRoutes = new OpenAPIHono()
-  .openapi(listRoute, async c => {
+  .openapi(listRoute, async (c: any) => {
     const query = c.req.valid('query')
     const result = await service.getTickets({
       page: parseInt(query.page),
@@ -91,33 +92,33 @@ export const ticketRoutes = new OpenAPIHono()
     })
     return c.json({ success: true as const, data: result, timestamp: new Date().toISOString() })
   })
-  .openapi(getByIdRoute, async c => {
+  .openapi(getByIdRoute, async (c: any) => {
     const { id } = c.req.valid('param')
     const ticket = await service.getTicketById(parseInt(id))
     if (!ticket) return c.json({ success: false as const, error: 'Ticket not found' }, 404)
     return c.json({ success: true as const, data: ticket, timestamp: new Date().toISOString() })
   })
-  .openapi(replyRoute, async c => {
+  .openapi(replyRoute, async (c: any) => {
     const { id } = c.req.valid('param')
     const body = c.req.valid('json')
     const ticket = await service.replyTicket(parseInt(id), body.content, body.author, true)
     if (!ticket) return c.json({ success: false as const, error: 'Ticket not found' }, 404)
     return c.json({ success: true as const, data: ticket, timestamp: new Date().toISOString() })
   })
-  .openapi(closeRoute, async c => {
+  .openapi(closeRoute, async (c: any) => {
     const { id } = c.req.valid('param')
     const ticket = await service.closeTicket(parseInt(id))
     if (!ticket) return c.json({ success: false as const, error: 'Ticket not found' }, 404)
     return c.json({ success: true as const, data: ticket, timestamp: new Date().toISOString() })
   })
-  .openapi(assignRoute, async c => {
+  .openapi(assignRoute, async (c: any) => {
     const { id } = c.req.valid('param')
     const body = c.req.valid('json')
     const ticket = await service.assignTicket(parseInt(id), body.assignedTo)
     if (!ticket) return c.json({ success: false as const, error: 'Ticket not found' }, 404)
     return c.json({ success: true as const, data: ticket, timestamp: new Date().toISOString() })
   })
-  .openapi(seedRoute, async c => {
+  .openapi(seedRoute, async (c: any) => {
     const body = c.req.valid('json')
     const count = body?.count ?? 20
     await service.seedTickets(count)

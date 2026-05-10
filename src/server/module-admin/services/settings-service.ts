@@ -51,7 +51,7 @@ export async function getSettingByKey(key: string): Promise<{
 export async function upsertSetting(
   key: string,
   value: string,
-  description?: string
+  description?: string | null
 ): Promise<{
   id: number
   key: string
@@ -79,8 +79,7 @@ export async function upsertSetting(
           : new Date(Number(r.updatedAt) * 1000).toISOString(),
     }
   }
-  const insertData: Record<string, unknown> = { key, value, updatedAt: now }
-  if (description !== undefined) insertData.description = description
+  const insertData = { key, value, description: description ?? null, updatedAt: now }
   const result = await db.insert(settings).values(insertData).returning()
   const r = result[0]
   return {
@@ -96,7 +95,7 @@ export async function upsertSetting(
 }
 
 export async function batchUpsertSettings(
-  items: Array<{ key: string; value: string; description?: string }>
+  items: Array<{ key: string; value: string; description?: string | null }>
 ): Promise<
   Array<{
     id: number

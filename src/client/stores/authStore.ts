@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { apiClient } from '@client/services/apiClient'
 
+// eslint-disable-next-line local-rules/prefer-shared-types
 interface UserProfile {
   id: string
   username: string

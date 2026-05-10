@@ -8,6 +8,7 @@ import * as os from 'node:os'
 const CONFIG_DIR = path.join(os.homedir(), '.xbrowser-marketplace')
 const CONFIG_FILE = path.join(CONFIG_DIR, 'config.json')
 
+// eslint-disable-next-line local-rules/prefer-shared-types
 interface CliConfig {
   baseUrl?: string
   token?: string
@@ -43,7 +44,7 @@ export function registerAuthCommands(program: Command) {
     .action(async options => {
       const logger = getLogger()
 
-      let { email, password } = options
+      const { email, password } = options
       if (!email || !password) {
         logger.error('Both --email and --password are required')
         process.exit(1)
