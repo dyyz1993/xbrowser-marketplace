@@ -25,7 +25,7 @@ async function seedPlugin(params: {
 test.describe.configure({ mode: 'serial' })
 
 test.describe('Search Functionality', () => {
-  test.beforeEach(async ({ _page }) => {
+  test.beforeEach(async () => {
     await fetch(`${getBaseUrl()}/api/__test__/cleanup`, { method: 'POST' })
     await fetch(`${getBaseUrl()}/api/__test__/seed`, { method: 'POST' })
 
