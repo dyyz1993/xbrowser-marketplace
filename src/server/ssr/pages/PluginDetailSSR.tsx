@@ -13,22 +13,6 @@ export interface PluginSSRData {
 }
 
 export const PluginDetailSSR: React.FC<{ plugin: PluginSSRData }> = ({ plugin }) => {
-  const jsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'SoftwareApplication',
-    name: plugin.name,
-    description: plugin.description,
-    applicationCategory: 'BrowserExtension',
-    operatingSystem: 'CrossPlatform',
-    author: { '@type': 'Person', name: plugin.author },
-    aggregateRating: {
-      '@type': 'AggregateRating',
-      ratingValue: plugin.avgRating ?? 0,
-      reviewCount: plugin.reviewCount ?? 0,
-    },
-    offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
-  }
-
   const installCmd = `xbrowser plugin install ${plugin.name.toLowerCase().replace(/\s+/g, '-')}`
 
   return (
@@ -228,12 +212,6 @@ export const PluginDetailSSR: React.FC<{ plugin: PluginSSRData }> = ({ plugin })
         </p>
         <p className="mt-1 text-xs text-gray-400">Built with Hono + React + TypeScript</p>
       </footer>
-
-      {/* JSON-LD for search engines */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
     </div>
   )
 }

@@ -83,11 +83,13 @@ ${extraHead}`
   html = html.replace(/<title>[^<]*<\/title>/, `<title>${escapeHtml(title)}</title>`)
 
   html = html.replace(
-    /<meta\s+name="description"[^>]*\/?>/,
+    /<meta\s+name="description"[^>]*\/?>/s,
     `<meta name="description" content="${escapeHtml(description)}" />`
   )
 
-  html = html.replace(/<meta\s+(?:property|name)=["'](?:og:|twitter:)[^"']*["'][^>]*\/?>/g, '')
+  html = html.replace(/<meta\s+(?:property|name)=["'](?:og:|twitter:)[^"']*["'][^>]*\/?>/gs, '')
+
+  html = html.replace(/<link\s+rel="canonical"[^>]*\/?>/g, '')
 
   html = html.replace('</head>', `${seoMeta}\n  </head>`)
 

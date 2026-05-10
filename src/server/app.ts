@@ -12,6 +12,7 @@ import {
   loggerMiddleware,
   errorHandlerMiddleware,
   authMiddleware,
+  securityHeadersMiddleware,
 } from './middleware'
 import { Role } from '@shared/modules/permission'
 import { realtimeEnvMiddleware } from './middleware/realtime-env'
@@ -39,6 +40,7 @@ export function createApp<T extends AppBindings = AppBindings>(_options: CreateA
     .use('*', errorHandlerMiddleware())
     .use('*', loggerMiddleware())
     .use('*', corsMiddleware())
+    .use('*', securityHeadersMiddleware())
     .use('*', realtimeEnvMiddleware())
     .use('/api/*', auditLogMiddleware())
     .use('/api/admin/notifications/*', authMiddleware())

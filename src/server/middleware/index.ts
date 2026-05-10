@@ -21,4 +21,5 @@ export {
 } from './captcha'
 export { permissionMiddleware } from './permission'
 export { rateLimitMiddleware, type RateLimitOptions } from './rate-limit'
+export { securityHeadersMiddleware, createSecurityHeadersMiddleware } from './security-headers'
 export { getAuthUser } from '../utils/auth'

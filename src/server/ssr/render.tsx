@@ -94,12 +94,12 @@ function buildFromTemplate(
   html = html.replace(/<title>[^<]*<\/title>/, `<title>${escapeHtml(title)}</title>`)
 
   html = html.replace(
-    /<meta\s+name="description"[^>]*\/?>/,
+    /<meta\s+name="description"[^>]*\/?>/s,
     `<meta name="description" content="${escapeHtml(description)}" />`
   )
 
-  // Remove existing og/twitter meta to avoid duplicates
-  html = html.replace(/<meta\s+(?:property|name)=["'](?:og:|twitter:)[^"']*["'][^>]*\/?>/g, '')
+  // Remove existing og/twitter meta to avoid duplicates (dotAll flag handles multi-line tags)
+  html = html.replace(/<meta\s+(?:property|name)=["'](?:og:|twitter:)[^"']*["'][^>]*\/?>/gs, '')
 
   const seoMeta = `<meta property="og:title" content="${escapeHtml(title)}" />
     <meta property="og:description" content="${escapeHtml(description)}" />

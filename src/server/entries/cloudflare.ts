@@ -68,12 +68,19 @@ export default {
 
     const url = new URL(request.url)
 
+    if (url.pathname.endsWith('/') && url.pathname.length > 1) {
+      const cleanPath = url.pathname.replace(/\/+$/, '')
+      const redirectUrl = new URL(cleanPath || '/', url.origin)
+      redirectUrl.search = url.search
+      return Response.redirect(redirectUrl.toString(), 301)
+    }
+
     if (url.pathname.startsWith('/api/') || url.pathname === '/health') {
-      return wrappedApp.fetch(request, env, ctx)
+      return addSecurityHeaders(wrappedApp.fetch(request, env, ctx), url)
     }
 
     if (url.pathname === '/robots.txt' || url.pathname === '/sitemap.xml') {
-      return wrappedApp.fetch(request, env, ctx)
+      return addSecurityHeaders(wrappedApp.fetch(request, env, ctx), url)
     }
 
     const staticPaths = ['/', '/categories', '/cli']
@@ -83,7 +90,7 @@ export default {
     if ((isStaticPage || isPluginPage) && env.ASSETS) {
       const assetResponse = await env.ASSETS.fetch(request)
       if (assetResponse.status === 200) {
-        return assetResponse
+        return addSecurityHeaders(Promise.resolve(assetResponse), url)
       }
     }
 
@@ -103,26 +110,62 @@ export default {
             '</head>',
             '<meta name="robots" content="noindex, nofollow"></head>'
           )
-          return new Response(injected, {
+          const resp = new Response(injected, {
             status: spaResponse.status,
             headers: spaResponse.headers,
           })
+          return addSecurityHeaders(Promise.resolve(resp), url)
         }
       }
 
       const assetResponse = await env.ASSETS.fetch(request)
       if (assetResponse.status !== 404) {
-        return assetResponse
+        return addSecurityHeaders(Promise.resolve(assetResponse), url)
       }
 
       const spaResponse = await env.ASSETS.fetch(
         new Request(new URL('/index.spa.html', request.url))
       )
-      if (spaResponse.ok) return spaResponse
+      if (spaResponse.ok) {
+        return addSecurityHeaders(Promise.resolve(spaResponse), url)
+      }
     }
 
-    return wrappedApp.fetch(request, env, ctx)
+    return addSecurityHeaders(wrappedApp.fetch(request, env, ctx), url)
   },
+}
+
+function addSecurityHeaders(
+  responseOrPromise: Response | Promise<Response>,
+  url: URL
+): Promise<Response> {
+  return Promise.resolve(responseOrPromise).then(response => {
+    const isApi = url.pathname.startsWith('/api/')
+    if (isApi) return response
+
+    const headers = new Headers(response.headers)
+
+    headers.set('X-Frame-Options', 'DENY')
+    headers.set('X-Content-Type-Options', 'nosniff')
+    headers.set('X-XSS-Protection', '1; mode=block')
+    headers.set('Referrer-Policy', 'strict-origin-when-cross-origin')
+    headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()')
+
+    if (url.protocol === 'https:' || url.hostname.endsWith('.workers.dev')) {
+      headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains')
+    }
+
+    const isAsset = url.pathname.startsWith('/assets/') || url.pathname.match(/\.[a-f0-9]{8,}\./)
+    if (isAsset) {
+      headers.set('Cache-Control', 'public, max-age=31536000, immutable')
+    }
+
+    return new Response(response.body, {
+      status: response.status,
+      statusText: response.statusText,
+      headers,
+    })
+  })
 }
 
 export { RealtimeDurableObject, getDb }
