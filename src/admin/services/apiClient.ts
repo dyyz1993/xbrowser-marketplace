@@ -38,7 +38,8 @@ function createCustomFetch() {
   })
 }
 
-// @ts-expect-error Hono RPC type depth exceeds TypeScript limit
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore Hono RPC type depth may exceed TypeScript limit in some environments
 const rawClient: any = hc<AdminApiType>(baseUrl, {
   fetch: createCustomFetch() as typeof fetch,
   webSocket: url => new WSClientImpl(url),
