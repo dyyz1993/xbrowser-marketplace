@@ -1,6 +1,6 @@
 import { getDb } from '../../db'
 import { developers } from '../../db/schema'
-import { eq } from 'drizzle-orm'
+import { eq, or } from 'drizzle-orm'
 import { generateUUID } from '../../utils/uuid'
 import { ConflictError, NotFoundError, AuthenticationError } from '../../utils/app-error'
 import { compareSync, hashSync } from 'bcryptjs'
@@ -52,19 +52,23 @@ export async function registerDeveloper(data: {
   return toProfile(rows[0])
 }
 
-export async function loginDeveloper(data: { email: string; password: string }) {
+export async function loginDeveloper(data: { account: string; password: string }) {
   const db = await getDb()
 
-  const rows = await db.select().from(developers).where(eq(developers.email, data.email)).limit(1)
+  const rows = await db
+    .select()
+    .from(developers)
+    .where(or(eq(developers.email, data.account), eq(developers.username, data.account)))
+    .limit(1)
 
   if (rows.length === 0) {
-    throw new AuthenticationError('Invalid email or password')
+    throw new AuthenticationError('Invalid account or password')
   }
 
   const dev = rows[0]
 
   if (!compareSync(data.password, dev.passwordHash)) {
-    throw new AuthenticationError('Invalid email or password')
+    throw new AuthenticationError('Invalid account or password')
   }
 
   return {

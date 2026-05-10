@@ -157,7 +157,7 @@ describe('Auth Routes', () => {
   })
 
   describe('POST /api/auth/login', () => {
-    it('should login with valid credentials', async () => {
+    it('should login with valid credentials via email', async () => {
       await seedDeveloper({
         email: 'login@example.com',
         password: 'password123',
@@ -167,7 +167,7 @@ describe('Auth Routes', () => {
       const client = createTestClient()
       const res = await client.api.auth.login.$post({
         json: {
-          email: 'login@example.com',
+          account: 'login@example.com',
           password: 'password123',
         },
       })
@@ -183,11 +183,36 @@ describe('Auth Routes', () => {
       }
     })
 
-    it('should reject login with wrong email', async () => {
+    it('should login with valid credentials via username', async () => {
+      await seedDeveloper({
+        username: 'loginuser',
+        email: 'loginuser@example.com',
+        password: 'password123',
+        apiKey: 'username-login-key',
+      })
+
       const client = createTestClient()
       const res = await client.api.auth.login.$post({
         json: {
-          email: 'nonexistent@example.com',
+          account: 'loginuser',
+          password: 'password123',
+        },
+      })
+
+      expect(res.status).toBe(200)
+      const data = await res.json()
+      expect(data.success).toBe(true)
+      if (data.success) {
+        expect(data.data.token).toBe('username-login-key')
+        expect(data.data.profile.username).toBe('loginuser')
+      }
+    })
+
+    it('should reject login with wrong account', async () => {
+      const client = createTestClient()
+      const res = await client.api.auth.login.$post({
+        json: {
+          account: 'nonexistent@example.com',
           password: 'password123',
         },
       })
@@ -204,24 +229,12 @@ describe('Auth Routes', () => {
       const client = createTestClient()
       const res = await client.api.auth.login.$post({
         json: {
-          email: 'wrongpw@example.com',
+          account: 'wrongpw@example.com',
           password: 'wrongpassword',
         },
       })
 
       expect(res.status).toBe(401)
-    })
-
-    it('should reject login with invalid email format', async () => {
-      const client = createTestClient()
-      const res = await client.api.auth.login.$post({
-        json: {
-          email: 'not-an-email',
-          password: 'password123',
-        },
-      })
-
-      expect([400, 422]).toContain(res.status)
     })
 
     it('should reject login with missing fields', async () => {
@@ -245,7 +258,7 @@ describe('Auth Routes', () => {
       const client = createTestClient()
       const res = await client.api.auth.login.$post({
         json: {
-          email: 'complete@example.com',
+          account: 'complete@example.com',
           password: 'password123',
         },
       })
@@ -347,7 +360,7 @@ describe('Auth Routes', () => {
 
       const loginRes = await client.api.auth.login.$post({
         json: {
-          email: 'flow@example.com',
+          account: 'flow@example.com',
           password: 'flowpass123',
         },
       })
@@ -384,7 +397,7 @@ describe('Auth Routes', () => {
 
       const loginRes = await client.api.auth.login.$post({
         json: {
-          email: 'wrongpw@example.com',
+          account: 'wrongpw@example.com',
           password: 'wrongpass',
         },
       })

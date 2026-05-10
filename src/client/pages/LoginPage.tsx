@@ -7,7 +7,7 @@ import { Package } from 'lucide-react'
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate()
   const setToken = useAuthStore(s => s.setToken)
-  const [email, setEmail] = useState('')
+  const [account, setAccount] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
@@ -19,7 +19,7 @@ export const LoginPage: React.FC = () => {
 
     try {
       const res = await apiClient.api.auth.login.$post({
-        json: { email, password },
+        json: { account, password },
       })
       const result = await res.json()
 
@@ -27,7 +27,7 @@ export const LoginPage: React.FC = () => {
         setToken(result.data.token)
         navigate('/developer')
       } else {
-        setError('Invalid email or password')
+        setError('Invalid account or password')
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed')
@@ -58,17 +58,17 @@ export const LoginPage: React.FC = () => {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-              Email
+            <label htmlFor="account" className="block text-sm font-medium text-gray-700 mb-1">
+              Email or Username
             </label>
             <input
-              id="email"
-              type="email"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
+              id="account"
+              type="text"
+              value={account}
+              onChange={e => setAccount(e.target.value)}
               required
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-              placeholder="you@example.com"
+              placeholder="Email or username"
               data-testid="login-email"
             />
           </div>

@@ -161,7 +161,7 @@ describe('Auth Service', () => {
   })
 
   describe('loginDeveloper', () => {
-    it('should login with valid credentials', async () => {
+    it('should login with valid credentials via email', async () => {
       await seedDeveloper({
         id: 'dev-login-1',
         email: 'login@example.com',
@@ -170,7 +170,7 @@ describe('Auth Service', () => {
       })
 
       const result = await authService.loginDeveloper({
-        email: 'login@example.com',
+        account: 'login@example.com',
         password: 'password123',
       })
 
@@ -181,20 +181,38 @@ describe('Auth Service', () => {
       expect(result.profile.username).toBe('testdev')
     })
 
-    it('should throw AuthenticationError for non-existent email', async () => {
+    it('should login with valid credentials via username', async () => {
+      await seedDeveloper({
+        id: 'dev-login-2',
+        username: 'specialuser',
+        email: 'special@example.com',
+        password: 'password123',
+        apiKey: 'username-api-key',
+      })
+
+      const result = await authService.loginDeveloper({
+        account: 'specialuser',
+        password: 'password123',
+      })
+
+      expect(result.token).toBe('username-api-key')
+      expect(result.profile.username).toBe('specialuser')
+    })
+
+    it('should throw AuthenticationError for non-existent account', async () => {
       await expect(
         authService.loginDeveloper({
-          email: 'nonexistent@example.com',
+          account: 'nonexistent@example.com',
           password: 'password123',
         })
       ).rejects.toThrow(AuthenticationError)
 
       await expect(
         authService.loginDeveloper({
-          email: 'nonexistent@example.com',
+          account: 'nonexistent@example.com',
           password: 'password123',
         })
-      ).rejects.toThrow('Invalid email or password')
+      ).rejects.toThrow('Invalid account or password')
     })
 
     it('should throw AuthenticationError for wrong password', async () => {
@@ -205,17 +223,17 @@ describe('Auth Service', () => {
 
       await expect(
         authService.loginDeveloper({
-          email: 'wrongpass@example.com',
+          account: 'wrongpass@example.com',
           password: 'wrongpassword',
         })
       ).rejects.toThrow(AuthenticationError)
 
       await expect(
         authService.loginDeveloper({
-          email: 'wrongpass@example.com',
+          account: 'wrongpass@example.com',
           password: 'wrongpassword',
         })
-      ).rejects.toThrow('Invalid email or password')
+      ).rejects.toThrow('Invalid account or password')
     })
 
     it('should return the API key as the token', async () => {
@@ -227,7 +245,7 @@ describe('Auth Service', () => {
       })
 
       const result = await authService.loginDeveloper({
-        email: 'apikey@example.com',
+        account: 'apikey@example.com',
         password: 'password123',
       })
 
@@ -243,7 +261,7 @@ describe('Auth Service', () => {
       })
 
       const result = await authService.loginDeveloper({
-        email: 'profile@example.com',
+        account: 'profile@example.com',
         password: 'password123',
       })
 
