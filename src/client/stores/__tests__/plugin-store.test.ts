@@ -124,10 +124,10 @@ describe('pluginStore', () => {
       data: { items: [], total: 0, page: 2, limit: 10 },
     })
 
-    await usePluginStore.getState().fetchPlugins({ page: 2, limit: 10, sort: 'downloads', featured: true })
+    await usePluginStore.getState().fetchPlugins({ page: 2, limit: 10, sort: 'most_downloaded', featured: true })
 
     expect(pluginApi.list).toHaveBeenCalledWith(
-      expect.objectContaining({ page: 2, limit: 10, sort: 'downloads', featured: true })
+      expect.objectContaining({ page: 2, limit: 10, sort: 'most_downloaded', featured: true })
     )
   })
 

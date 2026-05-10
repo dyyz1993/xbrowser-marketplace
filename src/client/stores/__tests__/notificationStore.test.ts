@@ -40,13 +40,13 @@ function mockNotification(overrides: Partial<AppNotification> = {}): AppNotifica
 }
 
 function createMockSSEClient() {
-  const listeners: Record<string, Function[]> = {}
+  const listeners: Record<string, Array<(...args: unknown[]) => void>> = {}
   let statusListener: ((s: string) => void) | null = null
   return {
     onStatusChange: vi.fn((cb: (s: string) => void) => {
       statusListener = cb
     }),
-    on: vi.fn((event: string, cb: Function) => {
+    on: vi.fn((event: string, cb: (...args: unknown[]) => void) => {
       if (!listeners[event]) listeners[event] = []
       listeners[event].push(cb)
     }),

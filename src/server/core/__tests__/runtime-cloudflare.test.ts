@@ -160,7 +160,7 @@ describe('CloudflareRuntimeAdapter', () => {
     })
 
     const response = await adapter.handleBroadcastRequest(request)
-    const result = await response.json()
+    const result = (await response.json()) as { success: boolean; sseRecipients: number }
 
     expect(result.success).toBe(true)
     expect(result.sseRecipients).toBe(1)

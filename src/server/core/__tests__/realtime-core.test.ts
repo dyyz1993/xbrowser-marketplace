@@ -56,10 +56,10 @@ describe('createRealtimeCore', () => {
       core.wsClients.set('ws1', { id: 'ws1', send: wsSend, close: vi.fn() })
       core.sseClients.set('sse1', { id: 'sse1', send: sseSend })
 
-      core.broadcast({ data: 'test' })
+      core.broadcast({ data: 'test' }, [], 'test')
 
-      expect(wsSend).toHaveBeenCalledWith({ type: 'notification', payload: { data: 'test' } })
-      expect(sseSend).toHaveBeenCalledWith('event: notification\ndata: {"data":"test"}\n\n')
+      expect(wsSend).toHaveBeenCalledWith({ type: 'test', payload: { data: 'test' } })
+      expect(sseSend).toHaveBeenCalledWith('event: test\ndata: {"data":"test"}\n\n')
     })
 
     it('should remove WS client when send throws', () => {
@@ -68,7 +68,7 @@ describe('createRealtimeCore', () => {
       })
       core.wsClients.set('ws1', { id: 'ws1', send, close: vi.fn() })
 
-      core.broadcast({ msg: 'hello' })
+      core.broadcast({ msg: 'hello' }, [], 'test')
 
       expect(core.wsClients.has('ws1')).toBe(false)
     })
@@ -79,13 +79,13 @@ describe('createRealtimeCore', () => {
       })
       core.sseClients.set('sse1', { id: 'sse1', send })
 
-      core.broadcast({ msg: 'hello' })
+      core.broadcast({ msg: 'hello' }, [], 'test')
 
       expect(core.sseClients.has('sse1')).toBe(false)
     })
 
     it('should handle broadcast with no clients', () => {
-      expect(() => core.broadcast({ msg: 'hello' })).not.toThrow()
+      expect(() => core.broadcast({ msg: 'hello' }, [], 'test')).not.toThrow()
     })
   })
 

@@ -42,9 +42,10 @@ describe('createTypedRuntime', () => {
     typed.registerRPC('echo', handler)
 
     const send = vi.fn()
-    const adapter = typed.adapter as NodeRuntimeAdapter
-    adapter.core.wsClients.set('client1', { id: 'client1', send, close: vi.fn() })
-    adapter.core.handleWSMessage('client1', {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const internal = typed.adapter as any
+    internal.core.wsClients.set('client1', { id: 'client1', send, close: vi.fn() })
+    internal.core.handleWSMessage('client1', {
       method: 'echo',
       id: '1',
       params: { message: 'hello' },
@@ -59,9 +60,10 @@ describe('createTypedRuntime', () => {
     typed.registerEvent('notification', handler)
 
     const send = vi.fn()
-    const adapter = typed.adapter as NodeRuntimeAdapter
-    adapter.core.wsClients.set('client1', { id: 'client1', send, close: vi.fn() })
-    adapter.core.handleWSMessage('client1', {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const internal = typed.adapter as any
+    internal.core.wsClients.set('client1', { id: 'client1', send, close: vi.fn() })
+    internal.core.handleWSMessage('client1', {
       type: 'notification',
       payload: { text: 'hello' },
     })
@@ -71,8 +73,9 @@ describe('createTypedRuntime', () => {
 
   it('should broadcast through runtime', () => {
     const sseSend = vi.fn()
-    const adapter = typed.adapter as NodeRuntimeAdapter
-    adapter.core.sseClients.set('sse1', { id: 'sse1', send: sseSend })
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const internal = typed.adapter as any
+    internal.core.sseClients.set('sse1', { id: 'sse1', send: sseSend })
 
     typed.broadcast('notification', { text: 'alert' })
 
@@ -85,9 +88,10 @@ describe('createTypedRuntime', () => {
   it('should broadcast with exclude list', () => {
     const send1 = vi.fn()
     const send2 = vi.fn()
-    const adapter = typed.adapter as NodeRuntimeAdapter
-    adapter.core.sseClients.set('sse1', { id: 'sse1', send: send1 })
-    adapter.core.sseClients.set('sse2', { id: 'sse2', send: send2 })
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const internal = typed.adapter as any
+    internal.core.sseClients.set('sse1', { id: 'sse1', send: send1 })
+    internal.core.sseClients.set('sse2', { id: 'sse2', send: send2 })
 
     typed.broadcast('update', { id: '123', value: 42 }, ['sse1'])
 

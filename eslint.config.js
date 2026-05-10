@@ -219,6 +219,7 @@ export default tseslint.config(
       'eslint.config.js',
       'patches/**/*',
     ],
+    ignores: ['**/__tests__/**'],
     plugins: {
       'local-rules': localRules,
     },

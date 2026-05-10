@@ -1,7 +1,8 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { NodeRuntimeAdapter, getNodeRuntimeAdapter } from '../runtime-node'
+import type { WebSocket as WSWebSocket } from 'ws'
 
-function createMockWebSocket(overrides?: Record<string, unknown>) {
+function createMockWebSocket(overrides?: Record<string, unknown>): WSWebSocket {
   const listeners: Record<string, Array<(...args: unknown[]) => void>> = {}
   return {
     readyState: 1,
@@ -15,7 +16,13 @@ function createMockWebSocket(overrides?: Record<string, unknown>) {
       for (const handler of listeners[event] || []) handler(...args)
     },
     ...overrides,
-  }
+  } as unknown as WSWebSocket
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function getInternal(adapter: NodeRuntimeAdapter): any {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return adapter as any
 }
 
 describe('NodeRuntimeAdapter', () => {
@@ -58,7 +65,7 @@ describe('NodeRuntimeAdapter', () => {
   describe('broadcast', () => {
     it('should broadcast to SSE clients', () => {
       const send = vi.fn()
-      adapter.core.sseClients.set('sse1', { id: 'sse1', send })
+      getInternal(adapter).core.sseClients.set('sse1', { id: 'sse1', send })
 
       adapter.broadcast('test-event', { data: 'hello' })
 
@@ -67,7 +74,7 @@ describe('NodeRuntimeAdapter', () => {
 
     it('should broadcast to WS clients', () => {
       const send = vi.fn()
-      adapter.core.wsClients.set('ws1', { id: 'ws1', send, close: vi.fn() })
+      getInternal(adapter).core.wsClients.set('ws1', { id: 'ws1', send, close: vi.fn() })
 
       adapter.broadcast('test-event', { data: 'hello' })
 
@@ -81,8 +88,8 @@ describe('NodeRuntimeAdapter', () => {
       const handler = vi.fn(() => ({ echoed: true }))
 
       adapter.registerRPC('echo', handler)
-      adapter.core.wsClients.set('ws1', { id: 'ws1', send, close: vi.fn() })
-      adapter.core.handleWSMessage('ws1', { method: 'echo', id: '1', params: { msg: 'hi' } })
+      getInternal(adapter).core.wsClients.set('ws1', { id: 'ws1', send, close: vi.fn() })
+      getInternal(adapter).core.handleWSMessage('ws1', { method: 'echo', id: '1', params: { msg: 'hi' } })
 
       expect(handler).toHaveBeenCalledWith({ msg: 'hi' }, 'ws1')
       expect(send).toHaveBeenCalledWith({ id: '1', result: { echoed: true } })
@@ -95,8 +102,8 @@ describe('NodeRuntimeAdapter', () => {
       adapter.registerEvent('chat', handler)
 
       const wsSend = vi.fn()
-      adapter.core.wsClients.set('ws1', { id: 'ws1', send: wsSend, close: vi.fn() })
-      adapter.core.handleWSMessage('ws1', { type: 'chat', payload: { text: 'hello' } })
+      getInternal(adapter).core.wsClients.set('ws1', { id: 'ws1', send: wsSend, close: vi.fn() })
+      getInternal(adapter).core.handleWSMessage('ws1', { type: 'chat', payload: { text: 'hello' } })
 
       expect(handler).toHaveBeenCalledWith({ text: 'hello' }, 'ws1')
     })
@@ -139,7 +146,7 @@ describe('NodeRuntimeAdapter', () => {
       const ws = createMockWebSocket()
       const handler = vi.fn(() => 'result')
       adapter.registerRPC('echo', handler)
-      const conn = adapter.handleConnection(ws)
+      adapter.handleConnection(ws)
 
       ws.emit('message', Buffer.from(JSON.stringify({ method: 'echo', id: '1', params: {} })))
 
@@ -211,7 +218,7 @@ describe('NodeRuntimeAdapter', () => {
       const ws = createMockWebSocket({ readyState: 0 })
       const conn = adapter.handleConnection(ws)
 
-      ws.send.mockClear()
+      ;(ws.send as ReturnType<typeof vi.fn>).mockClear()
       conn.send({ test: true })
 
       expect(ws.send).not.toHaveBeenCalled()

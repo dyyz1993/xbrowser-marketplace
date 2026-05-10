@@ -78,6 +78,7 @@ describe('autoRegisterRealtime', () => {
   })
 
   it('should skip routes without websocket or SSE content types', () => {
+    /* eslint-disable local-rules/require-response-helpers */
     const jsonRoute = createRoute({
       method: 'get',
       path: '/api/todos-json',
@@ -88,6 +89,7 @@ describe('autoRegisterRealtime', () => {
         },
       },
     })
+    /* eslint-enable local-rules/require-response-helpers */
 
     const app = new OpenAPIHono().openapi(jsonRoute, async c => c.json([]))
     autoRegisterRealtime(app)
