@@ -1,37 +1,6 @@
 import { Command } from 'commander'
-import { getClient } from '../../utils/api'
+import { getClient, loadConfig, saveConfig } from '../../utils/api'
 import { getLogger } from '../../utils/logger'
-import * as fs from 'node:fs'
-import * as path from 'node:path'
-import * as os from 'node:os'
-
-const CONFIG_DIR = path.join(os.homedir(), '.xbrowser-marketplace')
-const CONFIG_FILE = path.join(CONFIG_DIR, 'config.json')
-
-// eslint-disable-next-line local-rules/prefer-shared-types
-interface CliConfig {
-  baseUrl?: string
-  token?: string
-  user?: { id: string; username: string; email: string; role: string }
-}
-
-function loadConfig(): CliConfig {
-  try {
-    if (fs.existsSync(CONFIG_FILE)) {
-      return JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf-8'))
-    }
-  } catch {
-    // ignore
-  }
-  return {}
-}
-
-function saveConfig(config: CliConfig) {
-  if (!fs.existsSync(CONFIG_DIR)) {
-    fs.mkdirSync(CONFIG_DIR, { recursive: true })
-  }
-  fs.writeFileSync(CONFIG_FILE, JSON.stringify(config, null, 2))
-}
 
 export function registerAuthCommands(program: Command) {
   const auth = program.command('auth').description('Authentication commands')

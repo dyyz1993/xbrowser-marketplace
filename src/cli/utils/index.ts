@@ -1,5 +1,13 @@
 export { createLogger, getLogger, Logger, type LogLevel, type LoggerOptions } from './logger'
-export { setBaseUrl, getBaseUrl, getClient } from './api'
+export {
+  setBaseUrl,
+  getBaseUrl,
+  getClient,
+  getAuthToken,
+  loadConfig,
+  saveConfig,
+  getConfigPath,
+} from './api'
 export {
   registerAutoCommand,
   createCommandFromRoute,

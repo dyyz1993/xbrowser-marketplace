@@ -9,9 +9,17 @@ class Logger {
   private level: LogLevel = 'info'
 
   constructor(options: LoggerOptions = {}) {
-    if (options.debug || process.env.BIOMIMIC_DEBUG === 'true') {
+    if (
+      options.debug ||
+      process.env.XBROWSER_DEBUG === 'true' ||
+      process.env.BIOMIMIC_DEBUG === 'true'
+    ) {
       this.level = 'debug'
-    } else if (options.verbose || process.env.BIOMIMIC_VERBOSE === 'true') {
+    } else if (
+      options.verbose ||
+      process.env.XBROWSER_VERBOSE === 'true' ||
+      process.env.BIOMIMIC_VERBOSE === 'true'
+    ) {
       this.level = 'info'
     }
   }

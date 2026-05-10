@@ -1,40 +1,13 @@
 import { Command } from 'commander'
-import { getBaseUrl, setBaseUrl, getClient } from '../../utils/api'
+import {
+  getBaseUrl,
+  setBaseUrl,
+  getClient,
+  loadConfig,
+  saveConfig,
+  getConfigPath,
+} from '../../utils/api'
 import { getLogger } from '../../utils/logger'
-import fs from 'fs'
-import path from 'path'
-import os from 'os'
-
-const CONFIG_DIR = path.join(os.homedir(), '.xbrowser-marketplace')
-const CONFIG_FILE = path.join(CONFIG_DIR, 'config.json')
-
-interface Config {
-  baseUrl: string
-  stats?: {
-    totalCalls: number
-    lastCallAt?: string
-    commands?: Record<string, number>
-  }
-}
-
-function loadConfig(): Config {
-  try {
-    if (fs.existsSync(CONFIG_FILE)) {
-      const content = fs.readFileSync(CONFIG_FILE, 'utf-8')
-      return JSON.parse(content)
-    }
-  } catch {
-    // ignore
-  }
-  return { baseUrl: 'http://localhost:3000' }
-}
-
-function saveConfig(config: Config) {
-  if (!fs.existsSync(CONFIG_DIR)) {
-    fs.mkdirSync(CONFIG_DIR, { recursive: true })
-  }
-  fs.writeFileSync(CONFIG_FILE, JSON.stringify(config, null, 2))
-}
 
 export function registerConfigCommands(program: Command) {
   const config = program.command('config').description('CLI configuration and service management')
@@ -114,9 +87,8 @@ export function registerConfigCommands(program: Command) {
     .description('Reset configuration to defaults')
     .action(() => {
       const logger = getLogger()
-      const defaultConfig: Config = { baseUrl: 'http://localhost:3000' }
-      saveConfig(defaultConfig)
-      setBaseUrl(defaultConfig.baseUrl)
+      saveConfig({ baseUrl: 'http://localhost:3000' })
+      setBaseUrl('http://localhost:3000')
       logger.success('Configuration reset to defaults')
     })
 
@@ -125,8 +97,8 @@ export function registerConfigCommands(program: Command) {
     .description('Show config file path')
     .action(() => {
       const logger = getLogger()
-      logger.info(`Config file: ${CONFIG_FILE}`)
+      logger.info(`Config file: ${getConfigPath()}`)
     })
 }
 
-export { loadConfig, saveConfig, CONFIG_FILE }
+export { loadConfig, saveConfig, getConfigPath }

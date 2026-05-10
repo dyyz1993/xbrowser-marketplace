@@ -6,19 +6,21 @@ import { extendHonoClient, type ExtendedClientOptions } from '@shared/core/hono-
 
 export type { AppType }
 
-/**
- * CLI RPC 请求扩展参数
- */
 export interface CliFetchExtendOptions {
-  /** 是否显示详细日志 */
   verbose?: boolean
-  /** 超时时间 */
   timeout?: number
 }
 
-export function createRPCClient(baseUrl: string) {
+export function createRPCClient(baseUrl: string, token?: string) {
   return extendHonoClient(
     hc<ClientApiType>(baseUrl, {
+      fetch: (input: RequestInfo | URL, init?: RequestInit) => {
+        const headers = new Headers(init?.headers)
+        if (token) {
+          headers.set('Authorization', `Bearer ${token}`)
+        }
+        return globalThis.fetch(input, { ...init, headers })
+      },
       webSocket: url => new WSClientImpl(url),
       sse: url => new SSEClientImpl(url),
     } as ExtendedClientOptions)
