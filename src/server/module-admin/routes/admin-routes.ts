@@ -10,6 +10,8 @@ import { orderRoutes } from './order-routes'
 import { ticketRoutes } from './ticket-routes'
 import { disputeRoutes } from './dispute-routes'
 import { contentRoutes } from './content-routes'
+import { settingsRoutes } from './settings-routes'
+import { monitorRoutes } from './monitor-routes'
 
 const adminBase1 = new OpenAPIHono<{ Variables: { authUser: AuthUser } }>()
   .route('/', authRoutes)
@@ -23,6 +25,8 @@ const adminBase4 = adminBase3.route('/', orderRoutes).route('/', ticketRoutes)
 
 const adminBase5 = adminBase4.route('/', disputeRoutes).route('/', contentRoutes)
 
-export const adminRoutes = adminBase5
+const adminBase6 = adminBase5.route('/', settingsRoutes).route('/', monitorRoutes)
+
+export const adminRoutes = adminBase6
 
 export default adminRoutes

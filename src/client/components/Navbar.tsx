@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom'
-import { Plug, LayoutGrid, Terminal, Github } from 'lucide-react'
+import { Plug, LayoutGrid, Terminal, Github, Upload } from 'lucide-react'
 import { SearchBar } from './SearchBar'
 import { AuthButton } from './AuthButton'
 
@@ -16,6 +16,12 @@ export const Navbar: React.FC = () => {
           <div className="hidden lg:flex items-center gap-1">
             <NavLinkItem to="/categories" icon={LayoutGrid} label="Categories" />
             <NavLinkItem to="/cli" icon={Terminal} label="CLI" />
+            <NavLinkItem
+              to="/publish"
+              icon={Upload}
+              label="Publish"
+              data-testid="nav-publish-link"
+            />
           </div>
         </div>
 
@@ -43,9 +49,11 @@ const NavLinkItem: React.FC<{
   to: string
   icon: React.FC<{ className?: string }>
   label: string
-}> = ({ to, icon: Icon, label }) => (
+  'data-testid'?: string
+}> = ({ to, icon: Icon, label, 'data-testid': testId }) => (
   <NavLink
     to={to}
+    data-testid={testId}
     className={({ isActive }) =>
       `flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
         isActive ? 'bg-blue-50 text-blue-600' : 'text-gray-600 hover:bg-gray-100'

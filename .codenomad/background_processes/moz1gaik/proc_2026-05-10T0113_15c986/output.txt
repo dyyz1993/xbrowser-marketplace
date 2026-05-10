@@ -1,0 +1,104 @@
+
+> xbrowser-marketplace@0.1.0 dev
+> vite
+
+09:13:33 [vite] (client) Re-optimizing dependencies because vite config has changed
+Port 5173 is in use, trying another one...
+Port 5174 is in use, trying another one...
+Port 5175 is in use, trying another one...
+⚠️  WARNING: Dev tokens are ENABLED. Do not use in production!
+[WARN] MOCK_PASSWORD_HASH not set, using insecure default
+⚠️  WARNING: Dev tokens are ENABLED. Do not use in production!
+[WARN] MOCK_PASSWORD_HASH not set, using insecure default
+⚠️  WARNING: Dev tokens are ENABLED. Do not use in production!
+[WARN] MOCK_PASSWORD_HASH not set, using insecure default
+⚠️  WARNING: Dev tokens are ENABLED. Do not use in production!
+[WARN] MOCK_PASSWORD_HASH not set, using insecure default
+
+  VITE v6.4.1  ready in 1616 ms
+
+  ➜  Local:   http://localhost:5176/
+  ➜  Network: http://192.168.0.4:5176/
+[2026-05-10 09:13:33.650 +0800] [32mINFO[39m: [36m[bootstrap] Initializing database...[39m
+    [35mmodule[39m: "bootstrap"
+[2026-05-10 09:13:33.650 +0800] [34mDEBUG[39m: [36m[db] Creating database connection[39m
+    [35mmodule[39m: "db"
+    [35mdriver[39m: "sqlite"
+[2026-05-10 09:13:33.696 +0800] [34mDEBUG[39m: [36m[db] SQLite database created[39m
+    [35mmodule[39m: "db"
+    [35mpath[39m: "./data/development.db"
+[2026-05-10 09:13:33.697 +0800] [32mINFO[39m: [36m[db] Database connected[39m
+    [35mmodule[39m: "db"
+    [35mdriver[39m: "sqlite"
+[2026-05-10 09:13:33.718 +0800] [32mINFO[39m: [36m[db] Migrations applied[39m
+    [35mmodule[39m: "db"
+    [35mfolder[39m: "./drizzle"
+[2026-05-10 09:13:33.719 +0800] [32mINFO[39m: [36m[db] Initializing database...[39m
+    [35mmodule[39m: "db"
+[2026-05-10 09:13:33.726 +0800] [32mINFO[39m: [36m[db] Database initialization complete![39m
+    [35mmodule[39m: "db"
+[2026-05-10 09:13:33.726 +0800] [32mINFO[39m: [36m[bootstrap] Database ready[39m
+    [35mmodule[39m: "bootstrap"
+⚠️  WARNING: Dev tokens are ENABLED. Do not use in production!
+[WARN] MOCK_PASSWORD_HASH not set, using insecure default
+⚠️  WARNING: Dev tokens are ENABLED. Do not use in production!
+[WARN] MOCK_PASSWORD_HASH not set, using insecure default
+⚠️  WARNING: Dev tokens are ENABLED. Do not use in production!
+[WARN] MOCK_PASSWORD_HASH not set, using insecure default
+⚠️  WARNING: Dev tokens are ENABLED. Do not use in production!
+[WARN] MOCK_PASSWORD_HASH not set, using insecure default
+⚠️  WARNING: Dev tokens are ENABLED. Do not use in production!
+⚠️  WARNING: Dev tokens are ENABLED. Do not use in production!
+⚠️  WARNING: Dev tokens are ENABLED. Do not use in production!
+⚠️  WARNING: Dev tokens are ENABLED. Do not use in production!
+⚠️  WARNING: Dev tokens are ENABLED. Do not use in production!
+⚠️  WARNING: Dev tokens are ENABLED. Do not use in production!
+⚠️  WARNING: Dev tokens are ENABLED. Do not use in production!
+⚠️  WARNING: Dev tokens are ENABLED. Do not use in production!
+⚠️  WARNING: Dev tokens are ENABLED. Do not use in production!
+⚠️  WARNING: Dev tokens are ENABLED. Do not use in production!
+⚠️  WARNING: Dev tokens are ENABLED. Do not use in production!
+⚠️  WARNING: Dev tokens are ENABLED. Do not use in production!
+⚠️  WARNING: Dev tokens are ENABLED. Do not use in production!
+⚠️  WARNING: Dev tokens are ENABLED. Do not use in production!
+⚠️  WARNING: Dev tokens are ENABLED. Do not use in production!
+⚠️  WARNING: Dev tokens are ENABLED. Do not use in production!
+⚠️  WARNING: Dev tokens are ENABLED. Do not use in production!
+⚠️  WARNING: Dev tokens are ENABLED. Do not use in production!
+⚠️  WARNING: Dev tokens are ENABLED. Do not use in production!
+⚠️  WARNING: Dev tokens are ENABLED. Do not use in production!
+⚠️  WARNING: Dev tokens are ENABLED. Do not use in production!
+⚠️  WARNING: Dev tokens are ENABLED. Do not use in production!
+⚠️  WARNING: Dev tokens are ENABLED. Do not use in production!
+⚠️  WARNING: Dev tokens are ENABLED. Do not use in production!
+⚠️  WARNING: Dev tokens are ENABLED. Do not use in production!
+⚠️  WARNING: Dev tokens are ENABLED. Do not use in production!
+⚠️  WARNING: Dev tokens are ENABLED. Do not use in production!
+⚠️  WARNING: Dev tokens are ENABLED. Do not use in production!
+⚠️  WARNING: Dev tokens are ENABLED. Do not use in production!
+⚠️  WARNING: Dev tokens are ENABLED. Do not use in production!
+⚠️  WARNING: Dev tokens are ENABLED. Do not use in production!
+⚠️  WARNING: Dev tokens are ENABLED. Do not use in production!
+⚠️  WARNING: Dev tokens are ENABLED. Do not use in production!
+⚠️  WARNING: Dev tokens are ENABLED. Do not use in production!
+⚠️  WARNING: Dev tokens are ENABLED. Do not use in production!
+⚠️  WARNING: Dev tokens are ENABLED. Do not use in production!
+⚠️  WARNING: Dev tokens are ENABLED. Do not use in production!
+⚠️  WARNING: Dev tokens are ENABLED. Do not use in production!
+⚠️  WARNING: Dev tokens are ENABLED. Do not use in production!
+⚠️  WARNING: Dev tokens are ENABLED. Do not use in production!
+⚠️  WARNING: Dev tokens are ENABLED. Do not use in production!
+⚠️  WARNING: Dev tokens are ENABLED. Do not use in production!
+⚠️  WARNING: Dev tokens are ENABLED. Do not use in production!
+[WARN] MOCK_PASSWORD_HASH not set, using insecure default
+⚠️  WARNING: Dev tokens are ENABLED. Do not use in production!
+[WARN] MOCK_PASSWORD_HASH not set, using insecure default
+[2026-05-10 09:13:37.019 +0800] [34mDEBUG[39m: [36m[db] Creating database connection[39m
+    [35mmodule[39m: "db"
+    [35mdriver[39m: "sqlite"
+[2026-05-10 09:13:37.021 +0800] [34mDEBUG[39m: [36m[db] SQLite database created[39m
+    [35mmodule[39m: "db"
+    [35mpath[39m: "./data/development.db"
+[2026-05-10 09:13:37.021 +0800] [32mINFO[39m: [36m[db] Database connected[39m
+    [35mmodule[39m: "db"
+    [35mdriver[39m: "sqlite"

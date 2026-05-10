@@ -13,6 +13,12 @@ const NotificationPage = lazy(() =>
     default: m.NotificationPage,
   }))
 )
+const PublishPage = lazy(() =>
+  import('./pages/PublishPage').then(m => ({ default: m.PublishPage }))
+)
+const DeveloperDashboardPage = lazy(() =>
+  import('./pages/DeveloperDashboardPage').then(m => ({ default: m.DeveloperDashboardPage }))
+)
 
 function PageLoader() {
   return (
@@ -44,6 +50,22 @@ export const App: React.FC = () => {
             element={
               <Suspense fallback={<PageLoader />}>
                 <NotificationPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/publish"
+            element={
+              <Suspense fallback={<PageLoader />}>
+                <PublishPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/developer"
+            element={
+              <Suspense fallback={<PageLoader />}>
+                <DeveloperDashboardPage />
               </Suspense>
             }
           />

@@ -271,3 +271,36 @@ export const ContentListQuerySchema = z.object({
 })
 
 export const IdParamSchema = z.object({ id: z.string() })
+
+export const MonitorStatsSchema = z.object({
+  totalUsers: z.number(),
+  totalPlugins: z.number(),
+  totalOrders: z.number(),
+  totalTickets: z.number(),
+  totalDisputes: z.number(),
+  totalContents: z.number(),
+  pendingPlugins: z.number(),
+  openTickets: z.number(),
+  pendingOrders: z.number(),
+})
+
+export const RecentActivityEntrySchema = z.object({
+  id: z.union([z.string(), z.number()]),
+  type: z.enum(['plugin', 'order', 'ticket', 'dispute', 'user']),
+  title: z.string(),
+  status: z.string(),
+  createdAt: z.string(),
+})
+
+export const MonitorDataSchema = z.object({
+  stats: MonitorStatsSchema,
+  recentActivity: z.array(RecentActivityEntrySchema),
+  health: z.object({
+    database: z.enum(['connected', 'disconnected']),
+    uptime: z.number(),
+  }),
+})
+
+export type MonitorStats = z.infer<typeof MonitorStatsSchema>
+export type RecentActivityEntry = z.infer<typeof RecentActivityEntrySchema>
+export type MonitorData = z.infer<typeof MonitorDataSchema>

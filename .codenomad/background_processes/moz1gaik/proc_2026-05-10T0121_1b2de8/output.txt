@@ -1,0 +1,32 @@
+
+> xbrowser-marketplace@0.1.0 dev
+> vite
+
+09:21:16 [vite] (client) Re-optimizing dependencies because vite config has changed
+Port 5173 is in use, trying another one...
+Port 5174 is in use, trying another one...
+Port 5175 is in use, trying another one...
+[WARN] AUTH_SECRET_KEY not set, using insecure dev default. Set AUTH_SECRET_KEY in production!
+[WARN] MOCK_PASSWORD_HASH not set, using insecure default
+file:///Users/xuyingzhou/Project/study-node-ts/xbrowser-marketplace/node_modules/.vite-temp/vite.config.ts.timestamp-1778376075360-71462b2eb5fd58.mjs:383
+    throw new Error("FILE_SECRET_KEY environment variable is required in production");
+          ^
+
+Error: FILE_SECRET_KEY environment variable is required in production
+    at getAppConfig (file:///Users/xuyingzhou/Project/study-node-ts/xbrowser-marketplace/node_modules/.vite-temp/vite.config.ts.timestamp-1778376075360-71462b2eb5fd58.mjs:383:11)
+    at createNodeLogger (file:///Users/xuyingzhou/Project/study-node-ts/xbrowser-marketplace/node_modules/.vite-temp/vite.config.ts.timestamp-1778376075360-71462b2eb5fd58.mjs:814:19)
+    at createModuleLoggerSync (file:///Users/xuyingzhou/Project/study-node-ts/xbrowser-marketplace/node_modules/.vite-temp/vite.config.ts.timestamp-1778376075360-71462b2eb5fd58.mjs:865:19)
+    at Object.db (file:///Users/xuyingzhou/Project/study-node-ts/xbrowser-marketplace/node_modules/.vite-temp/vite.config.ts.timestamp-1778376075360-71462b2eb5fd58.mjs:878:17)
+    at src/server/db/driver.ts (file:///Users/xuyingzhou/Project/study-node-ts/xbrowser-marketplace/node_modules/.vite-temp/vite.config.ts.timestamp-1778376075360-71462b2eb5fd58.mjs:979:18)
+    at __init (file:///Users/xuyingzhou/Project/study-node-ts/xbrowser-marketplace/node_modules/.vite-temp/vite.config.ts.timestamp-1778376075360-71462b2eb5fd58.mjs:4:56)
+    at src/server/db/index.ts (file:///Users/xuyingzhou/Project/study-node-ts/xbrowser-marketplace/node_modules/.vite-temp/vite.config.ts.timestamp-1778376075360-71462b2eb5fd58.mjs:1021:5)
+    at __init (file:///Users/xuyingzhou/Project/study-node-ts/xbrowser-marketplace/node_modules/.vite-temp/vite.config.ts.timestamp-1778376075360-71462b2eb5fd58.mjs:4:56)
+    at file:///Users/xuyingzhou/Project/study-node-ts/xbrowser-marketplace/node_modules/.vite-temp/vite.config.ts.timestamp-1778376075360-71462b2eb5fd58.mjs:1746:102
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+
+Node.js v25.2.1
+
+  VITE v6.4.1  ready in 2278 ms
+
+  ➜  Local:   http://localhost:5176/
+  ➜  Network: http://192.168.0.4:5176/
