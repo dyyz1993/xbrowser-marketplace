@@ -1,6 +1,15 @@
 import { Card, Row, Col, Statistic, Table, Tag, Spin, Alert } from 'antd'
 import { useEffect, useState } from 'react'
-import { Activity, Package, ShoppingCart, Ticket, AlertTriangle, Database, Clock, Users } from 'lucide-react'
+import {
+  Activity,
+  Package,
+  ShoppingCart,
+  Ticket,
+  AlertTriangle,
+  Database,
+  Clock,
+  Users,
+} from 'lucide-react'
 import { apiClient } from '../services/apiClient'
 
 interface MonitorStats {
@@ -217,7 +226,13 @@ export const MonitorPage: React.FC = () => {
       </Row>
 
       <Card title="Recent Activity">
-        <Table dataSource={activity} columns={activityColumns} rowKey="id" pagination={false} size="small" />
+        <Table
+          dataSource={activity}
+          columns={activityColumns}
+          rowKey="id"
+          pagination={false}
+          size="small"
+        />
       </Card>
     </div>
   )

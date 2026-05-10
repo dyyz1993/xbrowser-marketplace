@@ -90,7 +90,10 @@ export const PublishPage: React.FC = () => {
     }
 
     const nativeForm = new window.FormData()
-    nativeForm.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }))
+    nativeForm.append(
+      'metadata',
+      new Blob([JSON.stringify(metadata)], { type: 'application/json' })
+    )
 
     if (form.file) {
       nativeForm.append('files', form.file)

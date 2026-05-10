@@ -30,8 +30,18 @@ vi.mock('../../stores/authStore', () => ({
 
 vi.mock('react-router-dom', () => ({
   useNavigate: () => vi.fn(),
-  Link: ({ children, to, ...props }: { children: React.ReactNode; to: string; [key: string]: unknown }) => (
-    <a href={to} {...props}>{children}</a>
+  Link: ({
+    children,
+    to,
+    ...props
+  }: {
+    children: React.ReactNode
+    to: string
+    [key: string]: unknown
+  }) => (
+    <a href={to} {...props}>
+      {children}
+    </a>
   ),
 }))
 

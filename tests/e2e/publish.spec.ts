@@ -150,7 +150,9 @@ test.describe('Plugin Publishing Flow', () => {
     await page.waitForLoadState('load')
 
     await expect(
-      page.locator('[data-testid="developer-dashboard-page"], [data-testid="developer-dashboard-auth-required"]')
+      page.locator(
+        '[data-testid="developer-dashboard-page"], [data-testid="developer-dashboard-auth-required"]'
+      )
     ).toBeVisible({ timeout: 15000 })
   })
 })

@@ -100,7 +100,9 @@ export const SettingsPage: React.FC = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="font-medium">Email Notifications</p>
-              <p className="text-sm text-gray-500">Receive email notifications for important updates</p>
+              <p className="text-sm text-gray-500">
+                Receive email notifications for important updates
+              </p>
             </div>
             <Form form={form} layout="vertical">
               <Form.Item name="emailNotifications" valuePropName="checked" noStyle>

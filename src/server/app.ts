@@ -7,7 +7,12 @@ import React from 'react'
 import type { AppBindings, CreateAppOptions } from './types/bindings'
 import { AppError } from './utils/app-error'
 import { autoRegisterRealtime } from './core/realtime-scanner'
-import { corsMiddleware, loggerMiddleware, errorHandlerMiddleware, authMiddleware } from './middleware'
+import {
+  corsMiddleware,
+  loggerMiddleware,
+  errorHandlerMiddleware,
+  authMiddleware,
+} from './middleware'
 import { Role } from '@shared/modules/permission'
 import { realtimeEnvMiddleware } from './middleware/realtime-env'
 import { captchaMiddleware } from './middleware/captcha'

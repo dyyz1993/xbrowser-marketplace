@@ -354,7 +354,9 @@ export async function getPluginsByCategory(
   return { items, total: countRows.length }
 }
 
-export async function listMyPlugins(authorId: string): Promise<{ items: PluginListItem[]; total: number }> {
+export async function listMyPlugins(
+  authorId: string
+): Promise<{ items: PluginListItem[]; total: number }> {
   const db = await getDb()
 
   const rows: PluginRow[] = await db

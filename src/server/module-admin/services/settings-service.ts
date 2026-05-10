@@ -18,13 +18,14 @@ export async function getAllSettings(): Promise<
     key: r.key,
     value: r.value,
     description: r.description,
-    updatedAt: r.updatedAt instanceof Date ? r.updatedAt.toISOString() : new Date(Number(r.updatedAt) * 1000).toISOString(),
+    updatedAt:
+      r.updatedAt instanceof Date
+        ? r.updatedAt.toISOString()
+        : new Date(Number(r.updatedAt) * 1000).toISOString(),
   }))
 }
 
-export async function getSettingByKey(
-  key: string
-): Promise<{
+export async function getSettingByKey(key: string): Promise<{
   id: number
   key: string
   value: string
@@ -40,7 +41,10 @@ export async function getSettingByKey(
     key: r.key,
     value: r.value,
     description: r.description,
-    updatedAt: r.updatedAt instanceof Date ? r.updatedAt.toISOString() : new Date(Number(r.updatedAt) * 1000).toISOString(),
+    updatedAt:
+      r.updatedAt instanceof Date
+        ? r.updatedAt.toISOString()
+        : new Date(Number(r.updatedAt) * 1000).toISOString(),
   }
 }
 
@@ -69,7 +73,10 @@ export async function upsertSetting(
       key: r.key,
       value: r.value,
       description: r.description,
-      updatedAt: r.updatedAt instanceof Date ? r.updatedAt.toISOString() : new Date(Number(r.updatedAt) * 1000).toISOString(),
+      updatedAt:
+        r.updatedAt instanceof Date
+          ? r.updatedAt.toISOString()
+          : new Date(Number(r.updatedAt) * 1000).toISOString(),
     }
   }
   const insertData: Record<string, unknown> = { key, value, updatedAt: now }
@@ -81,7 +88,10 @@ export async function upsertSetting(
     key: r.key,
     value: r.value,
     description: r.description,
-    updatedAt: r.updatedAt instanceof Date ? r.updatedAt.toISOString() : new Date(Number(r.updatedAt) * 1000).toISOString(),
+    updatedAt:
+      r.updatedAt instanceof Date
+        ? r.updatedAt.toISOString()
+        : new Date(Number(r.updatedAt) * 1000).toISOString(),
   }
 }
 
