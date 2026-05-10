@@ -76,7 +76,7 @@ describe('LoginPage', () => {
 
     await waitFor(() => {
       expect(mockPost).toHaveBeenCalledWith({
-        json: { email: 'test@test.com', password: 'password123' },
+        json: { account: 'test@test.com', password: 'password123' },
       })
     })
   })

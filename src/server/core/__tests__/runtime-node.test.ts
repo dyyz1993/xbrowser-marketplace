@@ -89,7 +89,11 @@ describe('NodeRuntimeAdapter', () => {
 
       adapter.registerRPC('echo', handler)
       getInternal(adapter).core.wsClients.set('ws1', { id: 'ws1', send, close: vi.fn() })
-      getInternal(adapter).core.handleWSMessage('ws1', { method: 'echo', id: '1', params: { msg: 'hi' } })
+      getInternal(adapter).core.handleWSMessage('ws1', {
+        method: 'echo',
+        id: '1',
+        params: { msg: 'hi' },
+      })
 
       expect(handler).toHaveBeenCalledWith({ msg: 'hi' }, 'ws1')
       expect(send).toHaveBeenCalledWith({ id: '1', result: { echoed: true } })

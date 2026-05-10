@@ -132,7 +132,9 @@ describe('notificationStore', () => {
   })
 
   it('should handle fetch with non-Error thrown', async () => {
-    ;(apiClient.api.notifications.$get as ReturnType<typeof vi.fn>).mockRejectedValue('string error')
+    ;(apiClient.api.notifications.$get as ReturnType<typeof vi.fn>).mockRejectedValue(
+      'string error'
+    )
 
     await useNotificationStore.getState().fetchNotifications()
 
@@ -190,9 +192,11 @@ describe('notificationStore', () => {
       notifications: [mockNotification()],
       unreadCount: 1,
     })
-    ;(apiClient.api.notifications[':id'].read.$patch as ReturnType<typeof vi.fn>).mockResolvedValue({
-      json: () => Promise.resolve({ success: true }),
-    })
+    ;(apiClient.api.notifications[':id'].read.$patch as ReturnType<typeof vi.fn>).mockResolvedValue(
+      {
+        json: () => Promise.resolve({ success: true }),
+      }
+    )
 
     await useNotificationStore.getState().markAsRead('noti-1')
 
@@ -206,9 +210,11 @@ describe('notificationStore', () => {
       notifications: [mockNotification()],
       unreadCount: 0,
     })
-    ;(apiClient.api.notifications[':id'].read.$patch as ReturnType<typeof vi.fn>).mockResolvedValue({
-      json: () => Promise.resolve({ success: true }),
-    })
+    ;(apiClient.api.notifications[':id'].read.$patch as ReturnType<typeof vi.fn>).mockResolvedValue(
+      {
+        json: () => Promise.resolve({ success: true }),
+      }
+    )
 
     await useNotificationStore.getState().markAsRead('noti-1')
 
@@ -231,9 +237,11 @@ describe('notificationStore', () => {
       notifications: [mockNotification(), mockNotification({ id: 'noti-2', read: true })],
       unreadCount: 1,
     })
-    ;(apiClient.api.notifications['read-all'].$patch as ReturnType<typeof vi.fn>).mockResolvedValue({
-      json: () => Promise.resolve({ success: true }),
-    })
+    ;(apiClient.api.notifications['read-all'].$patch as ReturnType<typeof vi.fn>).mockResolvedValue(
+      {
+        json: () => Promise.resolve({ success: true }),
+      }
+    )
 
     await useNotificationStore.getState().markAllAsRead()
 
@@ -301,7 +309,9 @@ describe('notificationStore', () => {
   })
 
   it('should fetch unread count', async () => {
-    ;(apiClient.api.notifications['unread-count'].$get as ReturnType<typeof vi.fn>).mockResolvedValue({
+    ;(
+      apiClient.api.notifications['unread-count'].$get as ReturnType<typeof vi.fn>
+    ).mockResolvedValue({
       json: () => Promise.resolve({ success: true, data: { count: 5 } }),
     })
 
@@ -311,9 +321,9 @@ describe('notificationStore', () => {
   })
 
   it('should handle fetchUnreadCount error gracefully', async () => {
-    ;(apiClient.api.notifications['unread-count'].$get as ReturnType<typeof vi.fn>).mockRejectedValue(
-      new Error('fail')
-    )
+    ;(
+      apiClient.api.notifications['unread-count'].$get as ReturnType<typeof vi.fn>
+    ).mockRejectedValue(new Error('fail'))
 
     await useNotificationStore.getState().fetchUnreadCount()
 

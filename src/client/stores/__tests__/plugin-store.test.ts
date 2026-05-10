@@ -124,7 +124,9 @@ describe('pluginStore', () => {
       data: { items: [], total: 0, page: 2, limit: 10 },
     })
 
-    await usePluginStore.getState().fetchPlugins({ page: 2, limit: 10, sort: 'most_downloaded', featured: true })
+    await usePluginStore
+      .getState()
+      .fetchPlugins({ page: 2, limit: 10, sort: 'most_downloaded', featured: true })
 
     expect(pluginApi.list).toHaveBeenCalledWith(
       expect.objectContaining({ page: 2, limit: 10, sort: 'most_downloaded', featured: true })
@@ -140,9 +142,7 @@ describe('pluginStore', () => {
 
     await usePluginStore.getState().fetchPlugins()
 
-    expect(pluginApi.list).toHaveBeenCalledWith(
-      expect.objectContaining({ category: 'dev-tools' })
-    )
+    expect(pluginApi.list).toHaveBeenCalledWith(expect.objectContaining({ category: 'dev-tools' }))
   })
 
   it('should handle fetch plugins error', async () => {
@@ -254,7 +254,9 @@ describe('pluginStore', () => {
   })
 
   it('should handle searchPluginsAppend error', async () => {
-    ;(pluginApi.search as ReturnType<typeof vi.fn>).mockRejectedValue(new Error('Search append fail'))
+    ;(pluginApi.search as ReturnType<typeof vi.fn>).mockRejectedValue(
+      new Error('Search append fail')
+    )
 
     await usePluginStore.getState().searchPluginsAppend({ q: 'test' })
 
@@ -383,7 +385,15 @@ describe('pluginStore', () => {
   it('should keep existing categories on error if present', async () => {
     usePluginStore.setState({
       categories: [
-        { id: 'c1', name: 'Existing', slug: 'existing', description: null, icon: null, sortOrder: null, pluginCount: 1 },
+        {
+          id: 'c1',
+          name: 'Existing',
+          slug: 'existing',
+          description: null,
+          icon: null,
+          sortOrder: null,
+          pluginCount: 1,
+        },
       ],
     })
     ;(pluginApi.categories as ReturnType<typeof vi.fn>).mockRejectedValue(new Error('fail'))
@@ -430,9 +440,7 @@ describe('pluginStore', () => {
   it('should handle track install error gracefully', async () => {
     ;(pluginApi.trackInstall as ReturnType<typeof vi.fn>).mockRejectedValue(new Error('fail'))
 
-    await expect(
-      usePluginStore.getState().trackInstall('test-plugin')
-    ).resolves.toBeUndefined()
+    await expect(usePluginStore.getState().trackInstall('test-plugin')).resolves.toBeUndefined()
   })
 
   it('should update search query', () => {

@@ -12,10 +12,13 @@ const mockClientWS = {
   close: vi.fn(),
 }
 
-vi.stubGlobal('WebSocketPair', class WebSocketPair {
-  '0' = mockClientWS
-  '1' = mockServerWS
-})
+vi.stubGlobal(
+  'WebSocketPair',
+  class WebSocketPair {
+    '0' = mockClientWS
+    '1' = mockServerWS
+  }
+)
 
 vi.stubGlobal('crypto', {
   randomUUID: () => 'test-uuid-' + Math.random().toString(36).slice(2, 8),

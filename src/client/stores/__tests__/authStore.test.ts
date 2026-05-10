@@ -104,9 +104,9 @@ describe('authStore', () => {
       json: () => Promise.resolve({ success: false }),
     } as any)
 
-    await expect(
-      useAuthStore.getState().login('test@test.com', 'wrong')
-    ).rejects.toThrow('Login failed')
+    await expect(useAuthStore.getState().login('test@test.com', 'wrong')).rejects.toThrow(
+      'Login failed'
+    )
 
     expect(useAuthStore.getState().loading).toBe(false)
   })
@@ -114,9 +114,9 @@ describe('authStore', () => {
   it('should handle network error on login', async () => {
     vi.mocked(apiClient.api.auth.login.$post).mockRejectedValue(new Error('Network error'))
 
-    await expect(
-      useAuthStore.getState().login('test@test.com', 'password')
-    ).rejects.toThrow('Network error')
+    await expect(useAuthStore.getState().login('test@test.com', 'password')).rejects.toThrow(
+      'Network error'
+    )
 
     expect(useAuthStore.getState().loading).toBe(false)
   })

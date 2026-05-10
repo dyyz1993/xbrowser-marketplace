@@ -52,13 +52,14 @@ export async function registerDeveloper(data: {
   return toProfile(rows[0])
 }
 
-export async function loginDeveloper(data: { account: string; password: string }) {
+export async function loginDeveloper(data: { account?: string; email?: string; password: string }) {
   const db = await getDb()
+  const identifier = data.account || data.email || ''
 
   const rows = await db
     .select()
     .from(developers)
-    .where(or(eq(developers.email, data.account), eq(developers.username, data.account)))
+    .where(or(eq(developers.email, identifier), eq(developers.username, identifier)))
     .limit(1)
 
   if (rows.length === 0) {

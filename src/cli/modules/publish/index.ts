@@ -287,7 +287,9 @@ export function registerPublishCommands(program: Command) {
               if (existing.success && existing.data) {
                 const currentVersion = existing.data.version || existing.data.latestVersion
                 if (currentVersion === options.version) {
-                  logger.error(`Version '${options.version}' already exists for plugin '${options.slug}'`)
+                  logger.error(
+                    `Version '${options.version}' already exists for plugin '${options.slug}'`
+                  )
                   process.exit(1)
                 }
               }
