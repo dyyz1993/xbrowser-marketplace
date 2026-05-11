@@ -28,6 +28,11 @@ import {
 import * as pluginService from '../services/plugin-service'
 import { resolveDownloadUrl, R2Storage } from '../services/storage-service'
 import { parsePositiveInt } from '../../utils/parse'
+import { withApiCache, invalidateCache, invalidatePluginCache } from '../../utils/api-cache'
+
+function getCache(): KVNamespace | undefined {
+  return (globalThis as unknown as { API_CACHE?: KVNamespace }).API_CACHE
+}
 
 const listPluginsRoute = createRoute({
   method: 'get',
@@ -242,7 +247,9 @@ const getStatsRoute = createRoute({
 
 export const pluginRoutes = new OpenAPIHono()
   .openapi(listCategoriesRoute, async c => {
-    const categories = await pluginService.listCategories()
+    const categories = await withApiCache(getCache(), { key: 'categories:all', ttl: 1800 }, () =>
+      pluginService.listCategories()
+    )
     return c.json(success(categories), 200)
   })
   .openapi(getCategoryPluginsRoute, async c => {
@@ -255,22 +262,28 @@ export const pluginRoutes = new OpenAPIHono()
     return c.json(success(result), 200)
   })
   .openapi(getStatsRoute, async c => {
-    const stats = await pluginService.getStats()
+    const stats = await withApiCache(getCache(), { key: 'stats:overview', ttl: 300 }, () =>
+      pluginService.getStats()
+    )
     return c.json(success(stats), 200)
   })
   .openapi(listPluginsRoute, async c => {
     const query = c.req.valid('query')
     const page = parsePositiveInt(query.page, 1)
     const limit = parsePositiveInt(query.limit, 20)
-    const result = await pluginService.listPlugins({
-      page,
-      limit,
-      status: query.status,
-      category: query.category,
-      tag: query.tag,
-      sort: query.sort,
-      featured: query.featured === 'true' ? true : query.featured === 'false' ? false : undefined,
-    })
+    const sort = query.sort || 'newest'
+    const cacheKey = `plugins:list:${page}:${limit}:${sort}:${query.category || ''}:${query.tag || ''}:${query.status || ''}:${query.featured || ''}`
+    const result = await withApiCache(getCache(), { key: cacheKey, ttl: 300 }, () =>
+      pluginService.listPlugins({
+        page,
+        limit,
+        status: query.status,
+        category: query.category,
+        tag: query.tag,
+        sort: query.sort,
+        featured: query.featured === 'true' ? true : query.featured === 'false' ? false : undefined,
+      })
+    )
     return c.json(success({ ...result, page, limit }), 200)
   })
   .openapi(listMyPluginsRoute, async c => {
@@ -282,30 +295,40 @@ export const pluginRoutes = new OpenAPIHono()
     const query = c.req.valid('query')
     const page = parsePositiveInt(query.page, 1)
     const limit = parsePositiveInt(query.limit, 20)
-    const result = await pluginService.searchPlugins({
-      query: query.q,
-      tag: query.tag,
-      site: query.site,
-      category: query.category,
-      page,
-      limit,
-    })
+    const cacheKey = `plugins:search:${query.q}:${query.tag || ''}:${query.site || ''}:${query.category || ''}:${page}:${limit}`
+    const result = await withApiCache(getCache(), { key: cacheKey, ttl: 300 }, () =>
+      pluginService.searchPlugins({
+        query: query.q,
+        tag: query.tag,
+        site: query.site,
+        category: query.category,
+        page,
+        limit,
+      })
+    )
     return c.json(success({ ...result, page, limit }), 200)
   })
   .openapi(getPluginRoute, async c => {
     const { slug } = c.req.valid('param')
-    const plugin = await pluginService.getPluginBySlug(slug)
+    const plugin = await withApiCache(getCache(), { key: `plugins:detail:${slug}`, ttl: 300 }, () =>
+      pluginService.getPluginBySlug(slug)
+    )
     return c.json(success(plugin), 200)
   })
   .openapi(getPluginVersionsRoute, async c => {
     const { slug } = c.req.valid('param')
-    const versions = await pluginService.getPluginVersions(slug)
+    const versions = await withApiCache(
+      getCache(),
+      { key: `plugins:versions:${slug}`, ttl: 300 },
+      () => pluginService.getPluginVersions(slug)
+    )
     return c.json(success(versions), 200)
   })
   .openapi(createPluginRoute, async c => {
     const data = c.req.valid('json')
     const user = c.get('authUser')
     const plugin = await pluginService.createPlugin(data, user.id, user.username)
+    await invalidatePluginCache(getCache())
     return c.json(created(plugin), 201)
   })
   .openapi(updatePluginRoute, async c => {
@@ -313,12 +336,14 @@ export const pluginRoutes = new OpenAPIHono()
     const data = c.req.valid('json')
     const user = c.get('authUser')
     const plugin = await pluginService.updatePlugin(slug, data, user.id)
+    await invalidatePluginCache(getCache(), [`plugins:detail:${slug}`, `plugins:versions:${slug}`])
     return c.json(success(plugin), 200)
   })
   .openapi(deletePluginRoute, async c => {
     const { slug } = c.req.valid('param')
     const user = c.get('authUser')
     const result = await pluginService.deletePlugin(slug, user.id)
+    await invalidatePluginCache(getCache(), [`plugins:detail:${slug}`, `plugins:versions:${slug}`])
     return c.json(success(result), 200)
   })
   .openapi(submitReviewRoute, async c => {
@@ -326,32 +351,40 @@ export const pluginRoutes = new OpenAPIHono()
     const data = c.req.valid('json')
     const user = c.get('authUser')
     const review = await pluginService.submitReview(slug, data, user.id, user.username)
+    await invalidateCache(getCache(), `plugins:detail:${slug}`)
     return c.json(created({ ...review, createdAt: review.createdAt.getTime() }), 201)
   })
   .openapi(getReviewsRoute, async c => {
     const { slug } = c.req.valid('param')
     const query = c.req.valid('query')
-    const result = await pluginService.getReviews(slug, {
-      page: parsePositiveInt(query.page, 1),
-      limit: parsePositiveInt(query.limit, 20),
-    })
-    return c.json(
-      success({
-        ...result,
-        items: result.items.map(r => ({ ...r, createdAt: r.createdAt.getTime() })),
-      }),
-      200
+    const page = parsePositiveInt(query.page, 1)
+    const limit = parsePositiveInt(query.limit, 20)
+    const result = await withApiCache(
+      getCache(),
+      { key: `plugins:reviews:${slug}:${page}:${limit}`, ttl: 300 },
+      () =>
+        pluginService.getReviews(slug, { page, limit }).then(r => ({
+          ...r,
+          items: r.items.map(rv => ({ ...rv, createdAt: rv.createdAt.getTime() })),
+        }))
     )
+    return c.json(success(result), 200)
   })
   .openapi(deleteReviewRoute, async c => {
     const { slug, reviewId } = c.req.valid('param')
     const user = c.get('authUser')
     const result = await pluginService.deleteReview(slug, reviewId, user.id, user.role)
+    await invalidateCache(getCache(), `plugins:detail:${slug}`)
     return c.json(success(result), 200)
   })
   .openapi(trackInstallRoute, async c => {
     const { slug } = c.req.valid('param')
     const result = await pluginService.trackInstall(slug)
+    const cache = getCache()
+    await Promise.all([
+      invalidateCache(cache, `plugins:detail:${slug}`),
+      invalidateCache(cache, 'stats:overview'),
+    ])
     return c.json(success(result), 200)
   })
   .openapi(downloadPluginRoute, async c => {

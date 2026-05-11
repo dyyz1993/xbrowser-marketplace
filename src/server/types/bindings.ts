@@ -3,6 +3,7 @@ export interface AppBindings {
   ASSETS?: { fetch: (request: Request) => Promise<Response> }
   REALTIME_DO?: DurableObjectNamespace
   R2_BUCKET?: R2Bucket
+  API_CACHE?: KVNamespace
   ENVIRONMENT?: string
 }
 

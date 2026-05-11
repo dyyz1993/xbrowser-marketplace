@@ -6,9 +6,14 @@ import { ApiSuccessSchema } from '@shared/schemas'
 import { PluginDetailSchema, VersionSchema, TarballInfoSchema } from '@shared/modules/plugins'
 import { PluginSlugSchema, PublishMetadataSchema, CreateVersionSchema } from '../plugin.types'
 import * as publishService from '../services/publish-service'
+import { invalidatePluginCache } from '../../utils/api-cache'
 
 function getR2Bucket(): R2Bucket | undefined {
   return (globalThis as unknown as { R2_BUCKET?: R2Bucket }).R2_BUCKET
+}
+
+function getCache(): KVNamespace | undefined {
+  return (globalThis as unknown as { API_CACHE?: KVNamespace }).API_CACHE
 }
 
 const publishPluginRoute = createRoute({
@@ -128,6 +133,8 @@ export const publishRoutes = new OpenAPIHono()
       { R2_BUCKET: getR2Bucket() }
     )
 
+    await invalidatePluginCache(getCache(), [`plugins:detail:${meta.slug}`])
+
     return c.json(created(plugin), 201)
   })
   .openapi(publishVersionRoute, async c => {
@@ -135,6 +142,7 @@ export const publishRoutes = new OpenAPIHono()
     const data = c.req.valid('json')
     const user = c.get('authUser')
     const version = await publishService.publishVersion(slug, data, user.id)
+    await invalidatePluginCache(getCache(), [`plugins:detail:${slug}`, `plugins:versions:${slug}`])
     return c.json(
       created({
         id: version.id,

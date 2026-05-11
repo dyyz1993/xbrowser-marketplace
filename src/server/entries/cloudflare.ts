@@ -20,6 +20,7 @@ export interface CloudflareBindings extends AppBindings {
   DB: D1Database
   REALTIME_DO: DurableObjectNamespace
   R2_BUCKET: R2Bucket
+  API_CACHE?: KVNamespace
   AUTH_SECRET_KEY?: string
 }
 
@@ -32,6 +33,7 @@ const wrappedApp = app
   .use('*', async (c, next) => {
     ;(globalThis as unknown as { DB: D1Database }).DB = c.env.DB
     ;(globalThis as unknown as { R2_BUCKET: R2Bucket }).R2_BUCKET = c.env.R2_BUCKET
+    ;(globalThis as unknown as { API_CACHE?: KVNamespace }).API_CACHE = c.env.API_CACHE
     if (c.env.AUTH_SECRET_KEY) {
       process.env.AUTH_SECRET_KEY = c.env.AUTH_SECRET_KEY
     }
@@ -59,6 +61,7 @@ export default {
     ;(globalThis as unknown as { R2_BUCKET: R2Bucket }).R2_BUCKET = (
       env as unknown as Record<string, unknown>
     ).R2_BUCKET as R2Bucket
+    ;(globalThis as unknown as { API_CACHE?: KVNamespace }).API_CACHE = env.API_CACHE
     if (env.AUTH_SECRET_KEY) {
       process.env.AUTH_SECRET_KEY = env.AUTH_SECRET_KEY
     }

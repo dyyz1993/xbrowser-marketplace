@@ -34,6 +34,11 @@ run_worker_first = true
 binding = "R2_BUCKET"
 bucket_name = "xbrowser-plugins"
 
+[[kv_namespaces]]
+binding = "API_CACHE"
+id = "15059bcaaba248c192bcd30b7e6d40ed"
+preview_id = "11b1636626f6449695ab0c904f48b266"
+
 [dev]
 port = 8787
 local_protocol = "http"

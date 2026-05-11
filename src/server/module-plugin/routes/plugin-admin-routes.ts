@@ -35,6 +35,11 @@ import {
 } from '@shared/modules/plugins'
 import * as adminService from '../services/admin-plugin-service'
 import { parsePositiveInt } from '../../utils/parse'
+import { invalidatePluginCache, invalidateCache } from '../../utils/api-cache'
+
+function getCache(): KVNamespace | undefined {
+  return (globalThis as unknown as { API_CACHE?: KVNamespace }).API_CACHE
+}
 
 const adminAuth = authMiddleware({ requiredRole: Role.SUPER_ADMIN })
 const adminOrDevAuth = authMiddleware({ requiredRole: Role.SUPER_ADMIN })
@@ -284,6 +289,7 @@ export const pluginAdminRoutes = new OpenAPIHono()
     const { slug } = c.req.valid('param')
     const user = c.get('authUser')
     const plugin = await adminService.approvePlugin(slug, user.id)
+    await invalidatePluginCache(getCache(), [`plugins:detail:${slug}`, `plugins:versions:${slug}`])
     return c.json(success(plugin), 200)
   })
   .openapi(rejectRoute, async c => {
@@ -291,44 +297,53 @@ export const pluginAdminRoutes = new OpenAPIHono()
     const { reason } = c.req.valid('json')
     const user = c.get('authUser')
     const plugin = await adminService.rejectPlugin(slug, reason, user.id)
+    await invalidatePluginCache(getCache(), [`plugins:detail:${slug}`])
     return c.json(success(plugin), 200)
   })
   .openapi(toggleFeaturedRoute, async c => {
     const { slug } = c.req.valid('param')
     const plugin = await adminService.toggleFeatured(slug)
+    await invalidatePluginCache(getCache(), [`plugins:detail:${slug}`])
     return c.json(success(plugin), 200)
   })
   .openapi(removePluginRoute, async c => {
     const { slug } = c.req.valid('param')
     const result = await adminService.adminRemovePlugin(slug)
+    await invalidatePluginCache(getCache(), [`plugins:detail:${slug}`, `plugins:versions:${slug}`])
     return c.json(success(result), 200)
   })
   .openapi(bulkApproveRoute, async c => {
     const { slugs } = c.req.valid('json')
     const user = c.get('authUser')
     let approved = 0
+    const cache = getCache()
     for (const slug of slugs) {
       try {
         await adminService.approvePlugin(slug, user.id)
+        await invalidateCache(cache, `plugins:detail:${slug}`)
         approved++
       } catch {
         // skip failures
       }
     }
+    await invalidatePluginCache(cache)
     return c.json(success({ approved }), 200)
   })
   .openapi(bulkRejectRoute, async c => {
     const { slugs, reason } = c.req.valid('json')
     const user = c.get('authUser')
     let rejected = 0
+    const cache = getCache()
     for (const slug of slugs) {
       try {
         await adminService.rejectPlugin(slug, reason ?? 'Bulk rejection', user.id)
+        await invalidateCache(cache, `plugins:detail:${slug}`)
         rejected++
       } catch {
         // skip failures
       }
     }
+    await invalidatePluginCache(cache)
     return c.json(success({ rejected }), 200)
   })
   .openapi(listCategoriesRoute, async c => {
@@ -338,17 +353,20 @@ export const pluginAdminRoutes = new OpenAPIHono()
   .openapi(createCategoryRoute, async c => {
     const data = c.req.valid('json')
     const category = await adminService.createCategory(data)
+    await invalidateCache(getCache(), 'categories:all')
     return c.json(success(category), 201)
   })
   .openapi(updateCategoryRoute, async c => {
     const { id } = c.req.valid('param')
     const data = c.req.valid('json')
     const category = await adminService.updateCategory(id, data)
+    await invalidateCache(getCache(), 'categories:all')
     return c.json(success(category), 200)
   })
   .openapi(deleteCategoryRoute, async c => {
     const { id } = c.req.valid('param')
     const result = await adminService.deleteCategory(id)
+    await invalidateCache(getCache(), 'categories:all')
     return c.json(success(result), 200)
   })
   .openapi(dbCleanupRoute, async c => {
