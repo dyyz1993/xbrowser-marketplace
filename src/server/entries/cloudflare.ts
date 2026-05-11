@@ -79,12 +79,36 @@ export default {
     const staticPaths = ['/', '/categories', '/cli']
     const isStaticPage =
       staticPaths.includes(url.pathname) || staticPaths.includes(url.pathname.replace(/\/$/, ''))
-    const isPluginPage = /^\/plugin\/[^/]+\/?$/.test(url.pathname)
+    const pluginMatch = url.pathname.match(/^\/plugin\/([^/]+)\/?$/)
+    const isPluginPage = pluginMatch !== null
 
-    if ((isStaticPage || isPluginPage) && env.ASSETS) {
-      const assetResponse = await env.ASSETS.fetch(request)
-      if (assetResponse.status === 200) {
-        return addSecurityHeaders(Promise.resolve(assetResponse), url)
+    if (env.ASSETS) {
+      // For SSG pages, try fetching the concrete HTML file directly.
+      // With not_found_handling = "single-page-application", env.ASSETS.fetch()
+      // returns 200 with the SPA shell even for missing files, so we must
+      // check for an SSG marker (data-ssg attribute) to confirm.
+      if (isPluginPage && pluginMatch) {
+        const ssgUrl = new URL(`/plugin/${pluginMatch[1]}/index.html`, request.url)
+        const ssgResponse = await env.ASSETS.fetch(new Request(ssgUrl))
+        if (ssgResponse.ok) {
+          const html = await ssgResponse.text()
+          if (html.includes('data-ssg="true"')) {
+            return addSecurityHeaders(Promise.resolve(new Response(html, ssgResponse)), url)
+          }
+        }
+      }
+
+      if (isStaticPage) {
+        const pageName = url.pathname.replace(/\/$/, '') || '/index'
+        const ssgPath = pageName === '/' ? '/index.html' : `${pageName}/index.html`
+        const ssgUrl = new URL(ssgPath, request.url)
+        const ssgResponse = await env.ASSETS.fetch(new Request(ssgUrl))
+        if (ssgResponse.ok) {
+          const html = await ssgResponse.text()
+          if (html.includes('data-ssg="true"')) {
+            return addSecurityHeaders(Promise.resolve(new Response(html, ssgResponse)), url)
+          }
+        }
       }
     }
 
@@ -98,12 +122,10 @@ export default {
       !url.pathname.match(/\.[a-zA-Z0-9]{1,10}$/)
 
     if (env.ASSETS) {
-      const shellUrl = needsNoindex
-        ? new Request(new URL('/index.spa.html', request.url))
-        : undefined
-
-      if (needsNoindex && shellUrl) {
-        const spaResponse = await env.ASSETS.fetch(shellUrl)
+      if (needsNoindex) {
+        const spaResponse = await env.ASSETS.fetch(
+          new Request(new URL('/index.spa.html', request.url))
+        )
         if (spaResponse.ok) {
           const html = await spaResponse.text()
           const injected = html.replace(
