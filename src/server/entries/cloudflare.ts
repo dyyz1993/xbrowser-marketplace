@@ -77,8 +77,8 @@ export default {
     }
 
     const staticPaths = ['/', '/categories', '/cli']
-    const isStaticPage = staticPaths.includes(url.pathname)
-    const isPluginPage = /^\/plugin\/[^/]+$/.test(url.pathname)
+    const isStaticPage = staticPaths.includes(url.pathname) || staticPaths.includes(url.pathname.replace(/\/$/, ''))
+    const isPluginPage = /^\/plugin\/[^/]+\/?$/.test(url.pathname)
 
     if ((isStaticPage || isPluginPage) && env.ASSETS) {
       const assetResponse = await env.ASSETS.fetch(request)
@@ -89,6 +89,10 @@ export default {
 
     const noindexPaths = ['/login', '/register', '/search', '/notifications', '/admin']
     const needsNoindex = noindexPaths.some(p => url.pathname.startsWith(p))
+
+    const isSpaRoute = isStaticPage || isPluginPage ||
+      /^\/plugin\//.test(url.pathname) ||
+      !url.pathname.match(/\.[a-zA-Z0-9]{1,10}$/)
 
     if (env.ASSETS) {
       const shellUrl = needsNoindex
@@ -111,9 +115,11 @@ export default {
         }
       }
 
-      const assetResponse = await env.ASSETS.fetch(request)
-      if (assetResponse.status !== 404) {
-        return addSecurityHeaders(Promise.resolve(assetResponse), url)
+      if (!isSpaRoute) {
+        const assetResponse = await env.ASSETS.fetch(request)
+        if (assetResponse.status !== 404) {
+          return addSecurityHeaders(Promise.resolve(assetResponse), url)
+        }
       }
 
       const spaResponse = await env.ASSETS.fetch(
