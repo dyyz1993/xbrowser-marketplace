@@ -77,7 +77,8 @@ export default {
     }
 
     const staticPaths = ['/', '/categories', '/cli']
-    const isStaticPage = staticPaths.includes(url.pathname) || staticPaths.includes(url.pathname.replace(/\/$/, ''))
+    const isStaticPage =
+      staticPaths.includes(url.pathname) || staticPaths.includes(url.pathname.replace(/\/$/, ''))
     const isPluginPage = /^\/plugin\/[^/]+\/?$/.test(url.pathname)
 
     if ((isStaticPage || isPluginPage) && env.ASSETS) {
@@ -90,7 +91,9 @@ export default {
     const noindexPaths = ['/login', '/register', '/search', '/notifications', '/admin']
     const needsNoindex = noindexPaths.some(p => url.pathname.startsWith(p))
 
-    const isSpaRoute = isStaticPage || isPluginPage ||
+    const isSpaRoute =
+      isStaticPage ||
+      isPluginPage ||
       /^\/plugin\//.test(url.pathname) ||
       !url.pathname.match(/\.[a-zA-Z0-9]{1,10}$/)
 
