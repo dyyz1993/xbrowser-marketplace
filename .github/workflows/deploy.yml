@@ -39,3 +39,36 @@ jobs:
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+  perf-test:
+    name: Performance Test
+    needs: deploy
+    runs-on: ubuntu-latest
+    if: success()
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Wait for deployment to propagate
+        run: sleep 30
+
+      - name: Run Performance Tests
+        run: |
+          chmod +x scripts/perf-test.sh
+          bash scripts/perf-test.sh "https://xbrowser-marketplace.dyyz1993.workers.dev"
+
+      - name: Upload Performance Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: perf-report-${{ github.sha }}
+          path: perf-reports/
+          retention-days: 90
+
+      - name: Add Report to Summary
+        if: always()
+        run: |
+          LATEST_REPORT=$(ls -t perf-reports/*.md | head -1)
+          if [ -f "$LATEST_REPORT" ]; then
+            echo "# 📊 Performance Report" >> $GITHUB_STEP_SUMMARY
+            cat "$LATEST_REPORT" >> $GITHUB_STEP_SUMMARY
+          fi
