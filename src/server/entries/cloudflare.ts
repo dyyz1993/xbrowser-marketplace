@@ -68,13 +68,6 @@ export default {
 
     const url = new URL(request.url)
 
-    if (url.pathname.endsWith('/') && url.pathname.length > 1) {
-      const cleanPath = url.pathname.replace(/\/+$/, '')
-      const redirectUrl = new URL(cleanPath || '/', url.origin)
-      redirectUrl.search = url.search
-      return Response.redirect(redirectUrl.toString(), 301)
-    }
-
     if (url.pathname.startsWith('/api/') || url.pathname === '/health') {
       return addSecurityHeaders(wrappedApp.fetch(request, env, ctx), url)
     }
