@@ -1,4 +1,4 @@
-import { createRoute, z } from '@hono/zod-openapi'
+import { createRoute } from '@hono/zod-openapi'
 import { OpenAPIHono } from '@hono/zod-openapi'
 import type { AuthUser } from '../../middleware/auth'
 import * as adminService from '../services/admin-service'
@@ -34,11 +34,7 @@ const getRecentActivityRoute = createRoute({
   path: '/admin/activity',
   tags: ['admin'],
   security: [{ Bearer: [] }],
-  request: {
-    query: z.object({
-      limit: z.string().optional(),
-    }),
-  },
+  request: {},
   responses: {
     200: successResponse(RecentActivitySchema, 'Get recent activity'),
     401: errorResponse('Unauthorized'),
