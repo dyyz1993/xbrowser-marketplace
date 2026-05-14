@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-Todo Application Template - A full-stack React + Hono application demonstrating best practices for monorepo-style architecture with single-port development.
+XBrowser Plugin Marketplace - A full-stack React + Hono application for managing browser plugins, with admin dashboard, user authentication, and real-time notifications.
 
 ## Commands
 
@@ -22,29 +22,47 @@ npm run typecheck    # Run TypeScript type check
 
 ## Architecture Overview
 
-**Monorepo-style structure** with client/server separation and shared types:
+**Monorepo-style structure** with client/admin/server separation and shared types:
 
 ```
 src/
-├── client/          # React frontend
+├── client/          # React frontend (user-facing marketplace)
 │   ├── components/  # UI components
 │   ├── stores/      # Zustand state management
 │   ├── services/    # API clients (apiClient)
 │   ├── hooks/       # Custom hooks
-│   ├── pages/      # Page components
+│   ├── pages/       # Page components
+│   └── App.tsx
+├── admin/           # React admin dashboard (Ant Design)
+│   ├── components/  # Admin UI components
+│   ├── layouts/     # Admin layout
+│   ├── pages/       # Admin pages
+│   ├── stores/      # Admin state management
+│   ├── services/    # Admin API client with interceptors
 │   └── App.tsx
 ├── server/          # Hono backend
-│   ├── module-todos/     # Todo module
-│   ├── module-chat/      # WebSocket chat module
-│   ├── module-notifications/ # SSE notifications module
-│   ├── core/             # Core services (runtime, realtime)
-│   ├── middleware/       # Express middleware
-│   ├── test-utils/       # Test utilities
-│   └── entries/          # Entry points (node.ts, cloudflare.ts)
-└── shared/              # Shared types
-    ├── core/             # Framework layer (ws-client, sse-client, api-schemas)
-    ├── modules/          # Business layer (chat, todos, notifications schemas)
-    └── schemas/          # Unified exports
+│   ├── module-plugin/        # Plugin management module
+│   ├── module-auth/          # Authentication module
+│   ├── module-permission/    # Permission & role module
+│   ├── module-notification/  # SSE notifications module
+│   ├── module-order/         # Order management module
+│   ├── module-ticket/        # Support ticket module
+│   ├── module-dispute/       # Dispute management module
+│   ├── module-content/       # Content management module
+│   ├── module-file/          # File storage module
+│   ├── module-admin/         # Admin API module
+│   ├── module-captcha/       # Captcha module
+│   ├── core/                 # Core services (runtime, realtime)
+│   ├── middleware/           # Middleware (auth, cors, logger)
+│   ├── test-utils/           # Test utilities
+│   └── entries/              # Entry points (node.ts, cloudflare.ts)
+├── shared/              # Shared types
+│   ├── core/            # Framework layer (sse-client, api-schemas, protocol-types)
+│   ├── modules/         # Business layer (plugins, admin, permission, notifications schemas)
+│   └── schemas/         # Unified exports
+└── cli/                 # CLI RPC client
+    ├── modules/         # CLI command modules
+    └── rpc/             # RPC client
 ```
 
 **Path Aliases** (configured in vite.config.ts and tsconfig.json):
@@ -52,8 +70,16 @@ src/
 - `@shared/*` → src/shared/\*
 - `@client/*` → src/client/\*
 - `@server/*` → src/server/\*
+- `@admin/*` → src/admin/\*
 
 ## Key Technical Concepts
+
+### Multi-Entry Architecture
+
+| Entry       | File                  | HTML          | Path       |
+| ----------- | --------------------- | ------------- | ---------- |
+| Marketplace | `src/client/main.tsx` | `index.html`  | `/`        |
+| Admin       | `src/admin/main.tsx`  | `admin.html`  | `/admin/*` |
 
 ### Single-Port Development
 
@@ -70,26 +96,21 @@ Type-safe API calls from frontend to backend:
 ```typescript
 import { apiClient } from '@client/services/apiClient'
 
-// HTTP API
-const response = await apiClient.api.todos.$get()
+// HTTP API - Plugin listing
+const response = await apiClient.api.plugins.$get()
 const result = await response.json()
 
-// WebSocket
-const ws = apiClient.api.chat.ws.$ws()
-const result = await ws.call('echo', { message: 'hello' })
-
-// SSE
+// SSE - Real-time notifications
 const conn = await apiClient.api.notifications.stream.$sse()
 conn.on('notification', n => console.log(n))
 ```
 
 ### Real-time Features
 
-| Feature   | Method              | Type Safety | Testing          |
-| --------- | ------------------- | ----------- | ---------------- |
-| HTTP API  | `$get()`, `$post()` | ✅          | No server needed |
-| WebSocket | `$ws()`             | ✅          | Requires server  |
-| SSE       | `$sse()`            | ✅          | No server needed |
+| Feature  | Method              | Type Safety | Testing          |
+| -------- | ------------------- | ----------- | ---------------- |
+| HTTP API | `$get()`, `$post()` | ✅          | No server needed |
+| SSE      | `$sse()`            | ✅          | No server needed |
 
 ### Module Pattern
 
@@ -104,42 +125,55 @@ module-{feature}/
 
 ### Framework Layer vs Business Layer
 
-The project has clear separation between framework and business layers:
-
 **Framework Layer** (`src/shared/core/`):
 
 - Generic, reusable infrastructure code
-- Examples: `ws-client.ts`, `sse-client.ts`, `api-schemas.ts`
+- Examples: `sse-client.ts`, `api-schemas.ts`, `protocol-types.ts`
 - Should not be modified by business code directly
 
 **Business Layer** (`src/shared/modules/`):
 
 - Business-specific schemas and protocols
-- Examples: `chat/`, `todos/`, `notifications/`
+- Examples: `plugins/`, `admin/`, `permission/`, `notifications/`
 - Organized by feature modules
 
-### Layer Boundary Rules (ESLint)
+### Module Dependency Graph
 
-The project enforces layer boundaries with `layer-boundary` rule:
-
-- Business code cannot directly modify framework layer code
-- Business code importing framework code needs `@framework-import` comment
-- Framework code modification needs `@framework-allow-modification` comment
+```
+plugin ──── (standalone)
+auth ──── (standalone)
+permission ── (standalone, foundational)
+notification ── (standalone)
+file ──── (standalone)
+captcha ── (standalone)
+admin ──→ permission + notifications
+order ──→ permission
+ticket ──→ permission
+dispute ──→ permission
+content ──→ permission
+```
 
 ### State Management with Zustand
 
-Global application state in `src/client/stores/`:
+Global application state in `src/client/stores/` and `src/admin/stores/`:
 
 - **Minimal Re-renders**: Use precise selector hooks
-- **Selector Pattern**: `const todos = useTodoStore((state) => state.todos)`
+- **Selector Pattern**: `const stats = useAdminStore((state) => state.stats)`
 - **Action Selectors**: Stable function references
+
+### Admin Dashboard (Ant Design)
+
+Admin module uses **Ant Design** as UI library, located at `src/admin/`:
+
+- Separate entry (`admin.html`) mounted at `/admin/*`
+- Own stores, services, and components
+- Uses extended `apiClient` with request interceptors (loading, auth, error handling)
 
 ### Testing Strategy
 
 - **Unit Tests**: `__tests__/*.test.ts` (jsdom for client, node for server)
 - **Integration Tests**: `src/server/__tests__/integration/*.test.ts`
 - **E2E Tests**: `tests/e2e/*.spec.ts` (Playwright)
-- **WebSocket Tests**: Require real server (`createTestServer`)
 - **SSE Tests**: No server needed (`$sse()` works with `app.fetch()`)
 
 ## Important Conventions
@@ -149,8 +183,8 @@ Global application state in `src/client/stores/`:
 Always use path aliases instead of relative imports:
 
 ```typescript
-import { Todo } from '@shared/schemas'
-import { useTodoStore } from '@client/stores/todoStore'
+import { PluginListItem } from '@shared/schemas'
+import { useAdminStore } from '@admin/stores/adminStore'
 ```
 
 ### Environment Variables
@@ -168,8 +202,9 @@ To add a new feature module:
 1. Create `src/server/module-{feature}/`
 2. Add routes, services, tests
 3. Register in `src/server/app.ts`
-4. Add client store if needed
-5. Add integration tests
+4. Add shared schemas in `src/shared/modules/{feature}/`
+5. Add client store if needed
+6. Add integration tests
 
 ### API Route Pattern
 
@@ -177,23 +212,9 @@ Use Hono RPC with chain syntax:
 
 ```typescript
 app.openapi(listRoute, async c => {
-  const todos = await todoService.listTodos()
-  return c.json({ success: true, data: todos })
+  const plugins = await pluginService.listPlugins()
+  return c.json({ success: true, data: plugins })
 })
-```
-
-### WebSocket Pattern
-
-Use `$ws()` method for type-safe WebSocket:
-
-```typescript
-// Server: Define protocol in src/shared/modules/chat/
-import { ChatProtocolSchema } from '@shared/modules/chat'
-
-// Client: Use $ws()
-const ws = apiClient.api.chat.ws.$ws()
-const result = await ws.call('echo', { message: 'hello' })
-ws.on('notification', n => console.log(n))
 ```
 
 ### SSE Pattern
@@ -215,27 +236,14 @@ conn.on('ping', p => console.log(p.timestamp))
 When creating notifications, broadcast to all connected SSE clients:
 
 ```typescript
-// In service layer - use createNotificationAndBroadcast
-import { createNotificationAndBroadcast } from '@server/module-notifications/services/notification-service'
+import { createNotificationAndBroadcast } from '@server/module-notification/services/notification-service'
 
-// The service automatically handles broadcasting via realtime middleware
 const notification = await createNotificationAndBroadcast(input)
 ```
 
 ## Project Rules
 
-See `.claude/rules/` for detailed development constraints:
-
-- `project-rules.md` - Environment & constants management
-- `client-component-rules.md` - React component patterns
-- `client-service-rules.md` - Service layer patterns
-- `zustand-rules.md` - Zustand store patterns
-- `websocket-rules.md` - WebSocket development patterns
-- `sse-rules.md` - SSE development patterns
-- `shared-types-rules.md` - Shared types organization
-- `layer-boundary-rules.md` - Framework/Business layer separation
-- `testing-standards.md` - Testing conventions
-- `hono-testing-best-practices.md` - Hono testing patterns
+See `.claude/rules/` for detailed development constraints.
 
 ## Documentation
 

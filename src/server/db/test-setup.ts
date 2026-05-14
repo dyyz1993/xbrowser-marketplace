@@ -8,28 +8,6 @@ export async function setupTestDatabase(): Promise<void> {
   }
 
   const migrationSQL = `
-    CREATE TABLE IF NOT EXISTS todos (
-      id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-      title TEXT NOT NULL,
-      description TEXT,
-      status TEXT DEFAULT 'pending' NOT NULL,
-      created_at INTEGER DEFAULT (unixepoch() * 1000) NOT NULL,
-      updated_at INTEGER DEFAULT (unixepoch() * 1000) NOT NULL
-    );
-    
-    CREATE TABLE IF NOT EXISTS todo_attachments (
-      id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-      todo_id INTEGER NOT NULL,
-      file_name TEXT NOT NULL,
-      original_name TEXT NOT NULL,
-      mime_type TEXT NOT NULL,
-      size INTEGER NOT NULL,
-      path TEXT NOT NULL,
-      uploaded_by TEXT,
-      created_at INTEGER DEFAULT (unixepoch() * 1000) NOT NULL,
-      FOREIGN KEY (todo_id) REFERENCES todos(id) ON DELETE CASCADE
-    );
-    
     CREATE TABLE IF NOT EXISTS notifications (
       id TEXT PRIMARY KEY NOT NULL,
       type TEXT NOT NULL,
@@ -688,12 +666,6 @@ export async function cleanupTestDatabase(): Promise<void> {
   const client = await getRawClient()
 
   if (client && 'execute' in client) {
-    try {
-      await client.execute('DELETE FROM todo_attachments')
-    } catch {
-      // Table may not exist in some test environments
-    }
-    await client.execute('DELETE FROM todos')
     await client.execute('DELETE FROM notifications')
     await client.execute('DELETE FROM permission_routes')
     await client.execute('DELETE FROM permission_audit_logs')

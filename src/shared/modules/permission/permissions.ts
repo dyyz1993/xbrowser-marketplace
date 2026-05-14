@@ -40,16 +40,6 @@ export enum Permission {
   NOTIFICATION_EDIT = 'notification:edit',
   NOTIFICATION_DELETE = 'notification:delete',
 
-  TODO_VIEW = 'todo:view',
-  TODO_CREATE = 'todo:create',
-  TODO_EDIT = 'todo:edit',
-  TODO_DELETE = 'todo:delete',
-  TODO_FILE_UPLOAD = 'todo:file_upload',
-  TODO_FILE_DELETE = 'todo:file_delete',
-
-  CHAT_VIEW = 'chat:view',
-  CHAT_SEND = 'chat:send',
-
   ROLE_VIEW = 'role:view',
   ROLE_CREATE = 'role:create',
   ROLE_EDIT = 'role:edit',
@@ -122,16 +112,6 @@ export const PERMISSION_LABELS: Record<Permission, string> = {
   [Permission.NOTIFICATION_EDIT]: '编辑通知',
   [Permission.NOTIFICATION_DELETE]: '删除通知',
 
-  [Permission.TODO_VIEW]: '查看待办',
-  [Permission.TODO_CREATE]: '创建待办',
-  [Permission.TODO_EDIT]: '编辑待办',
-  [Permission.TODO_DELETE]: '删除待办',
-  [Permission.TODO_FILE_UPLOAD]: '上传文件',
-  [Permission.TODO_FILE_DELETE]: '删除文件',
-
-  [Permission.CHAT_VIEW]: '查看聊天',
-  [Permission.CHAT_SEND]: '发送消息',
-
   [Permission.ROLE_VIEW]: '查看角色',
   [Permission.ROLE_CREATE]: '创建角色',
   [Permission.ROLE_EDIT]: '编辑角色',
@@ -200,21 +180,6 @@ export const PERMISSION_CATEGORIES = {
       Permission.NOTIFICATION_EDIT,
       Permission.NOTIFICATION_DELETE,
     ],
-  },
-  todo: {
-    label: '待办事项',
-    permissions: [
-      Permission.TODO_VIEW,
-      Permission.TODO_CREATE,
-      Permission.TODO_EDIT,
-      Permission.TODO_DELETE,
-      Permission.TODO_FILE_UPLOAD,
-      Permission.TODO_FILE_DELETE,
-    ],
-  },
-  chat: {
-    label: '聊天管理',
-    permissions: [Permission.CHAT_VIEW, Permission.CHAT_SEND],
   },
 }
 

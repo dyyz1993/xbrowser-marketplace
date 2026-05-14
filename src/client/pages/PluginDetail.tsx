@@ -277,12 +277,41 @@ export const PluginDetailPage: React.FC = () => {
           {plugin.versions.length > 0 && (
             <div className="bg-white rounded-xl border border-gray-200 p-5">
               <h3 className="text-sm font-semibold text-gray-900 mb-3">Version History</h3>
-              <div className="space-y-2">
+              <div className="space-y-1">
                 {plugin.versions.map(v => (
-                  <div key={v.id} className="flex items-center justify-between text-sm">
-                    <span className="font-mono text-gray-700">v{v.version}</span>
-                    <span className="text-xs text-gray-400">{formatDate(v.publishedAt)}</span>
-                  </div>
+                  <details key={v.id} className="group">
+                    <summary className="flex items-center justify-between text-sm cursor-pointer hover:bg-gray-50 rounded-lg px-3 py-2 -mx-3 transition-colors select-none">
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono text-gray-700">v{v.version}</span>
+                        {v.changelog && (
+                          <span className="text-xs text-gray-400 truncate max-w-[200px]">
+                            {v.changelog}
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-gray-400">{formatDate(v.publishedAt)}</span>
+                        <svg
+                          className="w-4 h-4 text-gray-300 transition-transform group-open:rotate-90"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M9 5l7 7-7 7"
+                          />
+                        </svg>
+                      </div>
+                    </summary>
+                    {v.changelog && (
+                      <div className="px-3 pb-2 pt-1 ml-6 border-l-2 border-gray-100">
+                        <p className="text-sm text-gray-600 whitespace-pre-wrap">{v.changelog}</p>
+                      </div>
+                    )}
+                  </details>
                 ))}
               </div>
             </div>

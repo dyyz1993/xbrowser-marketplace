@@ -1,8 +1,6 @@
 import bcrypt from 'bcryptjs'
 import { getDb } from '../../db'
-import { todos } from '../../db/schema'
-import { desc, eq } from 'drizzle-orm'
-import { toISOString } from '../../utils/date'
+import { eq } from 'drizzle-orm'
 import { getMockUsers } from '../../utils/auth'
 import { Role, getPermissionsByRole } from '@shared/modules/permission'
 import { getConfig } from '../../config'
@@ -42,18 +40,12 @@ export async function getSystemStats(): Promise<SystemStats> {
   const { plugins: pluginTable } = await import('../../db/schema')
 
   const [
-    allTodos,
-    pendingTodos,
-    completedTodos,
     allPlugins,
     pendingPlugins,
     approvedPlugins,
     rejectedPlugins,
     reviewRows,
   ] = await Promise.all([
-    db.select().from(todos),
-    db.select().from(todos).where(eq(todos.status, 'pending')),
-    db.select().from(todos).where(eq(todos.status, 'completed')),
     db.select().from(pluginTable),
     db.select().from(pluginTable).where(eq(pluginTable.status, 'pending')),
     db.select().from(pluginTable).where(eq(pluginTable.status, 'approved')),
@@ -73,9 +65,6 @@ export async function getSystemStats(): Promise<SystemStats> {
   const activeDevelopers = new Set(allPlugins.map(p => p.authorId)).size
 
   return {
-    totalTodos: allTodos.length,
-    pendingTodos: pendingTodos.length,
-    completedTodos: completedTodos.length,
     lastUpdated: new Date().toISOString(),
     totalPlugins: allPlugins.length,
     pendingPlugins: pendingPlugins.length,
@@ -91,7 +80,8 @@ export async function getSystemStats(): Promise<SystemStats> {
 export async function checkDatabaseHealth(): Promise<HealthCheck> {
   try {
     const db = await getDb()
-    await db.select().from(todos).limit(1)
+    const { plugins } = await import('../../db/schema')
+    await db.select().from(plugins).limit(1)
     return {
       database: 'connected',
       timestamp: new Date().toISOString(),
@@ -102,31 +92,6 @@ export async function checkDatabaseHealth(): Promise<HealthCheck> {
       timestamp: new Date().toISOString(),
     }
   }
-}
-
-export async function clearAllTodos(): Promise<{ deletedCount: number }> {
-  const db = await getDb()
-  const result = await db.delete(todos).returning()
-  return { deletedCount: result.length }
-}
-
-export async function getRecentActivity(limit: number = 10): Promise<
-  Array<{
-    id: number
-    title: string
-    status: string
-    updatedAt: string
-  }>
-> {
-  const db = await getDb()
-  const results = await db.select().from(todos).orderBy(desc(todos.updatedAt)).limit(limit)
-
-  return results.map(r => ({
-    id: r.id,
-    title: r.title,
-    status: r.status,
-    updatedAt: toISOString(r.updatedAt),
-  }))
 }
 
 function getMockPasswordHash(): string {
@@ -243,25 +208,6 @@ export async function createUser(data: CreateUserRequest): Promise<User> {
 
   mockUsers.push(newUser)
   return newUser
-}
-
-export async function getAllTodos(): Promise<
-  Array<{
-    id: number
-    title: string
-    completed: boolean
-    createdAt: string
-  }>
-> {
-  const db = await getDb()
-  const results = await db.select().from(todos).orderBy(desc(todos.createdAt))
-
-  return results.map(r => ({
-    id: r.id,
-    title: r.title,
-    completed: r.status === 'completed',
-    createdAt: toISOString(r.createdAt),
-  }))
 }
 
 const avatarCache = new LRUCache<{ data: Blob; contentType: string }>(50, 30 * 60 * 1000)

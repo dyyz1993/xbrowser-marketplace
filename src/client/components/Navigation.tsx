@@ -1,16 +1,14 @@
 import { NavLink } from 'react-router-dom'
-import { CheckCircle, Bell, Plug, Rocket, Github } from 'lucide-react'
+import { Bell, Rocket, Github } from 'lucide-react'
 import { AuthButton } from './AuthButton'
 
-type RouteKey = 'todos' | 'notifications' | 'websocket'
+type RouteKey = 'notifications'
 
 const routes: Record<
   RouteKey,
   { label: string; icon: React.FC<{ className?: string }>; path: string }
 > = {
-  todos: { label: 'Todo List', icon: CheckCircle, path: '/todos' },
   notifications: { label: 'Notifications', icon: Bell, path: '/notifications' },
-  websocket: { label: 'WebSocket', icon: Plug, path: '/websocket' },
 }
 
 export const Navigation: React.FC = () => {
@@ -23,7 +21,7 @@ export const Navigation: React.FC = () => {
             data-testid="app-title"
           >
             <Rocket className="w-6 h-6 text-blue-500" />
-            Biomimic App
+            XBrowser Marketplace
           </h1>
           <div className="flex items-center gap-1">
             {(Object.keys(routes) as RouteKey[]).map(route => {

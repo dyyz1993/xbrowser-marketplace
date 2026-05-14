@@ -53,9 +53,6 @@ const mockLoginResponse = {
 const mockStatsResponse = {
   success: true,
   data: {
-    totalTodos: 10,
-    pendingTodos: 3,
-    completedTodos: 7,
     lastUpdated: '2024-01-01',
   },
 }

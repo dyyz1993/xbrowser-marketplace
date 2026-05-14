@@ -42,9 +42,6 @@ describe('DashboardPage', () => {
         Promise.resolve({
           success: true,
           data: {
-            totalTodos: 42,
-            pendingTodos: 10,
-            completedTodos: 32,
             lastUpdated: '2025-01-01',
             totalPlugins: 100,
             pendingPlugins: 15,

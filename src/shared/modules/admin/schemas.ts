@@ -2,9 +2,6 @@ import { z } from '@hono/zod-openapi'
 import { RoleEnum, PermissionEnum } from '@shared/modules/permission'
 
 export const SystemStatsSchema = z.object({
-  totalTodos: z.number(),
-  pendingTodos: z.number(),
-  completedTodos: z.number(),
   lastUpdated: z.string(),
   totalPlugins: z.number().nullable().default(0),
   pendingPlugins: z.number().nullable().default(0),
@@ -83,10 +80,6 @@ export const CreateUserRequestSchema = z.object({
   status: z.enum(['active', 'inactive', 'locked']).nullish().default('active'),
 })
 
-export const ClearTodosResultSchema = z.object({
-  deletedCount: z.number(),
-})
-
 export const SuccessSchema = z.object({})
 
 export const DownloadTokenSchema = z.object({
@@ -130,7 +123,6 @@ export type LoginResponse = z.infer<typeof LoginResponseSchema>
 export type RegisterRequest = z.infer<typeof RegisterRequestSchema>
 export type User = z.infer<typeof UserSchema>
 export type UpdateUserRequest = z.infer<typeof UpdateUserRequestSchema>
-export type ClearTodosResult = z.infer<typeof ClearTodosResultSchema>
 
 export const OrderRowSchema = z.object({
   id: z.number(),

@@ -4,7 +4,6 @@ import { authRoutes } from './auth-routes'
 import { userManagementRoutes } from './user-management-routes'
 import { adminNotificationRoutes } from './admin-notification-routes'
 import { mediaRoutes } from './media-routes'
-import { exportRoutes } from './export-routes'
 import { systemRoutes } from './system-routes'
 import { orderRoutes } from './order-routes'
 import { ticketRoutes } from './ticket-routes'
@@ -19,7 +18,7 @@ const adminBase1 = new OpenAPIHono<{ Variables: { authUser: AuthUser } }>()
 
 const adminBase2 = adminBase1.route('/', adminNotificationRoutes).route('/', mediaRoutes)
 
-const adminBase3 = adminBase2.route('/', exportRoutes).route('/', systemRoutes)
+const adminBase3 = adminBase2.route('/', systemRoutes)
 
 const adminBase4 = adminBase3.route('/', orderRoutes).route('/', ticketRoutes)
 

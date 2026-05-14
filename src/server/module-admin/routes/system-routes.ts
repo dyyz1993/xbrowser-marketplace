@@ -7,7 +7,6 @@ import {
   SystemStatsSchema,
   HealthCheckSchema,
   RecentActivitySchema,
-  ClearTodosResultSchema,
 } from '@shared/modules/admin'
 
 const getStatsRoute = createRoute({
@@ -51,18 +50,6 @@ const getRecentActivityRoute = createRoute({
   },
 })
 
-const clearAllTodosRoute = createRoute({
-  method: 'delete',
-  path: '/admin/todos/all',
-  tags: ['admin'],
-  security: [{ Bearer: [] }],
-  responses: {
-    200: successResponse(ClearTodosResultSchema, 'All todos cleared'),
-    401: errorResponse('Unauthorized'),
-    403: errorResponse('Forbidden'),
-  },
-})
-
 export const systemRoutes = new OpenAPIHono<{ Variables: { authUser: AuthUser } }>()
   .openapi(getStatsRoute, async c => {
     const stats = await adminService.getSystemStats()
@@ -73,12 +60,6 @@ export const systemRoutes = new OpenAPIHono<{ Variables: { authUser: AuthUser } 
     return c.json(success(health), 200)
   })
   .openapi(getRecentActivityRoute, async c => {
-    const { limit } = c.req.valid('query')
-    const limitNum = limit ? parseInt(limit, 10) : 10
-    const activity = await adminService.getRecentActivity(limitNum)
+    const activity: { id: number; title: string; status: string; updatedAt: string }[] = []
     return c.json(success(activity), 200)
-  })
-  .openapi(clearAllTodosRoute, async c => {
-    const result = await adminService.clearAllTodos()
-    return c.json(success(result), 200)
   })

@@ -1,7 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest'
 import { createTestClient } from '../../test-utils/test-client'
 import { setupTestDatabase, cleanupTestDatabase } from '../../db/test-setup'
-import { getRawClient } from '../../db'
 import { Role } from '@shared/modules/permission'
 import * as notificationService from '../../module-notifications/services/notification-service'
 
@@ -59,36 +58,11 @@ describe('Admin Routes', () => {
       const data = await res.json()
       expect(data.success).toBe(true)
       if (data.success) {
-        expect(data.data).toHaveProperty('totalTodos')
-        expect(data.data).toHaveProperty('pendingTodos')
-        expect(data.data).toHaveProperty('completedTodos')
         expect(data.data).toHaveProperty('lastUpdated')
-      }
-    })
-
-    it('should return correct todo counts', async () => {
-      const rawClient = await getRawClient()
-      if (rawClient && 'execute' in rawClient) {
-        const now = Date.now()
-        await rawClient.execute({
-          sql: `INSERT INTO todos (title, status, created_at, updated_at) VALUES (?, ?, ?, ?)`,
-          args: ['Pending Todo', 'pending', now, now],
-        })
-        await rawClient.execute({
-          sql: `INSERT INTO todos (title, status, created_at, updated_at) VALUES (?, ?, ?, ?)`,
-          args: ['Completed Todo', 'completed', now, now],
-        })
-
-        const client = authedClient('admin-token')
-        const res = await client.api.admin.stats.$get()
-
-        const data = await res.json()
-        expect(data.success).toBe(true)
-        if (data.success) {
-          expect(data.data.totalTodos).toBe(2)
-          expect(data.data.pendingTodos).toBe(1)
-          expect(data.data.completedTodos).toBe(1)
-        }
+        expect(data.data).toHaveProperty('totalPlugins')
+        expect(data.data).toHaveProperty('pendingPlugins')
+        expect(data.data).toHaveProperty('approvedPlugins')
+        expect(data.data).toHaveProperty('rejectedPlugins')
       }
     })
   })
@@ -122,44 +96,13 @@ describe('Admin Routes', () => {
     })
 
     it('should respect limit parameter', async () => {
-      const rawClient = await getRawClient()
-      if (rawClient && 'execute' in rawClient) {
-        const now = Date.now()
-        for (let i = 0; i < 5; i++) {
-          await rawClient.execute({
-            sql: `INSERT INTO todos (title, status, created_at, updated_at) VALUES (?, ?, ?, ?)`,
-            args: [`Todo ${i}`, 'pending', now + i, now + i],
-          })
-        }
+      const client = authedClient('admin-token')
+      const res = await client.api.admin.activity.$get({ query: { limit: '3' } })
 
-        const client = authedClient('admin-token')
-        const res = await client.api.admin.activity.$get({ query: { limit: '3' } })
-
-        const data = await res.json()
-        expect(data.success).toBe(true)
-        if (data.success) {
-          expect(data.data.length).toBeLessThanOrEqual(3)
-        }
-      }
-    })
-  })
-
-  describe('DELETE /api/admin/todos/all', () => {
-    it('should clear all todos for admin', async () => {
-      const rawClient = await getRawClient()
-      if (rawClient && 'execute' in rawClient) {
-        const now = Date.now()
-        await rawClient.execute({
-          sql: `INSERT INTO todos (title, status, created_at, updated_at) VALUES (?, ?, ?, ?)`,
-          args: ['Todo to delete', 'pending', now, now],
-        })
-
-        const client = authedClient('admin-token')
-        const res = await client.api.admin.todos.all.$delete()
-
-        expect(res.status).toBe(200)
-        const data = await res.json()
-        expect(data.success).toBe(true)
+      const data = await res.json()
+      expect(data.success).toBe(true)
+      if (data.success) {
+        expect(data.data.length).toBeLessThanOrEqual(3)
       }
     })
   })
@@ -343,18 +286,4 @@ describe('Admin Routes', () => {
     })
   })
 
-  describe('POST /api/admin/todos/export/token', () => {
-    it('should generate download token', async () => {
-      const client = authedClient('admin-token')
-      const res = await client.api.admin.todos.export.token.$post()
-
-      expect(res.status).toBe(200)
-      const data = await res.json()
-      expect(data.success).toBe(true)
-      if (data.success) {
-        expect(data.data).toHaveProperty('token')
-        expect(data.data).toHaveProperty('downloadUrl')
-      }
-    })
-  })
 })

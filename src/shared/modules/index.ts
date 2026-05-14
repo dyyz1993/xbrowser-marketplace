@@ -27,12 +27,10 @@ export {
   RecentActivityItemSchema,
   RecentActivitySchema,
   AuthUserSchema,
-  ClearTodosResultSchema,
   type SystemStats,
   type HealthCheck,
   type RecentActivityItem,
   type AuthUserResponse,
-  type ClearTodosResult,
 } from './admin'
 export {
   RoleEnum,
