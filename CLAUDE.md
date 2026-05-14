@@ -76,10 +76,10 @@ src/
 
 ### Multi-Entry Architecture
 
-| Entry       | File                  | HTML          | Path       |
-| ----------- | --------------------- | ------------- | ---------- |
-| Marketplace | `src/client/main.tsx` | `index.html`  | `/`        |
-| Admin       | `src/admin/main.tsx`  | `admin.html`  | `/admin/*` |
+| Entry       | File                  | HTML         | Path       |
+| ----------- | --------------------- | ------------ | ---------- |
+| Marketplace | `src/client/main.tsx` | `index.html` | `/`        |
+| Admin       | `src/admin/main.tsx`  | `admin.html` | `/admin/*` |
 
 ### Single-Port Development
 

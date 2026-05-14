@@ -52,7 +52,12 @@ describe('System Routes', () => {
       expect(res.status).toBe(200)
       const data = (await res.json()) as {
         success: boolean
-        data: { totalPlugins: number; pendingPlugins: number; approvedPlugins: number; lastUpdated: string }
+        data: {
+          totalPlugins: number
+          pendingPlugins: number
+          approvedPlugins: number
+          lastUpdated: string
+        }
       }
       if (data.success) {
         expect(data.data).toHaveProperty('totalPlugins')

@@ -39,26 +39,21 @@ export async function getSystemStats(): Promise<SystemStats> {
 
   const { plugins: pluginTable } = await import('../../db/schema')
 
-  const [
-    allPlugins,
-    pendingPlugins,
-    approvedPlugins,
-    rejectedPlugins,
-    reviewRows,
-  ] = await Promise.all([
-    db.select().from(pluginTable),
-    db.select().from(pluginTable).where(eq(pluginTable.status, 'pending')),
-    db.select().from(pluginTable).where(eq(pluginTable.status, 'approved')),
-    db.select().from(pluginTable).where(eq(pluginTable.status, 'rejected')),
-    (async () => {
-      try {
-        const { pluginReviews } = await import('../../db/schema')
-        return db.select().from(pluginReviews)
-      } catch {
-        return []
-      }
-    })(),
-  ])
+  const [allPlugins, pendingPlugins, approvedPlugins, rejectedPlugins, reviewRows] =
+    await Promise.all([
+      db.select().from(pluginTable),
+      db.select().from(pluginTable).where(eq(pluginTable.status, 'pending')),
+      db.select().from(pluginTable).where(eq(pluginTable.status, 'approved')),
+      db.select().from(pluginTable).where(eq(pluginTable.status, 'rejected')),
+      (async () => {
+        try {
+          const { pluginReviews } = await import('../../db/schema')
+          return db.select().from(pluginReviews)
+        } catch {
+          return []
+        }
+      })(),
+    ])
 
   const totalDownloads = allPlugins.reduce((sum, p) => sum + (p.downloadCount ?? 0), 0)
   const totalViews = allPlugins.reduce((sum, p) => sum + (p.viewCount ?? 0), 0)
